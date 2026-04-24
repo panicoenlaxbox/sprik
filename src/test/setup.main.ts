@@ -1,8 +1,9 @@
 import { vi } from 'vitest'
+import { tmpdir } from 'os'
 
 vi.mock('electron', () => ({
   app: {
-    getPath: vi.fn((name: string) => `/tmp/murmur-test/${name}`),
+    getPath: vi.fn((name: string) => (name === 'temp' ? tmpdir() : `/tmp/murmur-test/${name}`)),
     getVersion: vi.fn(() => '0.1.0'),
     getName: vi.fn(() => 'Murmur'),
     quit: vi.fn(),

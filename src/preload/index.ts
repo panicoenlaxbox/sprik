@@ -1,8 +1,13 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer — expanded per milestone
-const api = {}
+const api = {
+  onOverlayState: (cb: (state: string) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, state: string): void => cb(state)
+    ipcRenderer.on('overlay:state', handler)
+    return () => ipcRenderer.removeListener('overlay:state', handler)
+  }
+}
 
 if (process.contextIsolated) {
   try {

@@ -1,10 +1,17 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, shell } from 'electron'
+import { app, BrowserWindow, Tray, Menu, nativeImage, shell, session, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { createWorkerWindow, createOverlayWindow } from './windows'
+import { registerShortcuts, unregisterShortcuts } from './shortcuts'
+import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge } from './recording'
+import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
 
 let tray: Tray | null = null
 let settingsWindow: BrowserWindow | null = null
+let workerWindow: BrowserWindow | null = null
+let overlayWindow: BrowserWindow | null = null
+let orchestrator: RecordingOrchestrator | null = null
 
 function createSettingsWindow(): BrowserWindow {
   if (settingsWindow && !settingsWindow.isDestroyed()) {
@@ -29,9 +36,7 @@ function createSettingsWindow(): BrowserWindow {
     }
   })
 
-  settingsWindow.on('ready-to-show', () => {
-    settingsWindow?.show()
-  })
+  settingsWindow.on('ready-to-show', () => settingsWindow?.show())
 
   settingsWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -53,40 +58,91 @@ function createTray(): void {
   tray.setToolTip('Murmur')
 
   const menu = Menu.buildFromTemplate([
-    {
-      label: 'Settings',
-      click: () => createSettingsWindow()
-    },
+    { label: 'Settings', click: () => createSettingsWindow() },
     { type: 'separator' },
-    {
-      label: 'Quit',
-      click: () => app.quit()
-    }
+    { label: 'Quit', click: () => app.quit() }
   ])
 
   tray.setContextMenu(menu)
   tray.on('click', () => createSettingsWindow())
 }
 
+function setupPermissions(): void {
+  session.defaultSession.setPermissionRequestHandler((_, permission, callback) => {
+    callback(permission === 'media')
+  })
+  session.defaultSession.setPermissionCheckHandler((_, permission) => {
+    return permission === 'media'
+  })
+}
+
+function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow): RecordingOrchestrator {
+  const workerBridge: WorkerBridge = {
+    send: (channel) => worker.webContents.send(channel),
+    onAudio: (cb) => {
+      ipcMain.on(CHANNELS.RECORDING_AUDIO, (_, payload: { buffer: ArrayBuffer; durationMs: number }) => {
+        const typed: RecordingAudioPayload = {
+          buffer: Buffer.from(payload.buffer),
+          durationMs: payload.durationMs
+        }
+        cb(typed)
+      })
+    },
+    onError: (cb) => {
+      ipcMain.on(CHANNELS.RECORDING_ERROR, (_, message: string) => cb(message))
+    }
+  }
+
+  const overlayBridge: OverlayBridge = {
+    setState: (state: OverlayState) => {
+      if (state === 'idle') {
+        overlay.hide()
+      } else {
+        overlay.showInactive()
+      }
+      overlay.webContents.send(CHANNELS.OVERLAY_STATE, state)
+    }
+  }
+
+  return new RecordingOrchestrator(workerBridge, overlayBridge)
+}
+
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.murmur.app')
+
+  setupPermissions()
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  workerWindow = createWorkerWindow()
+  overlayWindow = createOverlayWindow()
+  orchestrator = setupIpcBridges(workerWindow, overlayWindow)
+
+  registerShortcuts(
+    { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' },
+    {
+      onToggle: () => orchestrator?.toggle(),
+      onCancel: () => orchestrator?.cancel()
+    }
+  )
+
   createTray()
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (BrowserWindow.getAllWindows().filter((w) => w !== workerWindow && w !== overlayWindow).length === 0) {
       createSettingsWindow()
     }
   })
+
+  app.on('will-quit', () => {
+    orchestrator?.deleteTempFile()
+    unregisterShortcuts()
+  })
 })
 
-// Keep the app running even when all windows are closed (lives in tray)
+// Keep app alive in tray when all visible windows are closed
 app.on('window-all-closed', () => {
-  if (process.platform === 'darwin') {
-    // On macOS, keep app alive — the tray icon is enough
-  }
+  // Intentionally empty — app lives in the tray
 })
