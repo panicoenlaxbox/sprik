@@ -11,17 +11,17 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (capturing) inputRef.current?.focus()
+    if (capturing) {
+      inputRef.current?.focus()
+      window.api.pauseShortcuts()
+    } else {
+      window.api.resumeShortcuts()
+    }
   }, [capturing])
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
     e.preventDefault()
     e.stopPropagation()
-
-    if (e.key === 'Escape') {
-      setCapturing(false)
-      return
-    }
 
     if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return
 
@@ -30,7 +30,8 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
     if (e.altKey) parts.push('Alt')
     if (e.shiftKey) parts.push('Shift')
     if (e.metaKey) parts.push('Meta')
-    parts.push(e.key.length === 1 ? e.key.toUpperCase() : e.key)
+    const keyLabel = e.key === ' ' ? 'Space' : e.key.length === 1 ? e.key.toUpperCase() : e.key
+    parts.push(keyLabel)
 
     onChange(parts.join('+'))
     setCapturing(false)
@@ -47,7 +48,7 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
           onKeyDown={handleKeyDown}
           onBlur={() => setCapturing(false)}
           value=""
-          placeholder="Press keys…"
+          placeholder="Press keys… (click outside to cancel)"
           aria-label={`Capturing shortcut for ${label}`}
           className="text-sm border border-blue-400 rounded-md px-3 py-1.5 bg-blue-50 focus:outline-none w-48 placeholder:text-blue-400"
         />

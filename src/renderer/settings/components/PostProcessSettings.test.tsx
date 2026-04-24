@@ -23,7 +23,7 @@ describe('PostProcessSettings', () => {
 
     expect(screen.getByLabelText(/enable post-processing/i)).not.toBeChecked()
     expect(screen.queryByRole('combobox', { name: /llm provider/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('textbox', { name: /system prompt/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: /instructions/i })).not.toBeInTheDocument()
   })
 
   it('shows provider, model, and prompt fields when enabled', () => {
@@ -31,7 +31,7 @@ describe('PostProcessSettings', () => {
 
     expect(screen.getByRole('combobox', { name: /llm provider/i })).toBeInTheDocument()
     expect(screen.getByRole('combobox', { name: /llm model/i })).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: /system prompt/i })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /instructions/i })).toBeInTheDocument()
   })
 
   it('calls onChange with enabled: true when toggling on', async () => {
@@ -51,15 +51,15 @@ describe('PostProcessSettings', () => {
     render(<PostProcessSettings config={enabledConfig} onChange={onChange} />)
     await user.selectOptions(screen.getByRole('combobox', { name: /llm provider/i }), 'openai')
 
-    expect(onChange).toHaveBeenCalledWith({ provider: 'openai', model: 'gpt-4o-mini' })
+    expect(onChange).toHaveBeenCalledWith({ provider: 'openai', model: 'gpt-4o' })
   })
 
-  it('calls onChange when user edits the system prompt', async () => {
+  it('calls onChange when user edits the prompt', async () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
     render(<PostProcessSettings config={enabledConfig} onChange={onChange} />)
-    await user.type(screen.getByRole('textbox', { name: /system prompt/i }), '!')
+    await user.type(screen.getByRole('textbox', { name: /instructions/i }), '!')
 
     expect(onChange).toHaveBeenLastCalledWith({ systemPrompt: 'Fix grammar.!' })
   })

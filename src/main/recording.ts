@@ -2,11 +2,12 @@ import { app } from 'electron'
 import { join } from 'path'
 import { writeFileSync, unlinkSync, existsSync } from 'fs'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
+import { log } from './logger'
 
 export type RecordingState = 'idle' | 'recording'
 
 export interface WorkerBridge {
-  send(channel: string): void
+  send(channel: string, payload?: unknown): void
   onAudio(cb: (payload: RecordingAudioPayload) => void): void
   onError(cb: (error: string) => void): void
 }
@@ -22,29 +23,35 @@ export interface TranscribePipeline {
 export class RecordingOrchestrator {
   private state: RecordingState = 'idle'
   private tempPath: string | null = null
+  private cancelledTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(
     private readonly worker: WorkerBridge,
     private readonly overlay: OverlayBridge,
-    private readonly pipeline?: TranscribePipeline
+    private readonly pipeline?: TranscribePipeline,
+    private readonly onIdle?: () => void
   ) {
     worker.onAudio((payload) => { this.handleAudio(payload).catch(console.error) })
     worker.onError((err) => this.handleError(err))
   }
 
-  toggle(): void {
+  toggle(deviceId?: string): void {
     if (this.state === 'idle') {
-      this.start()
+      this.start(deviceId)
     } else {
       this.stop()
     }
   }
 
-  start(): void {
+  start(deviceId?: string): void {
     if (this.state !== 'idle') return
+    if (this.cancelledTimer) {
+      clearTimeout(this.cancelledTimer)
+      this.cancelledTimer = null
+    }
     this.state = 'recording'
     this.overlay.setState('recording')
-    this.worker.send(CHANNELS.RECORDING_START)
+    this.worker.send(CHANNELS.RECORDING_START, deviceId)
   }
 
   stop(): void {
@@ -57,7 +64,13 @@ export class RecordingOrchestrator {
     if (this.state === 'idle') return
     this.worker.send(CHANNELS.RECORDING_CANCEL)
     this.deleteTempFile()
-    this.reset()
+    this.state = 'idle'
+    this.overlay.setState('cancelled')
+    this.onIdle?.()
+    this.cancelledTimer = setTimeout(() => {
+      this.cancelledTimer = null
+      this.overlay.setState('idle')
+    }, 1500)
   }
 
   getState(): RecordingState {
@@ -79,7 +92,7 @@ export class RecordingOrchestrator {
     const tempDir = app.getPath('temp')
     this.tempPath = join(tempDir, `murmur-${Date.now()}.webm`)
     writeFileSync(this.tempPath, payload.buffer)
-    console.log(`[recording] saved ${this.tempPath} (${payload.durationMs}ms)`)
+    log('recording', `saved ${this.tempPath} (${payload.durationMs}ms)`)
 
     if (this.pipeline) {
       try {
@@ -104,5 +117,6 @@ export class RecordingOrchestrator {
   private reset(): void {
     this.state = 'idle'
     this.overlay.setState('idle')
+    this.onIdle?.()
   }
 }

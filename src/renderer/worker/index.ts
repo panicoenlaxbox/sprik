@@ -4,7 +4,7 @@ export {}
 declare global {
   interface Window {
     workerApi: {
-      onStart: (cb: () => void) => () => void
+      onStart: (cb: (deviceId?: string) => void) => () => void
       onStop: (cb: () => void) => () => void
       onCancel: (cb: () => void) => () => void
       sendAudio: (buffer: ArrayBuffer, durationMs: number) => void
@@ -17,11 +17,12 @@ let mediaRecorder: MediaRecorder | null = null
 let chunks: Blob[] = []
 let startedAt = 0
 
-async function startRecording(): Promise<void> {
+async function startRecording(deviceId?: string): Promise<void> {
   console.log('[worker] startRecording called')
   chunks = []
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    const constraint = deviceId ? { audio: { deviceId: { exact: deviceId } } } : { audio: true }
+    const stream = await navigator.mediaDevices.getUserMedia(constraint)
     console.log('[worker] got mic stream')
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' })
 

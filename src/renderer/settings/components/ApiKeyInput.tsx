@@ -1,15 +1,15 @@
 import React, { useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 
 interface Props {
   label: string
   isSet: boolean
   value: string
   onChange: (value: string) => void
-  onClear: () => void
 }
 
-export default function ApiKeyInput({ label, isSet, value, onChange, onClear }: Props): React.JSX.Element {
-  const [showClearConfirm, setShowClearConfirm] = useState(false)
+export default function ApiKeyInput({ label, isSet, value, onChange }: Props): React.JSX.Element {
+  const [showKey, setShowKey] = useState(false)
 
   return (
     <div className="flex items-center gap-3">
@@ -17,51 +17,23 @@ export default function ApiKeyInput({ label, isSet, value, onChange, onClear }: 
 
       <div className="relative flex-1">
         <input
-          type="password"
+          type={showKey ? 'text' : 'password'}
           aria-label={`${label} API key`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={isSet ? 'Key saved — type to replace' : 'Enter API key…'}
-          autoComplete="off"
-          className="w-full text-sm border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
+          placeholder={isSet ? 'Enter new key to replace…' : 'Enter API key…'}
+          autoComplete="new-password"
+          className="w-full text-sm border border-gray-300 rounded-md px-3 py-1.5 pr-9 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
         />
-      </div>
-
-      {isSet && !showClearConfirm && (
-        <span
-          className="text-xs text-green-600 font-medium whitespace-nowrap"
-          aria-label={`${label} key is set`}
+        <button
+          type="button"
+          onClick={() => setShowKey((v) => !v)}
+          aria-label={showKey ? 'Hide key' : 'Show key'}
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
         >
-          Key saved
-        </span>
-      )}
-
-      {isSet && (
-        showClearConfirm ? (
-          <div className="flex gap-1">
-            <button
-              onClick={() => { onClear(); setShowClearConfirm(false) }}
-              className="text-xs text-red-600 hover:underline"
-            >
-              Confirm
-            </button>
-            <button
-              onClick={() => setShowClearConfirm(false)}
-              className="text-xs text-gray-500 hover:underline"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowClearConfirm(true)}
-            aria-label={`Clear ${label} key`}
-            className="text-xs text-gray-400 hover:text-red-500"
-          >
-            Clear
-          </button>
-        )
-      )}
+          {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      </div>
     </div>
   )
 }

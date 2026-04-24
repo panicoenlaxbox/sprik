@@ -23,7 +23,22 @@ describe('HotkeyRebinder', () => {
     expect(screen.getByPlaceholderText(/press keys/i)).toBeInTheDocument()
   })
 
-  it('cancels capture on Escape without calling onChange', async () => {
+  it('captures Escape as a shortcut value when pressed alone', async () => {
+    const onChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <HotkeyRebinder label="Cancel recording" value="Escape" onChange={onChange} />
+    )
+
+    await user.click(screen.getByRole('button'))
+    fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Escape' })
+
+    expect(onChange).toHaveBeenCalledWith('Escape')
+    expect(screen.queryByPlaceholderText(/press keys/i)).not.toBeInTheDocument()
+  })
+
+  it('exits capture mode on blur without calling onChange', async () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
@@ -32,7 +47,7 @@ describe('HotkeyRebinder', () => {
     )
 
     await user.click(screen.getByRole('button'))
-    fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Escape' })
+    fireEvent.blur(screen.getByPlaceholderText(/press keys/i))
 
     expect(onChange).not.toHaveBeenCalled()
     expect(screen.queryByPlaceholderText(/press keys/i)).not.toBeInTheDocument()
@@ -53,7 +68,7 @@ describe('HotkeyRebinder', () => {
       altKey: true
     })
 
-    expect(onChange).toHaveBeenCalledWith('Ctrl+Alt+ ')
+    expect(onChange).toHaveBeenCalledWith('Ctrl+Alt+Space')
   })
 
   it('ignores standalone modifier key presses', async () => {

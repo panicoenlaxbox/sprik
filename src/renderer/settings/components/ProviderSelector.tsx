@@ -1,16 +1,7 @@
 import React from 'react'
+import { TRANSCRIPTION_PROVIDERS } from '../../shared/types'
 
-const PROVIDERS = {
-  groq: {
-    label: 'Groq',
-    models: ['whisper-large-v3-turbo', 'whisper-large-v3', 'distil-whisper-large-v3-en']
-  },
-  openai: {
-    label: 'OpenAI',
-    models: ['gpt-4o-mini-transcribe', 'whisper-1']
-  }
-} as const
-
+const PROVIDERS = TRANSCRIPTION_PROVIDERS
 type Provider = keyof typeof PROVIDERS
 
 interface Props {

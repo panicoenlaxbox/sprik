@@ -1,9 +1,12 @@
 import Store from 'electron-store'
 import { randomUUID } from 'crypto'
+import { rmSync, existsSync } from 'fs'
 
 export interface HistoryEntry {
   id: string
   text: string
+  transcript?: string
+  recordingFolder?: string
   timestamp: string
   provider: string
   model: string
@@ -30,11 +33,21 @@ export function getAllEntries(): HistoryEntry[] {
   return getEntries()
 }
 
+function removeFolder(entry: HistoryEntry): void {
+  if (entry.recordingFolder && existsSync(entry.recordingFolder)) {
+    rmSync(entry.recordingFolder, { recursive: true, force: true })
+  }
+}
+
 export function deleteEntry(id: string): void {
-  store.set('entries', getEntries().filter((e) => e.id !== id))
+  const entries = getEntries()
+  const entry = entries.find((e) => e.id === id)
+  if (entry) removeFolder(entry)
+  store.set('entries', entries.filter((e) => e.id !== id))
 }
 
 export function clearAll(): void {
+  getEntries().forEach(removeFolder)
   store.set('entries', [])
 }
 

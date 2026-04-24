@@ -3,6 +3,9 @@ import ProviderSelector from './components/ProviderSelector'
 import ApiKeyInput from './components/ApiKeyInput'
 import HotkeyRebinder from './components/HotkeyRebinder'
 import PostProcessSettings from './components/PostProcessSettings'
+import StorageSettings from './components/StorageSettings'
+import MicrophoneSelector from './components/MicrophoneSelector'
+import LanguageSelector from './components/LanguageSelector'
 import type { Config, ApiProvider, ApiKeyStatus } from '../shared/types'
 
 export default function App(): React.JSX.Element {
@@ -12,23 +15,43 @@ export default function App(): React.JSX.Element {
   const [saving, setSaving] = useState(false)
   const [savedBadge, setSavedBadge] = useState(false)
 
+  const [recordingsPath, setRecordingsPath] = useState('')
+
   useEffect(() => {
-    Promise.all([window.api.getConfig(), window.api.getApiKeyStatus()]).then(([cfg, status]) => {
-      setConfigState(cfg)
-      setKeyStatus(status)
+    const providers: ApiProvider[] = ['anthropic', 'groq', 'openai']
+    Promise.all([
+      window.api.getConfig(),
+      window.api.getApiKeyStatus(),
+      window.api.getRecordingsPath(),
+      ...providers.map((p) => window.api.getApiKey(p))
+    ]).then(([cfg, status, recPath, ...keys]) => {
+      setConfigState(cfg as Config)
+      setKeyStatus(status as ApiKeyStatus)
+      setRecordingsPath(recPath as string)
+      const initial: Partial<Record<ApiProvider, string>> = {}
+      providers.forEach((p, i) => { if (keys[i]) initial[p] = keys[i] as string })
+      setPendingKeys(initial)
     })
   }, [])
 
+  const shortcutConflict = config?.shortcuts.toggleRecording === config?.shortcuts.cancelRecording
+  const emptyPrompt = config?.postProcess.enabled && !config.postProcess.systemPrompt.trim()
+
   async function handleSave(): Promise<void> {
-    if (!config) return
+    if (!config || shortcutConflict || emptyPrompt) return
     setSaving(true)
     try {
       await window.api.setConfig(config)
       for (const [provider, key] of Object.entries(pendingKeys) as [ApiProvider, string][]) {
-        if (key.trim()) await window.api.setApiKey(provider, key.trim())
+        if (key.trim()) {
+          await window.api.setApiKey(provider, key.trim())
+        } else if (key === '' && keyStatus[provider]) {
+          await window.api.clearApiKey(provider)
+        }
       }
       const newStatus = await window.api.getApiKeyStatus()
       setKeyStatus(newStatus)
+
       setPendingKeys({})
       setSavedBadge(true)
       setTimeout(() => setSavedBadge(false), 2000)
@@ -37,23 +60,19 @@ export default function App(): React.JSX.Element {
     }
   }
 
-  async function handleClearKey(provider: ApiProvider): Promise<void> {
-    await window.api.clearApiKey(provider)
-    setKeyStatus((prev) => prev ? { ...prev, [provider]: false } : prev)
-  }
 
   if (!config || !keyStatus) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="h-full bg-gray-50 flex items-center justify-center">
         <p className="text-sm text-gray-500">Loading…</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-full bg-gray-50 flex flex-col">
       <header className="px-6 py-4 border-b border-gray-200 bg-white">
-        <h1 className="text-lg font-semibold text-gray-900">Murmur Settings</h1>
+        <h1 className="text-lg font-semibold text-gray-900">Settings</h1>
       </header>
 
       <main className="flex-1 p-6 space-y-8 overflow-y-auto">
@@ -61,30 +80,26 @@ export default function App(): React.JSX.Element {
           <h2 id="transcription-heading" className="text-sm font-medium text-gray-700 mb-3">
             Transcription
           </h2>
-          <ProviderSelector
-            provider={config.transcription.provider}
-            model={config.transcription.model}
-            onChange={(provider, model) =>
-              setConfigState({ ...config, transcription: { ...config.transcription, provider, model } })
-            }
-          />
-        </section>
-
-        <section aria-labelledby="api-keys-heading">
-          <h2 id="api-keys-heading" className="text-sm font-medium text-gray-700 mb-3">
-            API Keys
-          </h2>
-          <div className="space-y-3">
-            {(['openai', 'groq', 'anthropic'] as ApiProvider[]).map((provider) => (
-              <ApiKeyInput
-                key={provider}
-                label={provider === 'openai' ? 'OpenAI' : provider === 'groq' ? 'Groq' : 'Anthropic'}
-                isSet={keyStatus[provider]}
-                value={pendingKeys[provider] ?? ''}
-                onChange={(v) => setPendingKeys({ ...pendingKeys, [provider]: v })}
-                onClear={() => handleClearKey(provider)}
-              />
-            ))}
+          <div className="flex flex-col gap-3">
+            <ProviderSelector
+              provider={config.transcription.provider}
+              model={config.transcription.model}
+              onChange={(provider, model) =>
+                setConfigState({ ...config, transcription: { ...config.transcription, provider, model } })
+              }
+            />
+            <LanguageSelector
+              language={config.transcription.language}
+              onChange={(language) =>
+                setConfigState({ ...config, transcription: { ...config.transcription, language } })
+              }
+            />
+            <MicrophoneSelector
+              deviceId={config.transcription.deviceId}
+              onChange={(deviceId) =>
+                setConfigState({ ...config, transcription: { ...config.transcription, deviceId } })
+              }
+            />
           </div>
         </section>
 
@@ -98,6 +113,28 @@ export default function App(): React.JSX.Element {
               setConfigState({ ...config, postProcess: { ...config.postProcess, ...updates } })
             }
           />
+          {emptyPrompt && (
+            <p className="text-xs text-red-600 mt-2" role="alert">
+              A prompt is required when post-processing is enabled.
+            </p>
+          )}
+        </section>
+
+        <section aria-labelledby="api-keys-heading">
+          <h2 id="api-keys-heading" className="text-sm font-medium text-gray-700 mb-3">
+            API Keys
+          </h2>
+          <div className="space-y-3">
+            {(['anthropic', 'groq', 'openai'] as ApiProvider[]).map((provider) => (
+              <ApiKeyInput
+                key={provider}
+                label={provider === 'openai' ? 'OpenAI' : provider === 'groq' ? 'Groq' : 'Anthropic'}
+                isSet={keyStatus[provider]}
+                value={pendingKeys[provider] ?? ''}
+                onChange={(v) => setPendingKeys({ ...pendingKeys, [provider]: v })}
+              />
+            ))}
+          </div>
         </section>
 
         <section aria-labelledby="shortcuts-heading">
@@ -119,6 +156,11 @@ export default function App(): React.JSX.Element {
                 setConfigState({ ...config, shortcuts: { ...config.shortcuts, cancelRecording: v } })
               }
             />
+            {shortcutConflict && (
+              <p className="text-xs text-red-600" role="alert">
+                Toggle and Cancel shortcuts cannot be the same.
+              </p>
+            )}
           </div>
         </section>
 
@@ -155,6 +197,19 @@ export default function App(): React.JSX.Element {
             />
             Launch at login
           </label>
+        </section>
+
+        <section aria-labelledby="storage-heading">
+          <h2 id="storage-heading" className="text-sm font-medium text-gray-700 mb-3">
+            Data
+          </h2>
+          <StorageSettings
+            config={config.recordings}
+            recordingsPath={recordingsPath}
+            onChange={(updates) =>
+              setConfigState({ ...config, recordings: { ...config.recordings, ...updates } })
+            }
+          />
         </section>
       </main>
 

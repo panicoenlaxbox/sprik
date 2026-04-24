@@ -11,19 +11,20 @@ export const configSchema = z.object({
 
   transcription: z.object({
     provider: z.enum(['groq', 'openai']).default('groq'),
-    model: z.string().default('whisper-large-v3-turbo'),
-    language: z.string().optional()
-  }).default({ provider: 'groq', model: 'whisper-large-v3-turbo' }),
+    model: z.string().default('distil-whisper-large-v3-en'),
+    language: z.string().optional(),
+    deviceId: z.string().optional()
+  }).default({ provider: 'groq', model: 'distil-whisper-large-v3-en' }),
 
   postProcess: z.object({
     enabled: z.boolean().default(false),
     provider: z.enum(['anthropic', 'openai']).default('anthropic'),
-    model: z.string().default('claude-sonnet-4-6'),
+    model: z.string().default('claude-haiku-4-5-20251001'),
     systemPrompt: z.string().default('Clean up the transcription, fix punctuation and grammar.')
   }).default({
     enabled: false,
     provider: 'anthropic',
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5-20251001',
     systemPrompt: 'Clean up the transcription, fix punctuation and grammar.'
   }),
 
@@ -42,7 +43,12 @@ export const configSchema = z.object({
 
   ui: z.object({
     theme: z.enum(['system', 'light', 'dark']).default('system')
-  }).default({ theme: 'system' })
+  }).default({ theme: 'system' }),
+
+  recordings: z.object({
+    saveText: z.boolean().default(false),
+    saveAudio: z.boolean().default(false)
+  }).default({ saveText: false, saveAudio: false })
 })
 
 export type Config = z.infer<typeof configSchema>

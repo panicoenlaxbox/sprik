@@ -1,27 +1,8 @@
 import { z } from 'zod'
 
-export const CHANNELS = {
-  RECORDING_START: 'recording:start',
-  RECORDING_STOP: 'recording:stop',
-  RECORDING_CANCEL: 'recording:cancel',
-  RECORDING_AUDIO: 'recording:audio',
-  RECORDING_ERROR: 'recording:error',
-  OVERLAY_STATE: 'overlay:state',
-  SETTINGS_GET: 'settings:get',
-  SETTINGS_SET: 'settings:set',
-  SETTINGS_GET_KEY_STATUS: 'settings:get-key-status',
-  SETTINGS_SET_KEY: 'settings:set-key',
-  SETTINGS_CLEAR_KEY: 'settings:clear-key',
-  HISTORY_GET_ALL: 'history:get-all',
-  HISTORY_DELETE: 'history:delete',
-  HISTORY_CLEAR: 'history:clear',
-  HISTORY_EXPORT: 'history:export',
-  CLIPBOARD_WRITE: 'clipboard:write'
-} as const
+export { CHANNELS, type Channel } from './channels'
 
-export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS]
-
-export const overlayStateSchema = z.enum(['idle', 'recording', 'transcribing'])
+export const overlayStateSchema = z.enum(['idle', 'recording', 'transcribing', 'cancelled'])
 export type OverlayState = z.infer<typeof overlayStateSchema>
 
 export const recordingAudioPayloadSchema = z.object({

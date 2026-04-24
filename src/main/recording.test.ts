@@ -33,7 +33,7 @@ describe('RecordingOrchestrator', () => {
       orc.start()
 
       expect(orc.getState()).toBe('recording')
-      expect(worker.send).toHaveBeenCalledWith(CHANNELS.RECORDING_START)
+      expect(worker.send).toHaveBeenCalledWith(CHANNELS.RECORDING_START, undefined)
       expect(overlay.states).toContain('recording')
     })
 
@@ -80,7 +80,8 @@ describe('RecordingOrchestrator', () => {
   })
 
   describe('cancel flow', () => {
-    it('sends cancel to worker and resets to idle', () => {
+    it('sends cancel to worker, shows cancelled state briefly, then idles', () => {
+      vi.useFakeTimers()
       const worker = makeWorkerBridge()
       const overlay = makeOverlayBridge()
       const orc = new RecordingOrchestrator(worker, overlay)
@@ -90,7 +91,31 @@ describe('RecordingOrchestrator', () => {
 
       expect(worker.send).toHaveBeenCalledWith(CHANNELS.RECORDING_CANCEL)
       expect(orc.getState()).toBe('idle')
+      expect(overlay.states.at(-1)).toBe('cancelled')
+
+      vi.advanceTimersByTime(1500)
       expect(overlay.states.at(-1)).toBe('idle')
+
+      vi.useRealTimers()
+    })
+
+    it('starting a new recording during the cancelled window clears the timer', () => {
+      vi.useFakeTimers()
+      const worker = makeWorkerBridge()
+      const overlay = makeOverlayBridge()
+      const orc = new RecordingOrchestrator(worker, overlay)
+
+      orc.start()
+      orc.cancel()
+      expect(overlay.states.at(-1)).toBe('cancelled')
+
+      orc.start()
+      expect(overlay.states.at(-1)).toBe('recording')
+
+      vi.advanceTimersByTime(1500)
+      expect(overlay.states.at(-1)).toBe('recording')
+
+      vi.useRealTimers()
     })
 
     it('does nothing when cancel() is called while idle', () => {
@@ -116,6 +141,33 @@ describe('RecordingOrchestrator', () => {
       expect(orc.getState()).toBe('idle')
       expect(orc.getTempPath()).toBeNull()
       expect(overlay.states.at(-1)).toBe('idle')
+    })
+  })
+
+  describe('onIdle callback', () => {
+    it('calls onIdle when recording resets to idle after audio is received', () => {
+      const worker = makeWorkerBridge()
+      const overlay = makeOverlayBridge()
+      const onIdle = vi.fn()
+      const orc = new RecordingOrchestrator(worker, overlay, undefined, onIdle)
+
+      orc.start()
+      worker.triggerAudio({ buffer: Buffer.from('fake'), durationMs: 500 })
+
+      expect(onIdle).toHaveBeenCalledOnce()
+      orc.deleteTempFile()
+    })
+
+    it('calls onIdle when cancel resets to idle', () => {
+      const worker = makeWorkerBridge()
+      const overlay = makeOverlayBridge()
+      const onIdle = vi.fn()
+      const orc = new RecordingOrchestrator(worker, overlay, undefined, onIdle)
+
+      orc.start()
+      orc.cancel()
+
+      expect(onIdle).toHaveBeenCalledOnce()
     })
   })
 

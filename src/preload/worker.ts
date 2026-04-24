@@ -1,9 +1,10 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 
 contextBridge.exposeInMainWorld('workerApi', {
-  onStart: (cb: () => void) => {
-    ipcRenderer.on('recording:start', cb)
-    return () => ipcRenderer.removeListener('recording:start', cb)
+  onStart: (cb: (deviceId?: string) => void) => {
+    const handler = (_: IpcRendererEvent, deviceId?: string): void => cb(deviceId)
+    ipcRenderer.on('recording:start', handler)
+    return () => ipcRenderer.removeListener('recording:start', handler)
   },
   onStop: (cb: () => void) => {
     ipcRenderer.on('recording:stop', cb)

@@ -3,12 +3,12 @@ import type { Config } from '../../shared/types'
 
 const LLM_PROVIDERS = {
   anthropic: {
-    label: 'Claude (Anthropic)',
-    models: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001']
+    label: 'Anthropic',
+    models: ['claude-haiku-4-5-20251001', 'claude-opus-4-7', 'claude-sonnet-4-6']
   },
   openai: {
     label: 'OpenAI',
-    models: ['gpt-4o-mini', 'gpt-4o']
+    models: ['gpt-4o', 'gpt-4o-mini']
   }
 } as const
 
@@ -35,7 +35,7 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
           onChange={(e) => onChange({ enabled: e.target.checked })}
           className="rounded"
         />
-        Enable post-processing with an LLM
+        Enable
       </label>
 
       {config.enabled && (
@@ -73,14 +73,14 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="system-prompt" className="text-xs text-gray-500">System prompt</label>
+            <label htmlFor="system-prompt" className="text-xs text-gray-500">Instructions</label>
             <textarea
               id="system-prompt"
-              aria-label="System prompt"
+              aria-label="Instructions"
               value={config.systemPrompt}
               onChange={(e) => onChange({ systemPrompt: e.target.value })}
               rows={4}
-              placeholder="Instructions for the LLM to process the transcription…"
+              placeholder="Instructions to process the transcription…"
               className="text-sm border border-gray-300 rounded-md px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
             />
           </div>

@@ -16,7 +16,7 @@ export default function App(): React.JSX.Element {
   if (state === 'idle') return <></>
 
   return (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-black/80 text-white text-sm shadow-lg select-none">
+    <div className="w-fit flex items-center gap-2 px-3 py-2 rounded-full bg-black/80 text-white text-sm shadow-lg select-none">
       {state === 'recording' && (
         <>
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -27,6 +27,12 @@ export default function App(): React.JSX.Element {
         <>
           <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
           <span>Transcribing…</span>
+        </>
+      )}
+      {state === 'cancelled' && (
+        <>
+          <span className="w-2 h-2 rounded-full bg-gray-400" />
+          <span>Cancelled</span>
         </>
       )}
     </div>

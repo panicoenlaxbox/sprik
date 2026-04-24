@@ -1,14 +1,16 @@
-import { BrowserWindow, screen } from 'electron'
+import { BrowserWindow, screen, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 
-export function createHistoryWindow(): BrowserWindow {
+export function createAppWindow(): BrowserWindow {
   const win = new BrowserWindow({
-    width: 680,
+    width: 760,
     height: 560,
+    minWidth: 600,
+    minHeight: 400,
     show: false,
+    title: 'Murmur',
     autoHideMenuBar: true,
-    title: 'Murmur — History',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
@@ -19,12 +21,15 @@ export function createHistoryWindow(): BrowserWindow {
 
   win.on('ready-to-show', () => win.show())
 
-  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+  win.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url)
+    return { action: 'deny' }
+  })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/history/index.html`)
+    win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/app/index.html`)
   } else {
-    win.loadFile(join(__dirname, '../renderer/history/index.html'))
+    win.loadFile(join(__dirname, '../renderer/app/index.html'))
   }
 
   return win
@@ -48,10 +53,6 @@ export function createWorkerWindow(): BrowserWindow {
     win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/worker/index.html`)
   } else {
     win.loadFile(join(__dirname, '../renderer/worker/index.html'))
-  }
-
-  if (is.dev) {
-    win.webContents.openDevTools({ mode: 'detach' })
   }
 
   return win
@@ -81,13 +82,9 @@ export function createOverlayWindow(): BrowserWindow {
     }
   })
 
-  // Show once loaded and pass all mouse events through (content handles own visibility)
   win.once('ready-to-show', () => {
     win.showInactive()
     win.setIgnoreMouseEvents(true, { forward: true })
-    if (is.dev) {
-      win.webContents.openDevTools({ mode: 'detach' })
-    }
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {

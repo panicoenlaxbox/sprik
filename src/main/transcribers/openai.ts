@@ -1,11 +1,12 @@
 import OpenAI from 'openai'
 import { createReadStream } from 'fs'
 import type { Transcriber, TranscribeOpts } from './types'
+import { TRANSCRIPTION_PROVIDERS } from '../../renderer/shared/types'
 
 export const openaiTranscriber: Transcriber = {
   id: 'openai',
   name: 'OpenAI',
-  models: ['gpt-4o-mini-transcribe', 'whisper-1'] as const,
+  models: TRANSCRIPTION_PROVIDERS.openai.models,
 
   async transcribe(audioPath: string, opts: TranscribeOpts): Promise<string> {
     const client = new OpenAI({ apiKey: opts.apiKey, maxRetries: 0 })

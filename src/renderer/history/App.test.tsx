@@ -20,10 +20,10 @@ const entry2: HistoryEntry = {
 }
 
 beforeEach(() => {
+  vi.clearAllMocks()
   vi.mocked(window.api.getHistory).mockResolvedValue([entry1, entry2])
   vi.mocked(window.api.deleteHistory).mockResolvedValue(undefined)
   vi.mocked(window.api.clearHistory).mockResolvedValue(undefined)
-  vi.mocked(window.api.exportHistory).mockResolvedValue(JSON.stringify([entry1, entry2]))
   vi.mocked(window.api.copyToClipboard).mockResolvedValue(undefined)
 })
 
@@ -46,18 +46,23 @@ describe('History App', () => {
     expect(screen.queryByText('Another transcription via OpenAI')).not.toBeInTheDocument()
   })
 
-  it('calls deleteHistory and removes the entry from the list', async () => {
+  it('requires confirmation before deleting an individual entry', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await waitFor(() => screen.getAllByRole('button', { name: /delete/i }))
+    await waitFor(() => screen.getAllByRole('button', { name: /^delete$/i }))
 
-    await user.click(screen.getAllByRole('button', { name: /delete/i })[0])
+    await user.click(screen.getAllByRole('button', { name: /^delete$/i })[0])
+
+    expect(window.api.deleteHistory).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /^confirm$/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /^confirm$/i }))
 
     expect(window.api.deleteHistory).toHaveBeenCalledWith('abc-1')
     expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument()
   })
 
-  it('calls copyToClipboard with the entry text on Copy click', async () => {
+  it('calls copyToClipboard with the entry text on Copy click and shows a check icon briefly', async () => {
     const user = userEvent.setup()
     render(<App />)
     await waitFor(() => screen.getAllByRole('button', { name: /copy/i }))
@@ -67,16 +72,53 @@ describe('History App', () => {
     expect(window.api.copyToClipboard).toHaveBeenCalledWith('Hello world from Groq')
   })
 
-  it('calls clearHistory and empties the list', async () => {
+  it('requires confirmation before deleting all history', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await waitFor(() => screen.getByRole('button', { name: /clear all/i }))
+    await waitFor(() => screen.getByRole('button', { name: /delete all/i }))
 
-    await user.click(screen.getByRole('button', { name: /clear all/i }))
+    await user.click(screen.getByRole('button', { name: /delete all/i }))
+
+    expect(window.api.clearHistory).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /confirm/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /confirm/i }))
 
     expect(window.api.clearHistory).toHaveBeenCalled()
     expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument()
     expect(screen.getByText(/no transcriptions yet/i)).toBeInTheDocument()
+  })
+
+  it('cancels delete-all when Cancel is clicked', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => screen.getByRole('button', { name: /delete all/i }))
+
+    await user.click(screen.getByRole('button', { name: /delete all/i }))
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    expect(window.api.clearHistory).not.toHaveBeenCalled()
+    expect(screen.getByText('Hello world from Groq')).toBeInTheDocument()
+  })
+
+  it('shows raw transcription toggle when entry has transcript', async () => {
+    const entryWithRaw: HistoryEntry = {
+      ...entry1,
+      id: 'raw-1',
+      text: 'Post-processed text.',
+      transcript: 'raw transcription here'
+    }
+    vi.mocked(window.api.getHistory).mockResolvedValue([entryWithRaw])
+    const user = userEvent.setup()
+
+    render(<App />)
+    await waitFor(() => screen.getByText('Post-processed text.'))
+
+    expect(screen.queryByText('raw transcription here')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /raw transcription/i }))
+
+    expect(screen.getByText('raw transcription here')).toBeInTheDocument()
   })
 
   it('shows "No results" message when search yields nothing', async () => {
