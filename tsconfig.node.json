@@ -3,6 +3,6 @@
   "include": ["electron.vite.config.*", "vitest.config.*", "src/main/**/*", "src/preload/**/*", "src/test/**/*"],
   "compilerOptions": {
     "composite": true,
-    "types": ["electron-vite/node"]
+    "types": ["electron-vite/node", "vitest/globals"]
   }
 }

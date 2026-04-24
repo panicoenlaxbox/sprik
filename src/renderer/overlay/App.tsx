@@ -1,13 +1,9 @@
-import { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 
 type RecordingState = 'idle' | 'recording' | 'transcribing'
 
-export default function App(): JSX.Element {
-  const [state, setState] = useState<RecordingState>('idle')
-
-  useEffect(() => {
-    // Will be wired to IPC in M2
-  }, [])
+export default function App(): React.JSX.Element {
+  const [state] = useState<RecordingState>('idle')
 
   if (state === 'idle') return <></>
 

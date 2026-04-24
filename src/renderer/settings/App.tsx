@@ -1,4 +1,6 @@
-export default function App(): JSX.Element {
+import React from 'react'
+
+export default function App(): React.JSX.Element {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="px-6 py-4 border-b border-gray-200 bg-white">
