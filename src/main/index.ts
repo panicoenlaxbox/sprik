@@ -5,9 +5,11 @@ import icon from '../../resources/icon.png?asset'
 import { createWorkerWindow, createOverlayWindow } from './windows'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
 import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge, type TranscribePipeline } from './recording'
-import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
-import { openaiTranscriber } from './transcribers/openai'
+import { CHANNELS, type OverlayState, type RecordingAudioPayload, setKeyPayloadSchema, apiProviderSchema } from './ipc'
+import { getTranscriber } from './transcribers'
 import { copyAndPaste } from './paste'
+import { getConfig, setConfig } from './store'
+import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
 
 let tray: Tray | null = null
 let settingsWindow: BrowserWindow | null = null
@@ -78,6 +80,19 @@ function setupPermissions(): void {
   })
 }
 
+function buildPipeline(): TranscribePipeline {
+  return {
+    async run(audioPath: string): Promise<void> {
+      const config = getConfig()
+      const { provider, model, language } = config.transcription
+      const apiKey = getKey(provider) ?? ''
+      const transcriber = getTranscriber(provider)
+      const text = await transcriber.transcribe(audioPath, { model, language, apiKey })
+      await copyAndPaste(text, config.paste.autoPaste)
+    }
+  }
+}
+
 function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow): RecordingOrchestrator {
   const workerBridge: WorkerBridge = {
     send: (channel) => worker.webContents.send(channel),
@@ -101,18 +116,36 @@ function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow): Recordi
     }
   }
 
-  const pipeline: TranscribePipeline = {
-    async run(audioPath: string): Promise<void> {
-      const apiKey = process.env['OPENAI_API_KEY'] ?? ''
-      const text = await openaiTranscriber.transcribe(audioPath, {
-        model: 'gpt-4o-mini-transcribe',
-        apiKey
-      })
-      await copyAndPaste(text)
-    }
-  }
+  return new RecordingOrchestrator(workerBridge, overlayBridge, buildPipeline())
+}
 
-  return new RecordingOrchestrator(workerBridge, overlayBridge, pipeline)
+function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: () => void }): void {
+  ipcMain.handle(CHANNELS.SETTINGS_GET, () => getConfig())
+
+  ipcMain.handle(CHANNELS.SETTINGS_SET, (_, partial: unknown) => {
+    const prevConfig = getConfig()
+    setConfig(partial as Parameters<typeof setConfig>[0])
+    const newConfig = getConfig()
+    if (
+      prevConfig.shortcuts.toggleRecording !== newConfig.shortcuts.toggleRecording ||
+      prevConfig.shortcuts.cancelRecording !== newConfig.shortcuts.cancelRecording
+    ) {
+      unregisterShortcuts()
+      registerShortcuts(newConfig.shortcuts, shortcutHandlers)
+    }
+  })
+
+  ipcMain.handle(CHANNELS.SETTINGS_GET_KEY_STATUS, () => getKeyStatus())
+
+  ipcMain.handle(CHANNELS.SETTINGS_SET_KEY, (_, payload: unknown) => {
+    const { provider, key } = setKeyPayloadSchema.parse(payload)
+    setKey(provider, key)
+  })
+
+  ipcMain.handle(CHANNELS.SETTINGS_CLEAR_KEY, (_, provider: unknown) => {
+    const p = apiProviderSchema.parse(provider)
+    clearKey(p)
+  })
 }
 
 app.whenReady().then(() => {
@@ -128,13 +161,15 @@ app.whenReady().then(() => {
   overlayWindow = createOverlayWindow()
   orchestrator = setupIpcBridges(workerWindow, overlayWindow)
 
-  registerShortcuts(
-    { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' },
-    {
-      onToggle: () => orchestrator?.toggle(),
-      onCancel: () => orchestrator?.cancel()
-    }
-  )
+  const shortcutHandlers = {
+    onToggle: () => orchestrator?.toggle(),
+    onCancel: () => orchestrator?.cancel()
+  }
+
+  const config = getConfig()
+  registerShortcuts(config.shortcuts, shortcutHandlers)
+
+  setupSettingsIpc(shortcutHandlers)
 
   createTray()
 

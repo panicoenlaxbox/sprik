@@ -1,8 +1,10 @@
 import { openaiTranscriber } from './openai'
+import { groqTranscriber } from './groq'
 import type { Transcriber } from './types'
 
 const registry: Record<string, Transcriber> = {
-  openai: openaiTranscriber
+  openai: openaiTranscriber,
+  groq: groqTranscriber
 }
 
 export function getTranscriber(id: string): Transcriber {
