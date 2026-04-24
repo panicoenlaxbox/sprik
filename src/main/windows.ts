@@ -22,6 +22,10 @@ export function createWorkerWindow(): BrowserWindow {
     win.loadFile(join(__dirname, '../renderer/worker/index.html'))
   }
 
+  if (is.dev) {
+    win.webContents.openDevTools({ mode: 'detach' })
+  }
+
   return win
 }
 
@@ -53,6 +57,9 @@ export function createOverlayWindow(): BrowserWindow {
   win.once('ready-to-show', () => {
     win.showInactive()
     win.setIgnoreMouseEvents(true, { forward: true })
+    if (is.dev) {
+      win.webContents.openDevTools({ mode: 'detach' })
+    }
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {

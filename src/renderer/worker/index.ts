@@ -18,9 +18,11 @@ let chunks: Blob[] = []
 let startedAt = 0
 
 async function startRecording(): Promise<void> {
+  console.log('[worker] startRecording called')
   chunks = []
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    console.log('[worker] got mic stream')
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' })
 
     mediaRecorder.ondataavailable = (e): void => {
@@ -39,6 +41,7 @@ async function startRecording(): Promise<void> {
     mediaRecorder.start(250)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
+    console.error('[worker] getUserMedia error:', message)
     window.workerApi.sendError(message)
   }
 }

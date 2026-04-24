@@ -5,7 +5,11 @@ export default function App(): React.JSX.Element {
   const [state, setState] = useState<OverlayState>('idle')
 
   useEffect(() => {
-    const unsubscribe = window.api.onOverlayState((s) => setState(s as OverlayState))
+    console.log('[overlay] mounted, registering state listener')
+    const unsubscribe = window.api.onOverlayState((s) => {
+      console.log('[overlay] state →', s)
+      setState(s as OverlayState)
+    })
     return unsubscribe
   }, [])
 
