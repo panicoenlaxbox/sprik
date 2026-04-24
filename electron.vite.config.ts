@@ -9,6 +9,10 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve('src/main/index.ts')
+        },
+        output: {
+          format: 'es',
+          entryFileNames: '[name].mjs'
         }
       }
     }
@@ -19,10 +23,6 @@ export default defineConfig({
         input: {
           index: resolve('src/preload/index.ts'),
           worker: resolve('src/preload/worker.ts')
-        },
-        output: {
-          format: 'cjs',
-          entryFileNames: '[name].cjs'
         }
       }
     }

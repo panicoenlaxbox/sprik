@@ -10,7 +10,7 @@ export function createHistoryWindow(): BrowserWindow {
     autoHideMenuBar: true,
     title: 'Murmur — History',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.cjs'),
+      preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
@@ -37,7 +37,7 @@ export function createWorkerWindow(): BrowserWindow {
     height: 1,
     skipTaskbar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/worker.cjs'),
+      preload: join(__dirname, '../preload/worker.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
@@ -74,7 +74,7 @@ export function createOverlayWindow(): BrowserWindow {
     resizable: false,
     movable: false,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.cjs'),
+      preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
