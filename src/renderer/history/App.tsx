@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ChevronDown, ChevronUp, FolderOpen, Copy, Trash2, Check, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, FolderOpen, Copy, Trash2, Check, X, Info } from 'lucide-react'
 import type { HistoryEntry } from '../shared/types'
 
 export default function App(): React.JSX.Element {
@@ -10,6 +10,7 @@ export default function App(): React.JSX.Element {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [expandedRaw, setExpandedRaw] = useState<Set<string>>(new Set())
+  const [expandedInfo, setExpandedInfo] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     window.api.getHistory().then((data) => {
@@ -19,7 +20,7 @@ export default function App(): React.JSX.Element {
   }, [])
 
   const filtered = entries.filter((e) =>
-    e.text.toLowerCase().includes(search.toLowerCase())
+    e.processed.toLowerCase().includes(search.toLowerCase())
   )
 
   async function handleDelete(id: string): Promise<void> {
@@ -92,17 +93,39 @@ export default function App(): React.JSX.Element {
       <main className="flex-1 overflow-y-auto p-6">
         {filtered.length === 0 ? (
           <p className="text-sm text-gray-400 text-center mt-12">
-            {search ? 'No results for that query.' : 'No transcriptions yet.'}
+            {search ? 'No results for that query.' : 'No recordings yet.'}
           </p>
         ) : (
           <ul className="space-y-3">
             {filtered.map((entry) => (
               <li key={entry.id} className="bg-white rounded-lg border border-gray-200 p-4">
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm text-gray-800 flex-1 whitespace-pre-wrap">{entry.text}</p>
+                  <p className="text-sm text-gray-800 flex-1 whitespace-pre-wrap">{entry.processed}</p>
                   <div className="flex items-center gap-1 shrink-0">
+                    {entry.path && (
+                      <button
+                        onClick={() => window.api.openPath(entry.path!)}
+                        title="Open folder"
+                        aria-label="Open folder"
+                        className="p-1.5 text-gray-400 hover:text-blue-600 rounded cursor-pointer"
+                      >
+                        <FolderOpen size={14} />
+                      </button>
+                    )}
                     <button
-                      onClick={() => handleCopy(entry.id, entry.text)}
+                      onClick={() => setExpandedInfo((prev) => {
+                        const next = new Set(prev)
+                        next.has(entry.id) ? next.delete(entry.id) : next.add(entry.id)
+                        return next
+                      })}
+                      title="Details"
+                      aria-label="Details"
+                      className={`p-1.5 rounded transition-colors ${expandedInfo.has(entry.id) ? 'text-blue-500' : 'text-gray-400 hover:text-blue-600'}`}
+                    >
+                      <Info size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleCopy(entry.id, entry.processed)}
                       title="Copy"
                       aria-label="Copy"
                       className={`p-1.5 rounded transition-colors ${copiedId === entry.id ? 'text-green-500' : 'text-gray-400 hover:text-blue-600'}`}
@@ -152,28 +175,40 @@ export default function App(): React.JSX.Element {
                       className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600"
                     >
                       {expandedRaw.has(entry.id) ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                      Raw transcription
+                      Transcript
                     </button>
                     {expandedRaw.has(entry.id) && (
-                      <p className="mt-1 text-xs text-gray-500 whitespace-pre-wrap border-l-2 border-gray-200 pl-2">
+                      <p className="mt-1 text-xs text-gray-500 italic whitespace-pre-wrap border-l-2 border-gray-200 pl-2">
                         {entry.transcript}
                       </p>
                     )}
                   </div>
                 )}
 
-                <p className="text-xs text-gray-400 mt-2">
-                  {new Date(entry.timestamp).toLocaleString()} · {entry.provider} / {entry.model}
+                <p className="text-xs text-gray-500 mt-2">
+                  {new Date(entry.timestamp).toLocaleString()}
                 </p>
-
-                {entry.recordingFolder && (
-                  <button
-                    onClick={() => window.api.openPath(entry.recordingFolder!)}
-                    className="mt-1 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    <FolderOpen size={12} />
-                    {entry.recordingFolder}
-                  </button>
+                {expandedInfo.has(entry.id) && (
+                  <div className="mt-2 pt-2 border-t border-gray-100 space-y-0.5">
+                    <p className="text-xs text-gray-400">
+                      <span className="text-gray-300">Transcription:</span> {entry.transcription.provider} · {entry.transcription.model}
+                    </p>
+                    {entry.postProcessing && (
+                      <p className="text-xs text-gray-400">
+                        <span className="text-gray-300">Post-processing:</span> {entry.postProcessing.provider} · {entry.postProcessing.model}
+                      </p>
+                    )}
+                    {entry.language && (
+                      <p className="text-xs text-gray-400">
+                        <span className="text-gray-300">Language:</span> {entry.language}
+                      </p>
+                    )}
+                    {entry.micLabel && (
+                      <p className="text-xs text-gray-400">
+                        <span className="text-gray-300">Microphone:</span> {entry.micLabel}
+                      </p>
+                    )}
+                  </div>
                 )}
               </li>
             ))}

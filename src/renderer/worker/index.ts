@@ -7,7 +7,7 @@ declare global {
       onStart: (cb: (deviceId?: string) => void) => () => void
       onStop: (cb: () => void) => () => void
       onCancel: (cb: () => void) => () => void
-      sendAudio: (buffer: ArrayBuffer, durationMs: number) => void
+      sendAudio: (buffer: ArrayBuffer, durationMs: number, micLabel?: string) => void
       sendError: (message: string) => void
     }
   }
@@ -34,7 +34,8 @@ async function startRecording(deviceId?: string): Promise<void> {
       const durationMs = Date.now() - startedAt
       const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' })
       const buffer = await blob.arrayBuffer()
-      window.workerApi.sendAudio(buffer, durationMs)
+      const micLabel = stream.getAudioTracks()[0]?.label || undefined
+      window.workerApi.sendAudio(buffer, durationMs, micLabel)
       stream.getTracks().forEach((t) => t.stop())
     }
 

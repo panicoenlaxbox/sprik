@@ -17,7 +17,7 @@ export interface OverlayBridge {
 }
 
 export interface TranscribePipeline {
-  run(audioPath: string): Promise<void>
+  run(audioPath: string, micLabel?: string): Promise<void>
 }
 
 export class RecordingOrchestrator {
@@ -96,7 +96,7 @@ export class RecordingOrchestrator {
 
     if (this.pipeline) {
       try {
-        await this.pipeline.run(this.tempPath)
+        await this.pipeline.run(this.tempPath, payload.micLabel)
       } catch (err) {
         console.error('[recording] pipeline error:', (err as Error).message)
       } finally {

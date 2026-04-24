@@ -29,6 +29,12 @@ export default function App(): React.JSX.Element {
           <span>Transcribing…</span>
         </>
       )}
+      {state === 'processing' && (
+        <>
+          <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+          <span>Processing…</span>
+        </>
+      )}
       {state === 'cancelled' && (
         <>
           <span className="w-2 h-2 rounded-full bg-gray-400" />

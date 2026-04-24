@@ -42,6 +42,7 @@ export default function App(): React.JSX.Element {
     setSaving(true)
     try {
       await window.api.setConfig(config)
+      const providers: ApiProvider[] = ['anthropic', 'groq', 'openai']
       for (const [provider, key] of Object.entries(pendingKeys) as [ApiProvider, string][]) {
         if (key.trim()) {
           await window.api.setApiKey(provider, key.trim())
@@ -49,10 +50,14 @@ export default function App(): React.JSX.Element {
           await window.api.clearApiKey(provider)
         }
       }
-      const newStatus = await window.api.getApiKeyStatus()
-      setKeyStatus(newStatus)
-
-      setPendingKeys({})
+      const [newStatus, ...keys] = await Promise.all([
+        window.api.getApiKeyStatus(),
+        ...providers.map((p) => window.api.getApiKey(p))
+      ])
+      setKeyStatus(newStatus as ApiKeyStatus)
+      const refreshed: Partial<Record<ApiProvider, string>> = {}
+      providers.forEach((p, i) => { if (keys[i]) refreshed[p] = keys[i] as string })
+      setPendingKeys(refreshed)
       setSavedBadge(true)
       setTimeout(() => setSavedBadge(false), 2000)
     } finally {

@@ -2,14 +2,21 @@ import Store from 'electron-store'
 import { randomUUID } from 'crypto'
 import { rmSync, existsSync } from 'fs'
 
-export interface HistoryEntry {
-  id: string
-  text: string
-  transcript?: string
-  recordingFolder?: string
-  timestamp: string
+export interface ModelRef {
   provider: string
   model: string
+}
+
+export interface HistoryEntry {
+  id: string
+  processed: string
+  transcript?: string
+  path?: string
+  timestamp: string
+  transcription: ModelRef
+  postProcessing?: ModelRef
+  language?: string
+  micLabel?: string
 }
 
 const store = new Store<{ entries: HistoryEntry[] }>({ name: 'history' })
@@ -34,8 +41,8 @@ export function getAllEntries(): HistoryEntry[] {
 }
 
 function removeFolder(entry: HistoryEntry): void {
-  if (entry.recordingFolder && existsSync(entry.recordingFolder)) {
-    rmSync(entry.recordingFolder, { recursive: true, force: true })
+  if (entry.path && existsSync(entry.path)) {
+    rmSync(entry.path, { recursive: true, force: true })
   }
 }
 

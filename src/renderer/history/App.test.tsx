@@ -5,18 +5,16 @@ import type { HistoryEntry } from '../shared/types'
 
 const entry1: HistoryEntry = {
   id: 'abc-1',
-  text: 'Hello world from Groq',
+  processed: 'Hello world from Groq',
   timestamp: '2026-04-24T10:00:00.000Z',
-  provider: 'groq',
-  model: 'whisper-large-v3-turbo'
+  transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' }
 }
 
 const entry2: HistoryEntry = {
   id: 'abc-2',
-  text: 'Another transcription via OpenAI',
+  processed: 'Another transcription via OpenAI',
   timestamp: '2026-04-24T09:00:00.000Z',
-  provider: 'openai',
-  model: 'whisper-1'
+  transcription: { provider: 'openai', model: 'whisper-1' }
 }
 
 beforeEach(() => {
@@ -86,7 +84,7 @@ describe('History App', () => {
 
     expect(window.api.clearHistory).toHaveBeenCalled()
     expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument()
-    expect(screen.getByText(/no transcriptions yet/i)).toBeInTheDocument()
+    expect(screen.getByText(/no recordings yet/i)).toBeInTheDocument()
   })
 
   it('cancels delete-all when Cancel is clicked', async () => {
@@ -105,7 +103,7 @@ describe('History App', () => {
     const entryWithRaw: HistoryEntry = {
       ...entry1,
       id: 'raw-1',
-      text: 'Post-processed text.',
+      processed: 'Post-processed text.',
       transcript: 'raw transcription here'
     }
     vi.mocked(window.api.getHistory).mockResolvedValue([entryWithRaw])
@@ -116,7 +114,7 @@ describe('History App', () => {
 
     expect(screen.queryByText('raw transcription here')).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: /raw transcription/i }))
+    await user.click(screen.getByRole('button', { name: /^transcript$/i }))
 
     expect(screen.getByText('raw transcription here')).toBeInTheDocument()
   })

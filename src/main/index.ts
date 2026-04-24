@@ -66,16 +66,16 @@ function setupPermissions(): void {
   })
 }
 
-function buildPipeline(): TranscribePipeline {
+function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePipeline {
   return {
-    async run(audioPath: string): Promise<void> {
+    async run(audioPath: string, micLabel?: string): Promise<void> {
       const config = getConfig()
       const { provider, model, language } = config.transcription
-      const apiKey = getKey(provider) ?? ''
+      const transcriptionApiKey = getKey(provider) ?? ''
       const transcriber = getTranscriber(provider)
       let transcript: string
       try {
-        transcript = await transcriber.transcribe(audioPath, { model, language, apiKey })
+        transcript = await transcriber.transcribe(audioPath, { model, language, apiKey: transcriptionApiKey })
       } catch (err) {
         new Notification({
           title: 'Murmur — Transcription failed',
@@ -86,11 +86,15 @@ function buildPipeline(): TranscribePipeline {
 
       let text = transcript
       if (config.postProcess.enabled) {
-        const { provider: llmProvider, model: llmModel, systemPrompt } = config.postProcess
-        const llmApiKey = getKey(llmProvider) ?? ''
-        const processor = getPostProcessor(llmProvider)
+        setOverlayState('processing')
+        const postProcessingApiKey = getKey(config.postProcess.provider) ?? ''
+        const processor = getPostProcessor(config.postProcess.provider)
         try {
-          text = await processor.process(transcript, { model: llmModel, systemPrompt, apiKey: llmApiKey })
+          text = await processor.process(transcript, {
+            model: config.postProcess.model,
+            systemPrompt: config.postProcess.systemPrompt,
+            apiKey: postProcessingApiKey
+          })
         } catch (err) {
           new Notification({
             title: 'Murmur — Post-processing failed',
@@ -102,7 +106,7 @@ function buildPipeline(): TranscribePipeline {
 
       await copyAndPaste(text, config.paste.autoPaste)
 
-      let recordingFolder: string | undefined
+      let path: string | undefined
       if (config.recordings.saveText || config.recordings.saveAudio) {
         const sessionDir = join(app.getPath('userData'), 'recordings', `${Date.now()}`)
         mkdirSync(sessionDir, { recursive: true })
@@ -115,16 +119,20 @@ function buildPipeline(): TranscribePipeline {
             writeFileSync(join(sessionDir, 'processed.txt'), text, 'utf8')
           }
         }
-        recordingFolder = sessionDir
+        path = sessionDir
       }
 
       if (config.history.enabled) {
         appendEntry({
-          text,
+          processed: text,
           transcript: config.postProcess.enabled ? transcript : undefined,
-          recordingFolder,
-          provider,
-          model
+          path,
+          transcription: { provider, model },
+          postProcessing: config.postProcess.enabled
+            ? { provider: config.postProcess.provider, model: config.postProcess.model }
+            : undefined,
+          language: language || undefined,
+          micLabel
         }, config.history.retain)
       }
     }
@@ -133,12 +141,13 @@ function buildPipeline(): TranscribePipeline {
 
 function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow, onIdle: () => void): RecordingOrchestrator {
   const workerBridge: WorkerBridge = {
-    send: (channel) => worker.webContents.send(channel),
+    send: (channel, payload) => worker.webContents.send(channel, payload),
     onAudio: (cb) => {
-      ipcMain.on(CHANNELS.RECORDING_AUDIO, (_, payload: { buffer: ArrayBuffer; durationMs: number }) => {
+      ipcMain.on(CHANNELS.RECORDING_AUDIO, (_, payload: { buffer: ArrayBuffer; durationMs: number; micLabel?: string }) => {
         const typed: RecordingAudioPayload = {
           buffer: Buffer.from(payload.buffer),
-          durationMs: payload.durationMs
+          durationMs: payload.durationMs,
+          micLabel: payload.micLabel
         }
         cb(typed)
       })
@@ -155,7 +164,7 @@ function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow, onIdle: 
     }
   }
 
-  return new RecordingOrchestrator(workerBridge, overlayBridge, buildPipeline(), onIdle)
+  return new RecordingOrchestrator(workerBridge, overlayBridge, buildPipeline(overlayBridge.setState.bind(overlayBridge)), onIdle)
 }
 
 function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: () => void }): void {

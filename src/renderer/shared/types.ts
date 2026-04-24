@@ -1,4 +1,4 @@
-export type OverlayState = 'idle' | 'recording' | 'transcribing' | 'cancelled'
+export type OverlayState = 'idle' | 'recording' | 'transcribing' | 'processing' | 'cancelled'
 
 export const TRANSCRIPTION_PROVIDERS = {
   groq: {
@@ -11,14 +11,21 @@ export const TRANSCRIPTION_PROVIDERS = {
   }
 } as const
 
-export interface HistoryEntry {
-  id: string
-  text: string
-  transcript?: string
-  recordingFolder?: string
-  timestamp: string
+export interface ModelRef {
   provider: string
   model: string
+}
+
+export interface HistoryEntry {
+  id: string
+  processed: string
+  transcript?: string
+  path?: string
+  timestamp: string
+  transcription: ModelRef
+  postProcessing?: ModelRef
+  language?: string
+  micLabel?: string
 }
 
 export interface Config {

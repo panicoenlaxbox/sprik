@@ -14,8 +14,8 @@ contextBridge.exposeInMainWorld('workerApi', {
     ipcRenderer.on('recording:cancel', cb)
     return () => ipcRenderer.removeListener('recording:cancel', cb)
   },
-  sendAudio: (buffer: ArrayBuffer, durationMs: number) =>
-    ipcRenderer.send('recording:audio', { buffer, durationMs }),
+  sendAudio: (buffer: ArrayBuffer, durationMs: number, micLabel?: string) =>
+    ipcRenderer.send('recording:audio', { buffer, durationMs, micLabel }),
   sendError: (message: string) =>
     ipcRenderer.send('recording:error', message)
 })

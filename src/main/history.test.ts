@@ -17,7 +17,7 @@ beforeEach(() => {
   storeData = {}
 })
 
-const entryData = { text: 'Hello world', provider: 'groq', model: 'whisper-large-v3-turbo' }
+const entryData = { processed: 'Hello world', transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' } }
 
 describe('appendEntry', () => {
   it('stores a new entry with generated id and ISO timestamp', () => {
@@ -25,24 +25,24 @@ describe('appendEntry', () => {
     const entries = getAllEntries() as HistoryEntry[]
 
     expect(entries).toHaveLength(1)
-    expect(entries[0].text).toBe('Hello world')
-    expect(entries[0].provider).toBe('groq')
+    expect(entries[0].processed).toBe('Hello world')
+    expect(entries[0].transcription.provider).toBe('groq')
     expect(entries[0].id).toMatch(/^[0-9a-f-]{36}$/)
     expect(entries[0].timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/)
   })
 
   it('prepends new entries so most recent comes first', () => {
-    appendEntry({ ...entryData, text: 'First' }, 100)
-    appendEntry({ ...entryData, text: 'Second' }, 100)
+    appendEntry({ ...entryData, processed: 'First' }, 100)
+    appendEntry({ ...entryData, processed: 'Second' }, 100)
     const entries = getAllEntries() as HistoryEntry[]
 
-    expect(entries[0].text).toBe('Second')
-    expect(entries[1].text).toBe('First')
+    expect(entries[0].processed).toBe('Second')
+    expect(entries[1].processed).toBe('First')
   })
 
   it('trims to the retain limit', () => {
     for (let i = 0; i < 5; i++) {
-      appendEntry({ ...entryData, text: `Entry ${i}` }, 3)
+      appendEntry({ ...entryData, processed: `Entry ${i}` }, 3)
     }
 
     expect(getAllEntries()).toHaveLength(3)
@@ -60,15 +60,15 @@ describe('deleteEntry', () => {
   })
 
   it('leaves other entries untouched', () => {
-    appendEntry({ ...entryData, text: 'Keep' }, 100)
-    appendEntry({ ...entryData, text: 'Delete me' }, 100)
+    appendEntry({ ...entryData, processed: 'Keep' }, 100)
+    appendEntry({ ...entryData, processed: 'Delete me' }, 100)
     const id = (getAllEntries() as HistoryEntry[])[0].id
 
     deleteEntry(id)
 
     const remaining = getAllEntries() as HistoryEntry[]
     expect(remaining).toHaveLength(1)
-    expect(remaining[0].text).toBe('Keep')
+    expect(remaining[0].processed).toBe('Keep')
   })
 })
 
@@ -90,7 +90,7 @@ describe('exportEntries', () => {
     const parsed = JSON.parse(exportEntries()) as HistoryEntry[]
 
     expect(parsed).toHaveLength(1)
-    expect(parsed[0].text).toBe('Hello world')
+    expect(parsed[0].processed).toBe('Hello world')
   })
 
   it('returns an empty array when history is empty', () => {
