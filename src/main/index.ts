@@ -4,8 +4,10 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { createWorkerWindow, createOverlayWindow } from './windows'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
-import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge } from './recording'
+import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge, type TranscribePipeline } from './recording'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
+import { openaiTranscriber } from './transcribers/openai'
+import { copyAndPaste } from './paste'
 
 let tray: Tray | null = null
 let settingsWindow: BrowserWindow | null = null
@@ -99,7 +101,18 @@ function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow): Recordi
     }
   }
 
-  return new RecordingOrchestrator(workerBridge, overlayBridge)
+  const pipeline: TranscribePipeline = {
+    async run(audioPath: string): Promise<void> {
+      const apiKey = process.env['OPENAI_API_KEY'] ?? ''
+      const text = await openaiTranscriber.transcribe(audioPath, {
+        model: 'gpt-4o-mini-transcribe',
+        apiKey
+      })
+      await copyAndPaste(text)
+    }
+  }
+
+  return new RecordingOrchestrator(workerBridge, overlayBridge, pipeline)
 }
 
 app.whenReady().then(() => {

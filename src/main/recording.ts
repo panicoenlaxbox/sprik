@@ -15,15 +15,20 @@ export interface OverlayBridge {
   setState(state: OverlayState): void
 }
 
+export interface TranscribePipeline {
+  run(audioPath: string): Promise<void>
+}
+
 export class RecordingOrchestrator {
   private state: RecordingState = 'idle'
   private tempPath: string | null = null
 
   constructor(
     private readonly worker: WorkerBridge,
-    private readonly overlay: OverlayBridge
+    private readonly overlay: OverlayBridge,
+    private readonly pipeline?: TranscribePipeline
   ) {
-    worker.onAudio((payload) => this.handleAudio(payload))
+    worker.onAudio((payload) => { this.handleAudio(payload).catch(console.error) })
     worker.onError((err) => this.handleError(err))
   }
 
@@ -70,13 +75,24 @@ export class RecordingOrchestrator {
     this.tempPath = null
   }
 
-  private handleAudio(payload: RecordingAudioPayload): void {
+  private async handleAudio(payload: RecordingAudioPayload): Promise<void> {
     const tempDir = app.getPath('temp')
     this.tempPath = join(tempDir, `murmur-${Date.now()}.webm`)
     writeFileSync(this.tempPath, payload.buffer)
     console.log(`[recording] saved ${this.tempPath} (${payload.durationMs}ms)`)
-    // M3 will pick up tempPath for STT; for now just reset
-    this.reset()
+
+    if (this.pipeline) {
+      try {
+        await this.pipeline.run(this.tempPath)
+      } catch (err) {
+        console.error('[recording] pipeline error:', (err as Error).message)
+      } finally {
+        this.deleteTempFile()
+        this.reset()
+      }
+    } else {
+      this.reset()
+    }
   }
 
   private handleError(error: string): void {
