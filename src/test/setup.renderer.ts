@@ -11,6 +11,8 @@ Object.defineProperty(window, 'api', {
     clearApiKey: vi.fn(),
     getHistory: vi.fn(),
     deleteHistory: vi.fn(),
+    clearHistory: vi.fn(),
+    exportHistory: vi.fn(),
     copyToClipboard: vi.fn()
   },
   writable: true

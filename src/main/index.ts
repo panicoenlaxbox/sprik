@@ -1,8 +1,8 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, shell, session, ipcMain } from 'electron'
+import { app, BrowserWindow, Tray, Menu, nativeImage, shell, session, ipcMain, clipboard } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { createWorkerWindow, createOverlayWindow } from './windows'
+import { createWorkerWindow, createOverlayWindow, createHistoryWindow } from './windows'
 import { registerShortcuts, unregisterShortcuts } from './shortcuts'
 import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge, type TranscribePipeline } from './recording'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload, setKeyPayloadSchema, apiProviderSchema } from './ipc'
@@ -11,9 +11,11 @@ import { getPostProcessor } from './llm'
 import { copyAndPaste } from './paste'
 import { getConfig, setConfig } from './store'
 import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
+import { appendEntry, getAllEntries, deleteEntry, clearAll, exportEntries } from './history'
 
 let tray: Tray | null = null
 let settingsWindow: BrowserWindow | null = null
+let historyWindow: BrowserWindow | null = null
 let workerWindow: BrowserWindow | null = null
 let overlayWindow: BrowserWindow | null = null
 let orchestrator: RecordingOrchestrator | null = null
@@ -64,6 +66,16 @@ function createTray(): void {
 
   const menu = Menu.buildFromTemplate([
     { label: 'Settings', click: () => createSettingsWindow() },
+    {
+      label: 'History',
+      click: () => {
+        if (historyWindow && !historyWindow.isDestroyed()) {
+          historyWindow.focus()
+        } else {
+          historyWindow = createHistoryWindow()
+        }
+      }
+    },
     { type: 'separator' },
     { label: 'Quit', click: () => app.quit() }
   ])
@@ -98,6 +110,10 @@ function buildPipeline(): TranscribePipeline {
       }
 
       await copyAndPaste(text, config.paste.autoPaste)
+
+      if (config.history.enabled) {
+        appendEntry({ text, provider, model }, config.history.retain)
+      }
     }
   }
 }
@@ -155,6 +171,12 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     const p = apiProviderSchema.parse(provider)
     clearKey(p)
   })
+
+  ipcMain.handle(CHANNELS.HISTORY_GET_ALL, () => getAllEntries())
+  ipcMain.handle(CHANNELS.HISTORY_DELETE, (_, id: string) => deleteEntry(id))
+  ipcMain.handle(CHANNELS.HISTORY_CLEAR, () => clearAll())
+  ipcMain.handle(CHANNELS.HISTORY_EXPORT, () => exportEntries())
+  ipcMain.handle(CHANNELS.CLIPBOARD_WRITE, (_, text: string) => clipboard.writeText(text))
 }
 
 app.whenReady().then(() => {

@@ -2,6 +2,34 @@ import { BrowserWindow, screen } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 
+export function createHistoryWindow(): BrowserWindow {
+  const win = new BrowserWindow({
+    width: 680,
+    height: 560,
+    show: false,
+    autoHideMenuBar: true,
+    title: 'Murmur — History',
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true
+    }
+  })
+
+  win.on('ready-to-show', () => win.show())
+
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/history/index.html`)
+  } else {
+    win.loadFile(join(__dirname, '../renderer/history/index.html'))
+  }
+
+  return win
+}
+
 export function createWorkerWindow(): BrowserWindow {
   const win = new BrowserWindow({
     show: false,

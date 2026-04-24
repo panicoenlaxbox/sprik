@@ -1,5 +1,13 @@
 export type OverlayState = 'idle' | 'recording' | 'transcribing'
 
+export interface HistoryEntry {
+  id: string
+  text: string
+  timestamp: string
+  provider: string
+  model: string
+}
+
 export interface Config {
   shortcuts: {
     toggleRecording: string
@@ -41,6 +49,11 @@ export interface AppApi {
   getApiKeyStatus: () => Promise<ApiKeyStatus>
   setApiKey: (provider: ApiProvider, key: string) => Promise<void>
   clearApiKey: (provider: ApiProvider) => Promise<void>
+  getHistory: () => Promise<HistoryEntry[]>
+  deleteHistory: (id: string) => Promise<void>
+  clearHistory: () => Promise<void>
+  exportHistory: () => Promise<string>
+  copyToClipboard: (text: string) => Promise<void>
 }
 
 declare global {

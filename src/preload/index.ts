@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import { CHANNELS } from '../main/ipc'
-import type { Config, ApiProvider, OverlayState } from '../renderer/shared/types'
+import type { Config, ApiProvider, OverlayState, HistoryEntry } from '../renderer/shared/types'
 
 const api = {
   onOverlayState: (cb: (state: OverlayState) => void): (() => void) => {
@@ -23,7 +23,22 @@ const api = {
     ipcRenderer.invoke(CHANNELS.SETTINGS_SET_KEY, { provider, key }),
 
   clearApiKey: (provider: ApiProvider): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.SETTINGS_CLEAR_KEY, provider)
+    ipcRenderer.invoke(CHANNELS.SETTINGS_CLEAR_KEY, provider),
+
+  getHistory: (): Promise<HistoryEntry[]> =>
+    ipcRenderer.invoke(CHANNELS.HISTORY_GET_ALL),
+
+  deleteHistory: (id: string): Promise<void> =>
+    ipcRenderer.invoke(CHANNELS.HISTORY_DELETE, id),
+
+  clearHistory: (): Promise<void> =>
+    ipcRenderer.invoke(CHANNELS.HISTORY_CLEAR),
+
+  exportHistory: (): Promise<string> =>
+    ipcRenderer.invoke(CHANNELS.HISTORY_EXPORT),
+
+  copyToClipboard: (text: string): Promise<void> =>
+    ipcRenderer.invoke(CHANNELS.CLIPBOARD_WRITE, text)
 }
 
 if (process.contextIsolated) {

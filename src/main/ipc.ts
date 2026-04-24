@@ -11,7 +11,12 @@ export const CHANNELS = {
   SETTINGS_SET: 'settings:set',
   SETTINGS_GET_KEY_STATUS: 'settings:get-key-status',
   SETTINGS_SET_KEY: 'settings:set-key',
-  SETTINGS_CLEAR_KEY: 'settings:clear-key'
+  SETTINGS_CLEAR_KEY: 'settings:clear-key',
+  HISTORY_GET_ALL: 'history:get-all',
+  HISTORY_DELETE: 'history:delete',
+  HISTORY_CLEAR: 'history:clear',
+  HISTORY_EXPORT: 'history:export',
+  CLIPBOARD_WRITE: 'clipboard:write'
 } as const
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS]
