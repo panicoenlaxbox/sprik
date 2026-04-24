@@ -37,7 +37,7 @@ function createSettingsWindow(): BrowserWindow {
     title: 'Murmur — Settings',
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true

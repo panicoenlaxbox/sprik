@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Speech-to-text desktop app powered by OpenAI / Groq",
   "main": "./out/main/index.js",
+  "type": "module",
   "author": "sergio.leon@analyticalways.com",
   "scripts": {
     "format": "prettier --write .",
