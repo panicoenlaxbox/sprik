@@ -49,6 +49,12 @@ export function createOverlayWindow(): BrowserWindow {
     }
   })
 
+  // Show once loaded and pass all mouse events through (content handles own visibility)
+  win.once('ready-to-show', () => {
+    win.showInactive()
+    win.setIgnoreMouseEvents(true, { forward: true })
+  })
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/overlay/index.html`)
   } else {

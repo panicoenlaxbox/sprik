@@ -95,11 +95,6 @@ function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow): Recordi
 
   const overlayBridge: OverlayBridge = {
     setState: (state: OverlayState) => {
-      if (state === 'idle') {
-        overlay.hide()
-      } else {
-        overlay.showInactive()
-      }
       overlay.webContents.send(CHANNELS.OVERLAY_STATE, state)
     }
   }
