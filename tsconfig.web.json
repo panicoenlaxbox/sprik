@@ -1,0 +1,18 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
+  "include": [
+    "src/renderer/settings/**/*",
+    "src/renderer/overlay/**/*",
+    "src/renderer/worker/**/*",
+    "src/renderer/shared/**/*",
+    "src/preload/*.d.ts"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["src/renderer/shared/*"]
+    }
+  }
+}
