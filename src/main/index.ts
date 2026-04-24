@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, shell, session, ipcMain, clipboard } from 'electron'
+import { app, BrowserWindow, Tray, Menu, nativeImage, shell, session, ipcMain, clipboard, Notification } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -12,6 +12,7 @@ import { copyAndPaste } from './paste'
 import { getConfig, setConfig } from './store'
 import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
 import { appendEntry, getAllEntries, deleteEntry, clearAll, exportEntries } from './history'
+import { setAutostart } from './autostart'
 
 let tray: Tray | null = null
 let settingsWindow: BrowserWindow | null = null
@@ -100,13 +101,30 @@ function buildPipeline(): TranscribePipeline {
       const { provider, model, language } = config.transcription
       const apiKey = getKey(provider) ?? ''
       const transcriber = getTranscriber(provider)
-      let text = await transcriber.transcribe(audioPath, { model, language, apiKey })
+      let text: string
+      try {
+        text = await transcriber.transcribe(audioPath, { model, language, apiKey })
+      } catch (err) {
+        new Notification({
+          title: 'Murmur — Transcription failed',
+          body: err instanceof Error ? err.message : 'Check your API key and connection.'
+        }).show()
+        throw err
+      }
 
       if (config.postProcess.enabled) {
         const { provider: llmProvider, model: llmModel, systemPrompt } = config.postProcess
         const llmApiKey = getKey(llmProvider) ?? ''
         const processor = getPostProcessor(llmProvider)
-        text = await processor.process(text, { model: llmModel, systemPrompt, apiKey: llmApiKey })
+        try {
+          text = await processor.process(text, { model: llmModel, systemPrompt, apiKey: llmApiKey })
+        } catch (err) {
+          new Notification({
+            title: 'Murmur — Post-processing failed',
+            body: err instanceof Error ? err.message : 'Check your LLM API key.'
+          }).show()
+          throw err
+        }
       }
 
       await copyAndPaste(text, config.paste.autoPaste)
@@ -158,6 +176,9 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
       unregisterShortcuts()
       registerShortcuts(newConfig.shortcuts, shortcutHandlers)
     }
+    if (prevConfig.autostart.enabled !== newConfig.autostart.enabled) {
+      setAutostart(newConfig.autostart.enabled)
+    }
   })
 
   ipcMain.handle(CHANNELS.SETTINGS_GET_KEY_STATUS, () => getKeyStatus())
@@ -199,6 +220,7 @@ app.whenReady().then(() => {
 
   const config = getConfig()
   registerShortcuts(config.shortcuts, shortcutHandlers)
+  setAutostart(config.autostart.enabled)
 
   setupSettingsIpc(shortcutHandlers)
 

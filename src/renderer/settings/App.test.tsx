@@ -91,6 +91,19 @@ describe('Settings App', () => {
     )
   })
 
+  it('toggles autostart and saves it', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => screen.getByText('Murmur Settings'))
+
+    await user.click(screen.getByLabelText(/launch murmur at login/i))
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(window.api.setConfig).toHaveBeenCalledWith(
+      expect.objectContaining({ autostart: { enabled: true } })
+    )
+  })
+
   it('shows LLM provider and model when post-processing is enabled', async () => {
     const configWithPostProcess = {
       ...mockConfig,

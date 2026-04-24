@@ -138,6 +138,24 @@ export default function App(): React.JSX.Element {
             Auto-paste after transcription
           </label>
         </section>
+
+        <section aria-labelledby="autostart-heading">
+          <h2 id="autostart-heading" className="text-sm font-medium text-gray-700 mb-3">
+            Startup
+          </h2>
+          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={config.autostart.enabled}
+              onChange={(e) =>
+                setConfigState({ ...config, autostart: { enabled: e.target.checked } })
+              }
+              className="rounded"
+              aria-label="Launch Murmur at login"
+            />
+            Launch at login
+          </label>
+        </section>
       </main>
 
       <footer className="px-6 py-4 border-t border-gray-200 bg-white flex items-center gap-3">
