@@ -9,6 +9,23 @@ export const handlers = [
     HttpResponse.json({ text: 'Hello, this is a Groq transcription.' })
   ),
 
+  http.post('https://api.openai.com/v1/chat/completions', () =>
+    HttpResponse.json({
+      id: 'chatcmpl-test',
+      object: 'chat.completion',
+      created: 1677858242,
+      model: 'gpt-4o-mini',
+      choices: [
+        {
+          index: 0,
+          message: { role: 'assistant', content: 'Post-processed text.' },
+          finish_reason: 'stop'
+        }
+      ],
+      usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 }
+    })
+  ),
+
   http.post('https://api.anthropic.com/v1/messages', () =>
     HttpResponse.json({
       id: 'msg_test',

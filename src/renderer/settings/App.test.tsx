@@ -66,13 +66,42 @@ describe('Settings App', () => {
   it('toggles the auto-paste checkbox and saves it', async () => {
     const user = userEvent.setup()
     render(<App />)
-    await waitFor(() => screen.getByRole('checkbox'))
+    await waitFor(() => screen.getByText('Murmur Settings'))
 
-    await user.click(screen.getByRole('checkbox'))
+    await user.click(screen.getByRole('checkbox', { name: /auto-paste/i }))
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     expect(window.api.setConfig).toHaveBeenCalledWith(
       expect.objectContaining({ paste: { autoPaste: false } })
     )
+  })
+
+  it('enables post-processing when toggle is checked', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => screen.getByText('Murmur Settings'))
+
+    await user.click(screen.getByLabelText(/enable post-processing/i))
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(window.api.setConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        postProcess: expect.objectContaining({ enabled: true })
+      })
+    )
+  })
+
+  it('shows LLM provider and model when post-processing is enabled', async () => {
+    const configWithPostProcess = {
+      ...mockConfig,
+      postProcess: { ...mockConfig.postProcess, enabled: true }
+    }
+    vi.mocked(window.api.getConfig).mockResolvedValue(configWithPostProcess)
+
+    render(<App />)
+    await waitFor(() => screen.getByText('Murmur Settings'))
+
+    expect(screen.getByRole('combobox', { name: /llm provider/i })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /system prompt/i })).toBeInTheDocument()
   })
 })

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import ProviderSelector from './components/ProviderSelector'
 import ApiKeyInput from './components/ApiKeyInput'
 import HotkeyRebinder from './components/HotkeyRebinder'
+import PostProcessSettings from './components/PostProcessSettings'
 import type { Config, ApiProvider, ApiKeyStatus } from '../shared/types'
 
 export default function App(): React.JSX.Element {
@@ -85,6 +86,18 @@ export default function App(): React.JSX.Element {
               />
             ))}
           </div>
+        </section>
+
+        <section aria-labelledby="post-process-heading">
+          <h2 id="post-process-heading" className="text-sm font-medium text-gray-700 mb-3">
+            Post-processing
+          </h2>
+          <PostProcessSettings
+            config={config.postProcess}
+            onChange={(updates) =>
+              setConfigState({ ...config, postProcess: { ...config.postProcess, ...updates } })
+            }
+          />
         </section>
 
         <section aria-labelledby="shortcuts-heading">

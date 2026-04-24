@@ -7,6 +7,7 @@ import { registerShortcuts, unregisterShortcuts } from './shortcuts'
 import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge, type TranscribePipeline } from './recording'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload, setKeyPayloadSchema, apiProviderSchema } from './ipc'
 import { getTranscriber } from './transcribers'
+import { getPostProcessor } from './llm'
 import { copyAndPaste } from './paste'
 import { getConfig, setConfig } from './store'
 import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
@@ -87,7 +88,15 @@ function buildPipeline(): TranscribePipeline {
       const { provider, model, language } = config.transcription
       const apiKey = getKey(provider) ?? ''
       const transcriber = getTranscriber(provider)
-      const text = await transcriber.transcribe(audioPath, { model, language, apiKey })
+      let text = await transcriber.transcribe(audioPath, { model, language, apiKey })
+
+      if (config.postProcess.enabled) {
+        const { provider: llmProvider, model: llmModel, systemPrompt } = config.postProcess
+        const llmApiKey = getKey(llmProvider) ?? ''
+        const processor = getPostProcessor(llmProvider)
+        text = await processor.process(text, { model: llmModel, systemPrompt, apiKey: llmApiKey })
+      }
+
       await copyAndPaste(text, config.paste.autoPaste)
     }
   }
