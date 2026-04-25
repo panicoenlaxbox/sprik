@@ -50,7 +50,7 @@ const api = {
 
   openPath: (path: string): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_PATH, path),
 
-  openRecordingsPath: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_RECORDINGS),
+  openRecordingsPath: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_RECORDINGS_PATH),
 
   getRecordingsPath: (): Promise<string> => ipcRenderer.invoke(CHANNELS.RECORDINGS_GET_PATH),
 
