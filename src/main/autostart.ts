@@ -4,12 +4,12 @@ import { join } from 'path'
 import { writeFileSync, unlinkSync, existsSync, mkdirSync } from 'fs'
 
 const DESKTOP_DIR = join(homedir(), '.config', 'autostart')
-const DESKTOP_FILE = join(DESKTOP_DIR, 'murmur.desktop')
+const DESKTOP_FILE = join(DESKTOP_DIR, 'sprik.desktop')
 
 function desktopEntry(): string {
   return `[Desktop Entry]
 Type=Application
-Name=Murmur
+Name=Sprik
 Exec=${process.execPath}
 Hidden=false
 NoDisplay=false

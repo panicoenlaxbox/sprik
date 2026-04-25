@@ -1,8 +1,8 @@
-# Murmur
+# Sprik
 
 Press a hotkey, speak, get text — pasted where you need it.
 
-Murmur is a cross-platform desktop app that transcribes speech to text using
+Sprik is a cross-platform desktop app that transcribes speech to text using
 [OpenAI Whisper](https://platform.openai.com/docs/guides/speech-to-text) or
 [Groq](https://console.groq.com/), with optional post-processing via an LLM
 (Claude or GPT-4o). Lives in the system tray, no window in your way.

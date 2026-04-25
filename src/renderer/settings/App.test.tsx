@@ -23,7 +23,7 @@ beforeEach(() => {
   vi.mocked(window.api.setConfig).mockResolvedValue(undefined)
   vi.mocked(window.api.getApiKey).mockResolvedValue('')
   vi.mocked(window.api.getRecordingsPath).mockResolvedValue(
-    'C:\\Users\\user\\AppData\\Roaming\\murmur'
+    'C:\\Users\\user\\AppData\\Roaming\\sprik'
   )
   vi.mocked(window.api.setApiKey).mockResolvedValue(undefined)
   vi.mocked(window.api.clearApiKey).mockResolvedValue(undefined)
@@ -134,7 +134,7 @@ describe('Settings App', () => {
     render(<App />)
     await waitFor(() => screen.getByText('Settings'))
 
-    await user.click(screen.getByLabelText(/launch murmur at login/i))
+    await user.click(screen.getByLabelText(/launch sprik at login/i))
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     expect(window.api.setConfig).toHaveBeenCalledWith(

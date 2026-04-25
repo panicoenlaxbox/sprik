@@ -74,7 +74,7 @@ function openAppWindow(): BrowserWindow {
 function createTray(): void {
   const trayIcon = nativeImage.createFromPath(icon)
   tray = new Tray(trayIcon.resize({ width: 16, height: 16 }))
-  tray.setToolTip('Murmur')
+  tray.setToolTip('Sprik')
 
   const menu = Menu.buildFromTemplate([
     { label: 'Open', click: () => openAppWindow() },
@@ -112,7 +112,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       } catch (err) {
         log('transcription', err instanceof Error ? err.message : String(err), 'error')
         new Notification({
-          title: 'Murmur — Transcription failed',
+          title: 'Sprik — Transcription failed',
           body: 'Check your API key and connection.'
         }).show()
         throw err
@@ -132,7 +132,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         } catch (err) {
           log('postProcessing', err instanceof Error ? err.message : String(err), 'error')
           new Notification({
-            title: 'Murmur — Post-processing failed',
+            title: 'Sprik — Post-processing failed',
             body: 'Check your API key and connection.'
           }).show()
           throw err
@@ -276,7 +276,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.murmur.app')
+  electronApp.setAppUserModelId('com.sprik.app')
 
   setupPermissions()
 
@@ -299,7 +299,7 @@ app.whenReady().then(() => {
         const key = getKey(cfg.transcription.provider)
         if (!key) {
           const n = new Notification({
-            title: 'Murmur — No API key',
+            title: 'Sprik — No API key',
             body: 'Set an API key in Settings before recording.'
           })
           n.on('click', () => openAppWindow())

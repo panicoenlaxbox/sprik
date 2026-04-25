@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '../../test/msw/server'
 import { openaiTranscriber } from './openai'
 
-const testAudioPath = join(tmpdir(), 'murmur-test-audio.webm')
+const testAudioPath = join(tmpdir(), 'sprik-test-audio.webm')
 const validOpts = { model: 'gpt-4o-mini-transcribe', apiKey: 'sk-test-key' }
 
 beforeAll(() => {

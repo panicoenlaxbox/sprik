@@ -5,7 +5,7 @@ import { homedir } from 'os'
 import { join } from 'path'
 
 const DESKTOP_DIR = join(homedir(), '.config', 'autostart')
-const DESKTOP_FILE = join(DESKTOP_DIR, 'murmur.desktop')
+const DESKTOP_FILE = join(DESKTOP_DIR, 'sprik.desktop')
 
 vi.mock('fs', () => ({
   writeFileSync: vi.fn(),

@@ -9,7 +9,7 @@ export function createAppWindow(): BrowserWindow {
     minWidth: 600,
     minHeight: 400,
     show: false,
-    title: 'Murmur',
+    title: 'Sprik',
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

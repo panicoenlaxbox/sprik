@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '../../test/msw/server'
 import { groqTranscriber } from './groq'
 
-const testAudioPath = join(tmpdir(), 'murmur-test-groq-audio.webm')
+const testAudioPath = join(tmpdir(), 'sprik-test-groq-audio.webm')
 const validOpts = { model: 'whisper-large-v3-turbo', apiKey: 'gsk-test-key' }
 
 beforeAll(() => {

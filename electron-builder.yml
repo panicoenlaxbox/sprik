@@ -1,5 +1,5 @@
-appId: com.murmur.app
-productName: Murmur
+appId: com.sprik.app
+productName: Sprik
 directories:
   buildResources: build
 files:
@@ -14,7 +14,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: murmur
+  executableName: sprik
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -23,7 +23,7 @@ nsis:
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    - NSMicrophoneUsageDescription: Murmur needs microphone access to record your voice for transcription.
+    - NSMicrophoneUsageDescription: Sprik needs microphone access to record your voice for transcription.
   notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}

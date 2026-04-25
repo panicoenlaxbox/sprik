@@ -93,7 +93,7 @@ export class RecordingOrchestrator {
 
   private async handleAudio(payload: RecordingAudioPayload): Promise<void> {
     const tempDir = app.getPath('temp')
-    this.tempPath = join(tempDir, `murmur-${Date.now()}.webm`)
+    this.tempPath = join(tempDir, `sprik-${Date.now()}.webm`)
     writeFileSync(this.tempPath, payload.buffer)
     log('recording', `saved ${this.tempPath} (${payload.durationMs}ms)`)
 

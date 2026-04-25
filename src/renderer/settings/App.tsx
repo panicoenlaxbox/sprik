@@ -241,7 +241,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
                 setConfigState({ ...config, autostart: { enabled: e.target.checked } })
               }
               className="rounded"
-              aria-label="Launch Murmur at login"
+              aria-label="Launch Sprik at login"
             />
             Launch at login
           </label>

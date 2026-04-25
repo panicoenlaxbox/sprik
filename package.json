@@ -1,5 +1,5 @@
 {
-  "name": "murmur",
+  "name": "sprik",
   "version": "0.1.0",
   "description": "Speech-to-text desktop app powered by OpenAI / Groq",
   "main": "./out/main/index.mjs",
