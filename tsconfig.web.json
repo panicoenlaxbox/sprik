@@ -1,6 +1,7 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "include": [
+    "src/renderer/app/**/*",
     "src/renderer/settings/**/*",
     "src/renderer/history/**/*",
     "src/renderer/overlay/**/*",

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 
+html,
 body {
   background: transparent;
   margin: 0;

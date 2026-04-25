@@ -42,7 +42,8 @@ export const configSchema = z.object({
   }).default({ enabled: false }),
 
   ui: z.object({
-    theme: z.enum(['system', 'light', 'dark']).default('system')
+    theme: z.enum(['system', 'light', 'dark']).default('system'),
+    overlayPosition: z.object({ x: z.number(), y: z.number() }).optional()
   }).default({ theme: 'system' }),
 
   recordings: z.object({

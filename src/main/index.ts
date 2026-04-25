@@ -156,6 +156,7 @@ function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow, onIdle: 
   const overlayBridge: OverlayBridge = {
     setState: (state: OverlayState) => {
       overlay.webContents.send(CHANNELS.OVERLAY_STATE, state)
+      overlay.setIgnoreMouseEvents(state === 'idle', { forward: true })
       log('overlay', `state = ${state}`)
     }
   }
@@ -229,7 +230,12 @@ app.whenReady().then(() => {
   })
 
   workerWindow = createWorkerWindow()
-  overlayWindow = createOverlayWindow()
+  overlayWindow = createOverlayWindow(getConfig().ui.overlayPosition)
+  overlayWindow.on('moved', () => {
+    const [x, y] = overlayWindow!.getPosition()
+    const cfg = getConfig()
+    setConfig({ ui: { ...cfg.ui, overlayPosition: { x, y } } })
+  })
 
   const shortcutHandlers = {
     onToggle: () => {

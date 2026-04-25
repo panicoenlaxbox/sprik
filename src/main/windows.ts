@@ -58,14 +58,16 @@ export function createWorkerWindow(): BrowserWindow {
   return win
 }
 
-export function createOverlayWindow(): BrowserWindow {
+export function createOverlayWindow(savedPosition?: { x: number; y: number }): BrowserWindow {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
+  const x = savedPosition?.x ?? Math.round(width / 2 - 110)
+  const y = savedPosition?.y ?? height - 80
 
   const win = new BrowserWindow({
-    width: 220,
+    width: 160,
     height: 48,
-    x: Math.round(width / 2 - 110),
-    y: height - 80,
+    x,
+    y,
     show: false,
     frame: false,
     transparent: true,
@@ -73,7 +75,7 @@ export function createOverlayWindow(): BrowserWindow {
     focusable: false,
     skipTaskbar: true,
     resizable: false,
-    movable: false,
+    movable: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,

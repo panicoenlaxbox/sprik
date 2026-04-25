@@ -31,8 +31,7 @@ export default defineConfig({
     build: {
       rollupOptions: {
         input: {
-          settings: resolve('src/renderer/settings/index.html'),
-          history: resolve('src/renderer/history/index.html'),
+          app: resolve('src/renderer/app/index.html'),
           overlay: resolve('src/renderer/overlay/index.html'),
           worker: resolve('src/renderer/worker/index.html')
         }
