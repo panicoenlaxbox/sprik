@@ -13,7 +13,7 @@ export const openaiProcessor: PostProcessor = {
       model: opts.model,
       max_tokens: 1024,
       messages: [
-        { role: 'system', content: opts.systemPrompt },
+        { role: 'system', content: opts.prompt },
         { role: 'user', content: text }
       ]
     })

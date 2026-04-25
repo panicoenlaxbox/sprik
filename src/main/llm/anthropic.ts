@@ -15,7 +15,7 @@ export const anthropicProcessor: PostProcessor = {
       system: [
         {
           type: 'text',
-          text: opts.systemPrompt,
+          text: opts.prompt,
           cache_control: { type: 'ephemeral' }
         }
       ],

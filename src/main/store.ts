@@ -16,16 +16,16 @@ export const configSchema = z.object({
     deviceId: z.string().optional()
   }).default({ provider: 'groq', model: 'distil-whisper-large-v3-en' }),
 
-  postProcess: z.object({
+  postProcessing: z.object({
     enabled: z.boolean().default(false),
     provider: z.enum(['anthropic', 'openai']).default('anthropic'),
     model: z.string().default('claude-haiku-4-5-20251001'),
-    systemPrompt: z.string().default('Clean up the transcription, fix punctuation and grammar.')
+    prompt: z.string().default('Clean up the transcription, fix punctuation and grammar.')
   }).default({
     enabled: false,
     provider: 'anthropic',
     model: 'claude-haiku-4-5-20251001',
-    systemPrompt: 'Clean up the transcription, fix punctuation and grammar.'
+    prompt: 'Clean up the transcription, fix punctuation and grammar.'
   }),
 
   paste: z.object({

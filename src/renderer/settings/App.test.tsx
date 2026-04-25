@@ -6,7 +6,7 @@ import type { Config, ApiKeyStatus } from '../shared/types'
 const mockConfig: Config = {
   shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' },
   transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' },
-  postProcess: { enabled: false, provider: 'anthropic', model: 'claude-sonnet-4-6', systemPrompt: '' },
+  postProcessing: { enabled: false, provider: 'anthropic', model: 'claude-sonnet-4-6', prompt: '' },
   paste: { autoPaste: true },
   history: { retain: 100, enabled: true },
   autostart: { enabled: false },
@@ -110,7 +110,7 @@ describe('Settings App', () => {
 
     expect(window.api.setConfig).toHaveBeenCalledWith(
       expect.objectContaining({
-        postProcess: expect.objectContaining({ enabled: true, systemPrompt: 'Fix punctuation.' })
+        postProcessing: expect.objectContaining({ enabled: true, prompt: 'Fix punctuation.' })
       })
     )
   })
@@ -143,7 +143,7 @@ describe('Settings App', () => {
   it('shows LLM provider and model when post-processing is enabled', async () => {
     const configWithPostProcess = {
       ...mockConfig,
-      postProcess: { ...mockConfig.postProcess, enabled: true }
+      postProcessing: { ...mockConfig.postProcessing, enabled: true }
     }
     vi.mocked(window.api.getConfig).mockResolvedValue(configWithPostProcess)
 

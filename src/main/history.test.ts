@@ -1,4 +1,10 @@
 import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries, type HistoryEntry } from './history'
+import { rmSync, existsSync } from 'fs'
+
+vi.mock('fs', () => ({
+  existsSync: vi.fn().mockReturnValue(true),
+  rmSync: vi.fn()
+}))
 
 let storeData: Record<string, unknown> = {}
 
@@ -46,6 +52,17 @@ describe('appendEntry', () => {
     }
 
     expect(getEntries()).toHaveLength(3)
+  })
+
+  it('removes files of entries evicted by the retain limit', () => {
+    const evictedPath = '/recordings/old'
+    appendEntry({ ...entryData, path: evictedPath }, 2)
+    appendEntry(entryData, 2)
+
+    appendEntry(entryData, 2) // pushes evictedPath entry out
+
+    expect(existsSync).toHaveBeenCalledWith(evictedPath)
+    expect(rmSync).toHaveBeenCalledWith(evictedPath, { recursive: true, force: true })
   })
 })
 

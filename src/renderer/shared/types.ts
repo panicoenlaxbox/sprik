@@ -39,11 +39,11 @@ export interface Config {
     language?: string
     deviceId?: string
   }
-  postProcess: {
+  postProcessing: {
     enabled: boolean
     provider: 'anthropic' | 'openai'
     model: string
-    systemPrompt: string
+    prompt: string
   }
   paste: {
     autoPaste: boolean

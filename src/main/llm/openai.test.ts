@@ -5,7 +5,7 @@ import { openaiProcessor } from './openai'
 const validOpts = {
   apiKey: 'sk-test-key',
   model: 'gpt-4o-mini',
-  systemPrompt: 'Fix punctuation and grammar.'
+  prompt: 'Fix punctuation and grammar.'
 }
 
 function makeChatResponse(content: string) {
@@ -49,7 +49,7 @@ describe('openaiProcessor', () => {
     await openaiProcessor.process('hello', validOpts)
 
     expect(capturedMessages).toEqual([
-      { role: 'system', content: validOpts.systemPrompt },
+      { role: 'system', content: validOpts.prompt },
       { role: 'user', content: 'hello' }
     ])
   })

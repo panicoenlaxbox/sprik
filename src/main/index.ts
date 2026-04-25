@@ -83,14 +83,14 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       }
 
       let text = transcript
-      if (config.postProcess.enabled) {
+      if (config.postProcessing.enabled) {
         setOverlayState('processing')
-        const postProcessingApiKey = getKey(config.postProcess.provider) ?? ''
-        const processor = getPostProcessor(config.postProcess.provider)
+        const postProcessingApiKey = getKey(config.postProcessing.provider) ?? ''
+        const processor = getPostProcessor(config.postProcessing.provider)
         try {
           text = await processor.process(transcript, {
-            model: config.postProcess.model,
-            systemPrompt: config.postProcess.systemPrompt,
+            model: config.postProcessing.model,
+            prompt: config.postProcessing.prompt,
             apiKey: postProcessingApiKey
           })
         } catch (err) {
@@ -111,7 +111,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         }
         if (config.recordings.saveText) {
           writeFileSync(join(sessionDir, 'transcript.txt'), transcript, 'utf8')
-          if (config.postProcess.enabled) {
+          if (config.postProcessing.enabled) {
             writeFileSync(join(sessionDir, 'processed.txt'), text, 'utf8')
           }
         }
@@ -121,11 +121,11 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       if (config.history.enabled) {
         appendEntry({
           processed: text,
-          transcript: config.postProcess.enabled ? transcript : undefined,
+          transcript: config.postProcessing.enabled ? transcript : undefined,
           path,
           transcription: { provider, model },
-          postProcessing: config.postProcess.enabled
-            ? { provider: config.postProcess.provider, model: config.postProcess.model }
+          postProcessing: config.postProcessing.enabled
+            ? { provider: config.postProcessing.provider, model: config.postProcessing.model }
             : undefined,
           language: language || undefined,
           microphone

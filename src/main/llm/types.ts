@@ -1,7 +1,7 @@
 export interface PostProcessOpts {
   apiKey: string
   model: string
-  systemPrompt: string
+  prompt: string
 }
 
 export interface PostProcessor {

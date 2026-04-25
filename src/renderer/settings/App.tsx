@@ -39,7 +39,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   }, [])
 
   const shortcutConflict = config?.shortcuts.toggleRecording === config?.shortcuts.cancelRecording
-  const emptyPrompt = config?.postProcess.enabled && !config.postProcess.systemPrompt.trim()
+  const emptyPrompt = config?.postProcessing.enabled && !config.postProcessing.prompt.trim()
 
   async function handleSave(): Promise<void> {
     if (!config || shortcutConflict || emptyPrompt) return
@@ -118,9 +118,9 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             Post-processing
           </h2>
           <PostProcessSettings
-            config={config.postProcess}
+            config={config.postProcessing}
             onChange={(updates) =>
-              setConfigState({ ...config, postProcess: { ...config.postProcess, ...updates } })
+              setConfigState({ ...config, postProcessing: { ...config.postProcessing, ...updates } })
             }
           />
           {emptyPrompt && (

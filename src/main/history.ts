@@ -29,11 +29,9 @@ export function appendEntry(
   data: Omit<HistoryEntry, 'id' | 'timestamp'>,
   retain: number
 ): void {
-  const entries = [
-    { id: randomUUID(), timestamp: new Date().toISOString(), ...data },
-    ...getEntries()
-  ].slice(0, retain)
-  store.set('entries', entries)
+  const all = [{ id: randomUUID(), timestamp: new Date().toISOString(), ...data }, ...getEntries()]
+  all.slice(retain).forEach(removeEntryFiles)
+  store.set('entries', all.slice(0, retain))
 }
 
 function removeEntryFiles(entry: HistoryEntry): void {

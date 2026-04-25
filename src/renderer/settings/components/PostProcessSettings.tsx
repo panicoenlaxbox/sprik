@@ -15,8 +15,8 @@ const LLM_PROVIDERS = {
 type LLMProvider = keyof typeof LLM_PROVIDERS
 
 interface Props {
-  config: Config['postProcess']
-  onChange: (updates: Partial<Config['postProcess']>) => void
+  config: Config['postProcessing']
+  onChange: (updates: Partial<Config['postProcessing']>) => void
 }
 
 export default function PostProcessSettings({ config, onChange }: Props): React.JSX.Element {
@@ -77,8 +77,8 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
             <textarea
               id="system-prompt"
               aria-label="Instructions"
-              value={config.systemPrompt}
-              onChange={(e) => onChange({ systemPrompt: e.target.value })}
+              value={config.prompt}
+              onChange={(e) => onChange({ prompt: e.target.value })}
               rows={4}
               placeholder="Instructions to process the transcription…"
               className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-800 dark:text-gray-100"

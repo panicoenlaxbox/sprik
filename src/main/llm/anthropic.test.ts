@@ -5,7 +5,7 @@ import { anthropicProcessor } from './anthropic'
 const validOpts = {
   apiKey: 'sk-ant-test',
   model: 'claude-sonnet-4-6',
-  systemPrompt: 'Fix punctuation and grammar.'
+  prompt: 'Fix punctuation and grammar.'
 }
 
 function makeAnthropicResponse(text: string, cacheReadTokens = 0, cacheCreationTokens = 0) {
@@ -51,7 +51,7 @@ describe('anthropicProcessor', () => {
     expect(capturedSystem).toEqual([
       {
         type: 'text',
-        text: validOpts.systemPrompt,
+        text: validOpts.prompt,
         cache_control: { type: 'ephemeral' }
       }
     ])

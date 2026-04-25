@@ -3,18 +3,18 @@ import userEvent from '@testing-library/user-event'
 import PostProcessSettings from './PostProcessSettings'
 import type { Config } from '../../shared/types'
 
-const disabledConfig: Config['postProcess'] = {
+const disabledConfig: Config['postProcessing'] = {
   enabled: false,
   provider: 'anthropic',
   model: 'claude-sonnet-4-6',
-  systemPrompt: 'Fix grammar.'
+  prompt: 'Fix grammar.'
 }
 
-const enabledConfig: Config['postProcess'] = {
+const enabledConfig: Config['postProcessing'] = {
   enabled: true,
   provider: 'anthropic',
   model: 'claude-sonnet-4-6',
-  systemPrompt: 'Fix grammar.'
+  prompt: 'Fix grammar.'
 }
 
 describe('PostProcessSettings', () => {
@@ -61,6 +61,6 @@ describe('PostProcessSettings', () => {
     render(<PostProcessSettings config={enabledConfig} onChange={onChange} />)
     await user.type(screen.getByRole('textbox', { name: /instructions/i }), '!')
 
-    expect(onChange).toHaveBeenLastCalledWith({ systemPrompt: 'Fix grammar.!' })
+    expect(onChange).toHaveBeenLastCalledWith({ prompt: 'Fix grammar.!' })
   })
 })
