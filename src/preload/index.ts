@@ -57,7 +57,7 @@ const api = {
   openPath: (path: string): Promise<void> =>
     ipcRenderer.invoke(CHANNELS.SHELL_OPEN_PATH, path),
 
-  openRecordingsFolder: (): Promise<void> =>
+  openRecordingsPath: (): Promise<void> =>
     ipcRenderer.invoke(CHANNELS.SHELL_OPEN_RECORDINGS),
 
   getRecordingsPath: (): Promise<string> =>

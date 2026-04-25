@@ -215,7 +215,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
 
   ipcMain.handle(CHANNELS.RECORDINGS_GET_PATH, () => app.getPath('userData'))
 
-  ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS, () =>
+  ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () =>
     shell.openPath(app.getPath('userData'))
   )
 }

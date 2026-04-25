@@ -40,7 +40,7 @@ export function getAllEntries(): HistoryEntry[] {
   return getEntries()
 }
 
-function removeFolder(entry: HistoryEntry): void {
+function removeRecording(entry: HistoryEntry): void {
   if (entry.path && existsSync(entry.path)) {
     rmSync(entry.path, { recursive: true, force: true })
   }
@@ -49,12 +49,12 @@ function removeFolder(entry: HistoryEntry): void {
 export function deleteEntry(id: string): void {
   const entries = getEntries()
   const entry = entries.find((e) => e.id === id)
-  if (entry) removeFolder(entry)
+  if (entry) removeRecording(entry)
   store.set('entries', entries.filter((e) => e.id !== id))
 }
 
 export function clearAll(): void {
-  getEntries().forEach(removeFolder)
+  getEntries().forEach(removeRecording)
   store.set('entries', [])
 }
 

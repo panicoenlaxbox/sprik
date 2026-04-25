@@ -19,7 +19,7 @@ export const CHANNELS = {
   SHORTCUTS_PAUSE: 'shortcuts:pause',
   SHORTCUTS_RESUME: 'shortcuts:resume',
   SHELL_OPEN_PATH: 'shell:open-path',
-  SHELL_OPEN_RECORDINGS: 'shell:open-recordings',
+  SHELL_OPEN_RECORDINGS_PATH: 'shell:open-recordings-path',
   RECORDINGS_GET_PATH: 'recordings:get-path',
   LOG_FORWARD: 'log:forward'
 } as const

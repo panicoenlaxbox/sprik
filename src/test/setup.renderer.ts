@@ -24,7 +24,7 @@ Object.defineProperty(window, 'api', {
     pauseShortcuts: vi.fn(),
     resumeShortcuts: vi.fn(),
     openPath: vi.fn(),
-    openRecordingsFolder: vi.fn(),
+    openRecordingsPath: vi.fn(),
     getRecordingsPath: vi.fn()
   },
   writable: true

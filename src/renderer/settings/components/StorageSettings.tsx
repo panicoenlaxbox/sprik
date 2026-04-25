@@ -37,7 +37,7 @@ export default function StorageSettings({ config, recordingsPath, onChange }: Pr
         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pt-1 min-w-0">
           <button
             type="button"
-            onClick={() => window.api.openRecordingsFolder()}
+            onClick={() => window.api.openRecordingsPath()}
             className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline truncate cursor-pointer"
           >
             <FolderOpen size={12} className="shrink-0" />

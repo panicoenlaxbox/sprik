@@ -84,7 +84,7 @@ export interface AppApi {
   pauseShortcuts: () => Promise<void>
   resumeShortcuts: () => Promise<void>
   openPath: (path: string) => Promise<void>
-  openRecordingsFolder: () => Promise<void>
+  openRecordingsPath: () => Promise<void>
   getRecordingsPath: () => Promise<string>
 }
 
