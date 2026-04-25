@@ -235,7 +235,11 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     if (prevConfig.autostart.enabled !== newConfig.autostart.enabled) {
       setAutostart(newConfig.autostart.enabled)
     }
-    if (prevConfig.ui.theme !== newConfig.ui.theme && overlayWindow && !overlayWindow.isDestroyed()) {
+    if (
+      prevConfig.ui.theme !== newConfig.ui.theme &&
+      overlayWindow &&
+      !overlayWindow.isDestroyed()
+    ) {
       overlayWindow.webContents.send(CHANNELS.UI_THEME_CHANGED, newConfig.ui.theme)
     }
   })
@@ -259,7 +263,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
 
   ipcMain.handle(CHANNELS.HISTORY_GET_ALL, () => getEntries())
   ipcMain.handle(CHANNELS.HISTORY_DELETE, (_, id: string) => deleteEntry(id))
-  ipcMain.handle(CHANNELS.HISTORY_CLEAR, () => clearEntries()())
+  ipcMain.handle(CHANNELS.HISTORY_CLEAR, () => clearEntries())
   ipcMain.handle(CHANNELS.HISTORY_EXPORT, () => exportEntries())
   ipcMain.handle(CHANNELS.CLIPBOARD_WRITE, (_, text: string) => clipboard.writeText(text))
 

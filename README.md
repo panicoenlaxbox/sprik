@@ -2,10 +2,8 @@
 
 Press a hotkey, speak, get text — pasted where you need it.
 
-Sprik is a cross-platform desktop app that transcribes speech to text using
-[OpenAI Whisper](https://platform.openai.com/docs/guides/speech-to-text) or
-[Groq](https://console.groq.com/), with optional post-processing via an LLM
-(Claude or GPT-4o). Lives in the system tray, no window in your way.
+Sprik is a cross-platform desktop app that transcribes speech to text,
+with optional post-processing via an LLM. Lives in the system tray, no window in your way.
 
 ## Features
 
@@ -28,11 +26,8 @@ Sprik is a cross-platform desktop app that transcribes speech to text using
 pnpm install
 ```
 
-For development, copy `.env.example` to `.env.local` and add your API keys:
+For development, copy `.env.example` to `.env.local` and add your API keys.
 
-```bash
-cp .env.example .env.local
-```
 
 ## Usage
 
@@ -48,6 +43,9 @@ pnpm test:coverage
 
 # Type check
 pnpm typecheck
+
+# Lint
+pnpm lint
 ```
 
 ## Build
@@ -60,16 +58,9 @@ pnpm build:linux  # Linux (AppImage + deb)
 
 ## Providers
 
-| Role            | Provider  | Models                                                                               |
-| --------------- | --------- | ------------------------------------------------------------------------------------ |
-| Transcription   | Groq      | `whisper-large-v3-turbo` (default), `whisper-large-v3`, `distil-whisper-large-v3-en` |
-| Transcription   | OpenAI    | `whisper-1`                                                                          |
-| Post-processing | Anthropic | `claude-sonnet-4-6` (default)                                                        |
-| Post-processing | OpenAI    | `gpt-4o-mini` (default)                                                              |
-
-## IDE Setup
-
-[VS Code](https://code.visualstudio.com/) with the
-[ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and
-[Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-extensions (both recommended in `.vscode/extensions.json`).
+| Role            | Provider  | Models                                                                                        |
+| --------------- | --------- | --------------------------------------------------------------------------------------------- |
+| Transcription   | Groq      | `distil-whisper-large-v3-en` (default), `whisper-large-v3`, `whisper-large-v3-turbo`          |
+| Transcription   | OpenAI    | `gpt-4o-mini-transcribe`, `gpt-4o-transcribe`, `whisper-1`                                    |
+| Post-processing | Anthropic | `claude-haiku-4-5-20251001` (default), `claude-sonnet-4-6`, `claude-opus-4-7`                 |
+| Post-processing | OpenAI    | `gpt-4o-mini` (default), `gpt-4o`                                                             |

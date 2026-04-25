@@ -24,7 +24,6 @@ export class RecordingOrchestrator {
   private state: RecordingState = 'idle'
   private tempPath: string | null = null
   private cancelledTimer: ReturnType<typeof setTimeout> | null = null
-  private errorTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(
     private readonly worker: WorkerBridge,
@@ -121,8 +120,7 @@ export class RecordingOrchestrator {
     this.state = 'error'
     this.overlay.setState('error')
     this.onIdle?.()
-    this.errorTimer = setTimeout(() => {
-      this.errorTimer = null
+    void setTimeout(() => {
       this.state = 'idle'
       this.overlay.setState('idle')
     }, 1500)

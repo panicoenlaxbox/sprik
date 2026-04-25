@@ -55,7 +55,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       for (const [provider, key] of Object.entries(pendingKeys) as [ApiProvider, string][]) {
         if (key.trim()) {
           await window.api.setApiKey(provider, key.trim())
-        } else if (key === '' && keyStatus[provider]) {
+        } else if (key === '' && keyStatus?.[provider]) {
           await window.api.clearApiKey(provider)
         }
       }
