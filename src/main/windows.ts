@@ -1,6 +1,7 @@
-import { BrowserWindow, screen, shell } from 'electron'
+import { BrowserWindow, nativeImage, screen, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
+import icon from '../../resources/icon.png?asset'
 
 export function createAppWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -10,6 +11,7 @@ export function createAppWindow(): BrowserWindow {
     minHeight: 400,
     show: false,
     title: 'Sprik',
+    icon: nativeImage.createFromPath(icon),
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
