@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 import type { Config, ApiKeyStatus } from '../shared/types'
@@ -140,6 +140,37 @@ describe('Settings App', () => {
     expect(window.api.setConfig).toHaveBeenCalledWith(
       expect.objectContaining({ autostart: { enabled: true } })
     )
+  })
+
+  it('shows retain input and storage options only when history is enabled', async () => {
+    const user = userEvent.setup()
+    vi.mocked(window.api.getConfig).mockResolvedValue({
+      ...mockConfig,
+      history: { retain: 100, enabled: false }
+    })
+
+    render(<App />)
+    await waitFor(() => screen.getByText('Settings'))
+
+    expect(screen.queryByLabelText(/keep last/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/save transcript/i)).not.toBeInTheDocument()
+
+    await user.click(screen.getByLabelText(/enable history/i))
+
+    expect(screen.getByLabelText(/keep last/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/save transcript/i)).toBeInTheDocument()
+  })
+
+  it('blocks save and shows error when retain is less than 1', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => screen.getByText('Settings'))
+
+    fireEvent.change(screen.getByLabelText(/keep last/i), { target: { value: '0' } })
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(window.api.setConfig).not.toHaveBeenCalled()
+    expect(screen.getByRole('alert')).toHaveTextContent(/at least 1/i)
   })
 
   it('shows LLM provider and model when post-processing is enabled', async () => {

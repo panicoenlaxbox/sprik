@@ -42,9 +42,12 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
 
   const shortcutConflict = config?.shortcuts.toggleRecording === config?.shortcuts.cancelRecording
   const emptyPrompt = config?.postProcessing.enabled && !config.postProcessing.prompt.trim()
+  const invalidRetain =
+    config?.history.enabled &&
+    (!Number.isInteger(config.history.retain) || config.history.retain < 1)
 
   async function handleSave(): Promise<void> {
-    if (!config || shortcutConflict || emptyPrompt) return
+    if (!config || shortcutConflict || emptyPrompt || invalidRetain) return
     setSaving(true)
     try {
       await window.api.setConfig(config)
@@ -244,20 +247,69 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           </label>
         </section>
 
-        <section aria-labelledby="storage-heading">
+        <section aria-labelledby="history-heading">
           <h2
-            id="storage-heading"
+            id="history-heading"
             className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
           >
-            Data
+            History
           </h2>
-          <StorageSettings
-            config={config.recordings}
-            recordingsPath={recordingsPath}
-            onChange={(updates) =>
-              setConfigState({ ...config, recordings: { ...config.recordings, ...updates } })
-            }
-          />
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.history.enabled}
+                onChange={(e) =>
+                  setConfigState({
+                    ...config,
+                    history: { ...config.history, enabled: e.target.checked }
+                  })
+                }
+                className="rounded"
+                aria-label="Enable history"
+              />
+              Keep transcription history
+            </label>
+            {config.history.enabled && (
+              <>
+                <div className="flex items-center gap-3 pl-6">
+                  <label
+                    htmlFor="history-retain"
+                    className="text-sm text-gray-600 dark:text-gray-400 shrink-0"
+                  >
+                    Keep last
+                  </label>
+                  <input
+                    id="history-retain"
+                    type="number"
+                    min={1}
+                    value={config.history.retain}
+                    onChange={(e) => {
+                      const v = parseInt(e.target.value, 10)
+                      setConfigState({
+                        ...config,
+                        history: { ...config.history, retain: isNaN(v) ? 1 : v }
+                      })
+                    }}
+                    className="w-20 text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-100"
+                  />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">entries</span>
+                </div>
+                {invalidRetain && (
+                  <p className="text-xs text-red-600 pl-6" role="alert">
+                    Must be at least 1.
+                  </p>
+                )}
+                <StorageSettings
+                  config={config.recordings}
+                  recordingsPath={recordingsPath}
+                  onChange={(updates) =>
+                    setConfigState({ ...config, recordings: { ...config.recordings, ...updates } })
+                  }
+                />
+              </>
+            )}
+          </div>
         </section>
 
         <section aria-labelledby="appearance-heading">
