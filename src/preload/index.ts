@@ -52,7 +52,13 @@ const api = {
 
   openRecordingsPath: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_RECORDINGS),
 
-  getRecordingsPath: (): Promise<string> => ipcRenderer.invoke(CHANNELS.RECORDINGS_GET_PATH)
+  getRecordingsPath: (): Promise<string> => ipcRenderer.invoke(CHANNELS.RECORDINGS_GET_PATH),
+
+  onThemeChange: (cb: (theme: 'system' | 'light' | 'dark') => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, theme: 'system' | 'light' | 'dark'): void => cb(theme)
+    ipcRenderer.on(CHANNELS.UI_THEME_CHANGED, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.UI_THEME_CHANGED, handler)
+  }
 }
 
 if (process.contextIsolated) {

@@ -235,6 +235,9 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     if (prevConfig.autostart.enabled !== newConfig.autostart.enabled) {
       setAutostart(newConfig.autostart.enabled)
     }
+    if (prevConfig.ui.theme !== newConfig.ui.theme && overlayWindow && !overlayWindow.isDestroyed()) {
+      overlayWindow.webContents.send(CHANNELS.UI_THEME_CHANGED, newConfig.ui.theme)
+    }
   })
 
   ipcMain.handle(CHANNELS.SETTINGS_GET_KEY_STATUS, () => getKeyStatus())

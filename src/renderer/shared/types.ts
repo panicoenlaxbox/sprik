@@ -92,6 +92,7 @@ export interface AppApi {
   openPath: (path: string) => Promise<void>
   openRecordingsPath: () => Promise<void>
   getRecordingsPath: () => Promise<string>
+  onThemeChange: (cb: (theme: 'system' | 'light' | 'dark') => void) => () => void
 }
 
 declare global {

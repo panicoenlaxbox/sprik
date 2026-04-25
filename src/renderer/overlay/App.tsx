@@ -10,6 +10,7 @@ export default function App(): React.JSX.Element {
 
   useEffect(() => {
     window.api.getConfig().then((cfg) => setTheme(cfg.ui.theme))
+    return window.api.onThemeChange(setTheme)
   }, [])
 
   useEffect(() => {
