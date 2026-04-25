@@ -68,7 +68,7 @@ function setupPermissions(): void {
 
 function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePipeline {
   return {
-    async run(audioPath: string, micLabel?: string): Promise<void> {
+    async run(audioPath: string, microphone?: string): Promise<void> {
       const config = getConfig()
       const { provider, model, language } = config.transcription
       const transcriptionApiKey = getKey(provider) ?? ''
@@ -77,10 +77,8 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       try {
         transcript = await transcriber.transcribe(audioPath, { model, language, apiKey: transcriptionApiKey })
       } catch (err) {
-        new Notification({
-          title: 'Murmur — Transcription failed',
-          body: err instanceof Error ? err.message : 'Check your API key and connection.'
-        }).show()
+        log('transcription', err instanceof Error ? err.message : String(err), 'error')
+        new Notification({ title: 'Murmur — Transcription failed', body: 'Check your API key and connection.' }).show()
         throw err
       }
 
@@ -96,10 +94,8 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
             apiKey: postProcessingApiKey
           })
         } catch (err) {
-          new Notification({
-            title: 'Murmur — Post-processing failed',
-            body: err instanceof Error ? err.message : 'Check your LLM API key.'
-          }).show()
+          log('postProcessing', err instanceof Error ? err.message : String(err), 'error')
+          new Notification({ title: 'Murmur — Post-processing failed', body: 'Check your API key and connection.' }).show()
           throw err
         }
       }
@@ -132,7 +128,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
             ? { provider: config.postProcess.provider, model: config.postProcess.model }
             : undefined,
           language: language || undefined,
-          micLabel
+          microphone
         }, config.history.retain)
       }
     }
@@ -143,11 +139,11 @@ function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow, onIdle: 
   const workerBridge: WorkerBridge = {
     send: (channel, payload) => worker.webContents.send(channel, payload),
     onAudio: (cb) => {
-      ipcMain.on(CHANNELS.RECORDING_AUDIO, (_, payload: { buffer: ArrayBuffer; durationMs: number; micLabel?: string }) => {
+      ipcMain.on(CHANNELS.RECORDING_AUDIO, (_, payload: { buffer: ArrayBuffer; durationMs: number; microphone?: string }) => {
         const typed: RecordingAudioPayload = {
           buffer: Buffer.from(payload.buffer),
           durationMs: payload.durationMs,
-          micLabel: payload.micLabel
+          microphone: payload.microphone
         }
         cb(typed)
       })

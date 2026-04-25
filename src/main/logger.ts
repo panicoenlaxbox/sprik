@@ -12,9 +12,11 @@ export function setLogRenderer(wc: WebContents): void {
   target = wc
 }
 
-export function log(scope: string, message: string): void {
-  electronLog.scope(scope).info(message)
+type Level = 'info' | 'warn' | 'error'
+
+export function log(scope: string, message: string, level: Level = 'info'): void {
+  electronLog.scope(scope)[level](message)
   if (target && !target.isDestroyed()) {
-    target.send(CHANNELS.LOG_FORWARD, scope, message)
+    target.send(CHANNELS.LOG_FORWARD, scope, message, level)
   }
 }

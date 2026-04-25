@@ -4,7 +4,7 @@ import { writeFileSync, unlinkSync, existsSync } from 'fs'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
 import { log } from './logger'
 
-export type RecordingState = 'idle' | 'recording'
+export type RecordingState = 'idle' | 'recording' | 'error'
 
 export interface WorkerBridge {
   send(channel: string, payload?: unknown): void
@@ -17,13 +17,14 @@ export interface OverlayBridge {
 }
 
 export interface TranscribePipeline {
-  run(audioPath: string, micLabel?: string): Promise<void>
+  run(audioPath: string, microphone?: string): Promise<void>
 }
 
 export class RecordingOrchestrator {
   private state: RecordingState = 'idle'
   private tempPath: string | null = null
   private cancelledTimer: ReturnType<typeof setTimeout> | null = null
+  private errorTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(
     private readonly worker: WorkerBridge,
@@ -38,7 +39,7 @@ export class RecordingOrchestrator {
   toggle(deviceId?: string): void {
     if (this.state === 'idle') {
       this.start(deviceId)
-    } else {
+    } else if (this.state === 'recording') {
       this.stop()
     }
   }
@@ -96,12 +97,12 @@ export class RecordingOrchestrator {
 
     if (this.pipeline) {
       try {
-        await this.pipeline.run(this.tempPath, payload.micLabel)
-      } catch (err) {
-        console.error('[recording] pipeline error:', (err as Error).message)
-      } finally {
+        await this.pipeline.run(this.tempPath, payload.microphone)
         this.deleteTempFile()
         this.reset()
+      } catch {
+        this.deleteTempFile()
+        this.showError()
       }
     } else {
       this.reset()
@@ -112,6 +113,17 @@ export class RecordingOrchestrator {
     console.error(`[recording] worker error: ${error}`)
     this.deleteTempFile()
     this.reset()
+  }
+
+  private showError(): void {
+    this.state = 'error'
+    this.overlay.setState('error')
+    this.onIdle?.()
+    this.errorTimer = setTimeout(() => {
+      this.errorTimer = null
+      this.state = 'idle'
+      this.overlay.setState('idle')
+    }, 1500)
   }
 
   private reset(): void {

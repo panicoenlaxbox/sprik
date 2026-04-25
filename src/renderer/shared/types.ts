@@ -1,4 +1,4 @@
-export type OverlayState = 'idle' | 'recording' | 'transcribing' | 'processing' | 'cancelled'
+export type OverlayState = 'idle' | 'recording' | 'transcribing' | 'processing' | 'cancelled' | 'error'
 
 export const TRANSCRIPTION_PROVIDERS = {
   groq: {
@@ -25,7 +25,7 @@ export interface HistoryEntry {
   transcription: ModelRef
   postProcessing?: ModelRef
   language?: string
-  micLabel?: string
+  microphone?: string
 }
 
 export interface Config {
@@ -69,7 +69,7 @@ export type ApiKeyStatus = Record<ApiProvider, boolean>
 
 export interface AppApi {
   onOverlayState: (cb: (state: OverlayState) => void) => () => void
-  onLog: (cb: (scope: string, message: string) => void) => () => void
+  onLog: (cb: (scope: string, message: string, level: string) => void) => () => void
   getConfig: () => Promise<Config>
   setConfig: (partial: Partial<Config>) => Promise<void>
   getApiKeyStatus: () => Promise<ApiKeyStatus>

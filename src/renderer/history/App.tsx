@@ -203,9 +203,9 @@ export default function App(): React.JSX.Element {
                         <span className="text-gray-300">Language:</span> {entry.language}
                       </p>
                     )}
-                    {entry.micLabel && (
+                    {entry.microphone && (
                       <p className="text-xs text-gray-400">
-                        <span className="text-gray-300">Microphone:</span> {entry.micLabel}
+                        <span className="text-gray-300">Microphone:</span> {entry.microphone}
                       </p>
                     )}
                   </div>

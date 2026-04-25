@@ -8,8 +8,9 @@ type View = 'settings' | 'history'
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<View>('settings')
 
-  useEffect(() => window.api.onLog((scope, message) => {
-    console.log(`%c[${scope}]%c ${message}`, 'color:#6366f1;font-weight:bold', 'color:inherit')
+  useEffect(() => window.api.onLog((scope, message, level) => {
+    const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log
+    fn(`%c[${scope}]%c ${message}`, 'color:#6366f1;font-weight:bold', 'color:inherit')
   }), [])
 
   const navItems: { id: View; icon: React.JSX.Element; label: string }[] = [

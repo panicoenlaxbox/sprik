@@ -16,7 +16,7 @@ export interface HistoryEntry {
   transcription: ModelRef
   postProcessing?: ModelRef
   language?: string
-  micLabel?: string
+  microphone?: string
 }
 
 const store = new Store<{ entries: HistoryEntry[] }>({ name: 'history' })

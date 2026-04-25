@@ -41,6 +41,12 @@ export default function App(): React.JSX.Element {
           <span>Cancelled</span>
         </>
       )}
+      {state === 'error' && (
+        <>
+          <span className="w-2 h-2 rounded-full bg-red-500" />
+          <span>Error</span>
+        </>
+      )}
     </div>
   )
 }

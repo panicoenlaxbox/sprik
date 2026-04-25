@@ -9,8 +9,8 @@ const api = {
     return () => ipcRenderer.removeListener(CHANNELS.OVERLAY_STATE, handler)
   },
 
-  onLog: (cb: (scope: string, message: string) => void): (() => void) => {
-    const handler = (_: IpcRendererEvent, scope: string, message: string): void => cb(scope, message)
+  onLog: (cb: (scope: string, message: string, level: string) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, scope: string, message: string, level: string): void => cb(scope, message, level)
     ipcRenderer.on(CHANNELS.LOG_FORWARD, handler)
     return () => ipcRenderer.removeListener(CHANNELS.LOG_FORWARD, handler)
   },
