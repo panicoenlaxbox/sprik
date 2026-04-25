@@ -39,7 +39,7 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-600 w-36">{label}</span>
+      <span className="text-sm text-gray-600 dark:text-gray-400 w-36">{label}</span>
 
       {capturing ? (
         <input
@@ -50,13 +50,13 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
           value=""
           placeholder="Press keys… (click outside to cancel)"
           aria-label={`Capturing shortcut for ${label}`}
-          className="text-sm border border-blue-400 rounded-md px-3 py-1.5 bg-blue-50 focus:outline-none w-48 placeholder:text-blue-400"
+          className="text-sm border border-blue-400 rounded-md px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500 focus:outline-none w-48 placeholder:text-blue-400 dark:placeholder:text-blue-500 dark:text-blue-300"
         />
       ) : (
         <button
           onClick={() => setCapturing(true)}
           aria-label={`Change shortcut for ${label}: currently ${value}`}
-          className="text-sm font-mono border border-gray-300 rounded-md px-3 py-1.5 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 text-left"
+          className="text-sm font-mono border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 w-48 text-left"
         >
           {value}
         </button>

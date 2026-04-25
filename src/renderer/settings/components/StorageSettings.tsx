@@ -11,7 +11,7 @@ interface Props {
 export default function StorageSettings({ config, recordingsPath, onChange }: Props): React.JSX.Element {
   return (
     <div className="space-y-3">
-      <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
         <input
           type="checkbox"
           checked={config.saveText}
@@ -22,7 +22,7 @@ export default function StorageSettings({ config, recordingsPath, onChange }: Pr
         Save transcript
       </label>
 
-      <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
         <input
           type="checkbox"
           checked={config.saveAudio}
@@ -34,11 +34,11 @@ export default function StorageSettings({ config, recordingsPath, onChange }: Pr
       </label>
 
       {recordingsPath && (
-        <div className="flex items-center gap-2 text-xs text-gray-500 pt-1 min-w-0">
+        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 pt-1 min-w-0">
           <button
             type="button"
             onClick={() => window.api.openRecordingsFolder()}
-            className="flex items-center gap-1 text-blue-600 hover:underline truncate cursor-pointer"
+            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline truncate cursor-pointer"
           >
             <FolderOpen size={12} className="shrink-0" />
             <span className="truncate">{recordingsPath}</span>

@@ -8,7 +8,11 @@ import MicrophoneSelector from './components/MicrophoneSelector'
 import LanguageSelector from './components/LanguageSelector'
 import type { Config, ApiProvider, ApiKeyStatus } from '../shared/types'
 
-export default function App(): React.JSX.Element {
+interface Props {
+  onThemeChange?: (theme: 'system' | 'light' | 'dark') => void
+}
+
+export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [config, setConfigState] = useState<Config | null>(null)
   const [keyStatus, setKeyStatus] = useState<ApiKeyStatus | null>(null)
   const [pendingKeys, setPendingKeys] = useState<Partial<Record<ApiProvider, string>>>({})
@@ -58,6 +62,7 @@ export default function App(): React.JSX.Element {
       const refreshed: Partial<Record<ApiProvider, string>> = {}
       providers.forEach((p, i) => { if (keys[i]) refreshed[p] = keys[i] as string })
       setPendingKeys(refreshed)
+      onThemeChange?.(config.ui.theme)
       setSavedBadge(true)
       setTimeout(() => setSavedBadge(false), 2000)
     } finally {
@@ -68,21 +73,21 @@ export default function App(): React.JSX.Element {
 
   if (!config || !keyStatus) {
     return (
-      <div className="h-full bg-gray-50 flex items-center justify-center">
-        <p className="text-sm text-gray-500">Loading…</p>
+      <div className="h-full bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>
       </div>
     )
   }
 
   return (
-    <div className="h-full bg-gray-50 flex flex-col">
-      <header className="px-6 py-4 border-b border-gray-200 bg-white">
-        <h1 className="text-lg font-semibold text-gray-900">Settings</h1>
+    <div className="h-full bg-gray-50 dark:bg-gray-950 flex flex-col">
+      <header className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Settings</h1>
       </header>
 
       <main className="flex-1 p-6 space-y-8 overflow-y-auto">
         <section aria-labelledby="transcription-heading">
-          <h2 id="transcription-heading" className="text-sm font-medium text-gray-700 mb-3">
+          <h2 id="transcription-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Transcription
           </h2>
           <div className="flex flex-col gap-3">
@@ -109,7 +114,7 @@ export default function App(): React.JSX.Element {
         </section>
 
         <section aria-labelledby="post-process-heading">
-          <h2 id="post-process-heading" className="text-sm font-medium text-gray-700 mb-3">
+          <h2 id="post-process-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Post-processing
           </h2>
           <PostProcessSettings
@@ -126,7 +131,7 @@ export default function App(): React.JSX.Element {
         </section>
 
         <section aria-labelledby="api-keys-heading">
-          <h2 id="api-keys-heading" className="text-sm font-medium text-gray-700 mb-3">
+          <h2 id="api-keys-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             API Keys
           </h2>
           <div className="space-y-3">
@@ -143,7 +148,7 @@ export default function App(): React.JSX.Element {
         </section>
 
         <section aria-labelledby="shortcuts-heading">
-          <h2 id="shortcuts-heading" className="text-sm font-medium text-gray-700 mb-3">
+          <h2 id="shortcuts-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Shortcuts
           </h2>
           <div className="space-y-3">
@@ -170,10 +175,10 @@ export default function App(): React.JSX.Element {
         </section>
 
         <section aria-labelledby="paste-heading">
-          <h2 id="paste-heading" className="text-sm font-medium text-gray-700 mb-3">
+          <h2 id="paste-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Paste
           </h2>
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
             <input
               type="checkbox"
               checked={config.paste.autoPaste}
@@ -187,10 +192,10 @@ export default function App(): React.JSX.Element {
         </section>
 
         <section aria-labelledby="autostart-heading">
-          <h2 id="autostart-heading" className="text-sm font-medium text-gray-700 mb-3">
+          <h2 id="autostart-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Startup
           </h2>
-          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
             <input
               type="checkbox"
               checked={config.autostart.enabled}
@@ -205,7 +210,7 @@ export default function App(): React.JSX.Element {
         </section>
 
         <section aria-labelledby="storage-heading">
-          <h2 id="storage-heading" className="text-sm font-medium text-gray-700 mb-3">
+          <h2 id="storage-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Data
           </h2>
           <StorageSettings
@@ -216,9 +221,31 @@ export default function App(): React.JSX.Element {
             }
           />
         </section>
+
+        <section aria-labelledby="appearance-heading">
+          <h2 id="appearance-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            Appearance
+          </h2>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600 dark:text-gray-400 w-20">Theme</span>
+            <select
+              value={config.ui.theme}
+              onChange={(e) => {
+                const theme = e.target.value as 'system' | 'light' | 'dark'
+                setConfigState({ ...config, ui: { theme } })
+                onThemeChange?.(theme)
+              }}
+              className="w-fit text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-100"
+            >
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+        </section>
       </main>
 
-      <footer className="px-6 py-4 border-t border-gray-200 bg-white flex items-center gap-3">
+      <footer className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center gap-3">
         <button
           onClick={handleSave}
           disabled={saving}
