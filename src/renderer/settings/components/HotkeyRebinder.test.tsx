@@ -4,9 +4,7 @@ import HotkeyRebinder from './HotkeyRebinder'
 
 describe('HotkeyRebinder', () => {
   it('displays the current shortcut as a button', () => {
-    render(
-      <HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={vi.fn()} />
-    )
+    render(<HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={vi.fn()} />)
 
     expect(screen.getByRole('button')).toHaveTextContent('Ctrl+Alt+Space')
   })
@@ -14,9 +12,7 @@ describe('HotkeyRebinder', () => {
   it('enters capture mode when the button is clicked', async () => {
     const user = userEvent.setup()
 
-    render(
-      <HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={vi.fn()} />
-    )
+    render(<HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={vi.fn()} />)
 
     await user.click(screen.getByRole('button'))
 
@@ -27,9 +23,7 @@ describe('HotkeyRebinder', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <HotkeyRebinder label="Cancel recording" value="Escape" onChange={onChange} />
-    )
+    render(<HotkeyRebinder label="Cancel recording" value="Escape" onChange={onChange} />)
 
     await user.click(screen.getByRole('button'))
     fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Escape' })
@@ -42,9 +36,7 @@ describe('HotkeyRebinder', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={onChange} />
-    )
+    render(<HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={onChange} />)
 
     await user.click(screen.getByRole('button'))
     fireEvent.blur(screen.getByPlaceholderText(/press keys/i))
@@ -57,9 +49,7 @@ describe('HotkeyRebinder', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={onChange} />
-    )
+    render(<HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={onChange} />)
 
     await user.click(screen.getByRole('button'))
     fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), {
@@ -75,9 +65,7 @@ describe('HotkeyRebinder', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={onChange} />
-    )
+    render(<HotkeyRebinder label="Toggle recording" value="Ctrl+Alt+Space" onChange={onChange} />)
 
     await user.click(screen.getByRole('button'))
     fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Control' })

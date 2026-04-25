@@ -12,7 +12,7 @@ export function getPasteCommand(): string {
     return 'powershell -NoProfile -NonInteractive -Command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait(\'^v\')"'
   }
   if (process.platform === 'darwin') {
-    return "osascript -e 'tell application \"System Events\" to keystroke \"v\" using command down'"
+    return 'osascript -e \'tell application "System Events" to keystroke "v" using command down\''
   }
   // Linux
   return process.env['XDG_SESSION_TYPE'] === 'wayland' ? 'ydotool key ctrl+v' : 'xdotool key ctrl+v'

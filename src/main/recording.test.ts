@@ -2,7 +2,10 @@ import { existsSync } from 'fs'
 import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge } from './recording'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
 
-function makeWorkerBridge(): WorkerBridge & { triggerAudio: (p: RecordingAudioPayload) => void; triggerError: (e: string) => void } {
+function makeWorkerBridge(): WorkerBridge & {
+  triggerAudio: (p: RecordingAudioPayload) => void
+  triggerError: (e: string) => void
+} {
   const audioCallbacks: Array<(p: RecordingAudioPayload) => void> = []
   const errorCallbacks: Array<(e: string) => void> = []
 
@@ -180,7 +183,9 @@ describe('RecordingOrchestrator', () => {
       orc.start()
       orc.start()
 
-      expect(vi.mocked(worker.send).mock.calls.filter((c) => c[0] === CHANNELS.RECORDING_START)).toHaveLength(1)
+      expect(
+        vi.mocked(worker.send).mock.calls.filter((c) => c[0] === CHANNELS.RECORDING_START)
+      ).toHaveLength(1)
     })
 
     it('stop() is a no-op when idle', () => {

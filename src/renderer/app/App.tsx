@@ -16,10 +16,14 @@ export default function App(): React.JSX.Element {
     window.api.getConfig().then((cfg) => setTheme(cfg.ui.theme))
   }, [])
 
-  useEffect(() => window.api.onLog((scope, message, level) => {
-    const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log
-    fn(`%c[${scope}]%c ${message}`, 'color:#6366f1;font-weight:bold', 'color:inherit')
-  }), [])
+  useEffect(
+    () =>
+      window.api.onLog((scope, message, level) => {
+        const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log
+        fn(`%c[${scope}]%c ${message}`, 'color:#6366f1;font-weight:bold', 'color:inherit')
+      }),
+    []
+  )
 
   const navItems: { id: View; icon: React.JSX.Element; label: string }[] = [
     { id: 'settings', icon: <Settings size={20} />, label: 'Settings' },

@@ -19,9 +19,7 @@ export default function App(): React.JSX.Element {
     })
   }, [])
 
-  const filtered = entries.filter((e) =>
-    e.processed.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = entries.filter((e) => e.processed.toLowerCase().includes(search.toLowerCase()))
 
   async function handleDelete(id: string): Promise<void> {
     await window.api.deleteHistory(id)
@@ -98,9 +96,14 @@ export default function App(): React.JSX.Element {
         ) : (
           <ul className="space-y-3">
             {filtered.map((entry) => (
-              <li key={entry.id} className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <li
+                key={entry.id}
+                className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4"
+              >
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-sm text-gray-800 dark:text-gray-100 flex-1 whitespace-pre-wrap">{entry.processed}</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-100 flex-1 whitespace-pre-wrap">
+                    {entry.processed}
+                  </p>
                   <div className="flex items-center gap-1 shrink-0">
                     {entry.path && (
                       <button
@@ -113,11 +116,13 @@ export default function App(): React.JSX.Element {
                       </button>
                     )}
                     <button
-                      onClick={() => setExpandedInfo((prev) => {
-                        const next = new Set(prev)
-                        next.has(entry.id) ? next.delete(entry.id) : next.add(entry.id)
-                        return next
-                      })}
+                      onClick={() =>
+                        setExpandedInfo((prev) => {
+                          const next = new Set(prev)
+                          next.has(entry.id) ? next.delete(entry.id) : next.add(entry.id)
+                          return next
+                        })
+                      }
                       title="Details"
                       aria-label="Details"
                       className={`p-1.5 rounded transition-colors ${expandedInfo.has(entry.id) ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
@@ -135,7 +140,10 @@ export default function App(): React.JSX.Element {
                     {confirmDeleteId === entry.id ? (
                       <>
                         <button
-                          onClick={() => { handleDelete(entry.id); setConfirmDeleteId(null) }}
+                          onClick={() => {
+                            handleDelete(entry.id)
+                            setConfirmDeleteId(null)
+                          }}
                           title="Confirm"
                           aria-label="Confirm"
                           className="p-1.5 text-white bg-red-500 rounded hover:bg-red-600"
@@ -167,14 +175,20 @@ export default function App(): React.JSX.Element {
                 {entry.transcript && (
                   <div className="mt-2">
                     <button
-                      onClick={() => setExpandedRaw((prev) => {
-                        const next = new Set(prev)
-                        next.has(entry.id) ? next.delete(entry.id) : next.add(entry.id)
-                        return next
-                      })}
+                      onClick={() =>
+                        setExpandedRaw((prev) => {
+                          const next = new Set(prev)
+                          next.has(entry.id) ? next.delete(entry.id) : next.add(entry.id)
+                          return next
+                        })
+                      }
                       className="flex items-center gap-1 text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
                     >
-                      {expandedRaw.has(entry.id) ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                      {expandedRaw.has(entry.id) ? (
+                        <ChevronUp size={12} />
+                      ) : (
+                        <ChevronDown size={12} />
+                      )}
                       Transcript
                     </button>
                     {expandedRaw.has(entry.id) && (
@@ -191,21 +205,25 @@ export default function App(): React.JSX.Element {
                 {expandedInfo.has(entry.id) && (
                   <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-800 space-y-0.5">
                     <p className="text-xs text-gray-400 dark:text-gray-500">
-                      <span className="text-gray-300 dark:text-gray-600">Transcription:</span> {entry.transcription.provider} · {entry.transcription.model}
+                      <span className="text-gray-300 dark:text-gray-600">Transcription:</span>{' '}
+                      {entry.transcription.provider} · {entry.transcription.model}
                     </p>
                     {entry.postProcessing && (
                       <p className="text-xs text-gray-400 dark:text-gray-500">
-                        <span className="text-gray-300 dark:text-gray-600">Post-processing:</span> {entry.postProcessing.provider} · {entry.postProcessing.model}
+                        <span className="text-gray-300 dark:text-gray-600">Post-processing:</span>{' '}
+                        {entry.postProcessing.provider} · {entry.postProcessing.model}
                       </p>
                     )}
                     {entry.language && (
                       <p className="text-xs text-gray-400 dark:text-gray-500">
-                        <span className="text-gray-300 dark:text-gray-600">Language:</span> {entry.language}
+                        <span className="text-gray-300 dark:text-gray-600">Language:</span>{' '}
+                        {entry.language}
                       </p>
                     )}
                     {entry.microphone && (
                       <p className="text-xs text-gray-400 dark:text-gray-500">
-                        <span className="text-gray-300 dark:text-gray-600">Microphone:</span> {entry.microphone}
+                        <span className="text-gray-300 dark:text-gray-600">Microphone:</span>{' '}
+                        {entry.microphone}
                       </p>
                     )}
                   </div>

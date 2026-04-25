@@ -23,7 +23,9 @@ export default function ProviderSelector({ provider, model, onChange }: Props): 
   return (
     <div className="flex gap-3">
       <div className="flex flex-col gap-1">
-        <label htmlFor="provider-select" className="text-xs text-gray-500 dark:text-gray-400">Provider</label>
+        <label htmlFor="provider-select" className="text-xs text-gray-500 dark:text-gray-400">
+          Provider
+        </label>
         <select
           id="provider-select"
           aria-label="Provider"
@@ -32,13 +34,17 @@ export default function ProviderSelector({ provider, model, onChange }: Props): 
           className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
         >
           {(Object.keys(PROVIDERS) as Provider[]).map((p) => (
-            <option key={p} value={p}>{PROVIDERS[p].label}</option>
+            <option key={p} value={p}>
+              {PROVIDERS[p].label}
+            </option>
           ))}
         </select>
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="model-select" className="text-xs text-gray-500 dark:text-gray-400">Model</label>
+        <label htmlFor="model-select" className="text-xs text-gray-500 dark:text-gray-400">
+          Model
+        </label>
         <select
           id="model-select"
           aria-label="Model"
@@ -47,7 +53,9 @@ export default function ProviderSelector({ provider, model, onChange }: Props): 
           className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
         >
           {PROVIDERS[provider].models.map((m) => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m} value={m}>
+              {m}
+            </option>
           ))}
         </select>
       </div>

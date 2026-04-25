@@ -4,8 +4,12 @@ let storeData: Record<string, unknown> = {}
 
 vi.mock('electron-store', () => ({
   default: vi.fn().mockImplementation(() => ({
-    get store() { return storeData },
-    set store(v: Record<string, unknown>) { storeData = v }
+    get store() {
+      return storeData
+    },
+    set store(v: Record<string, unknown>) {
+      storeData = v
+    }
   }))
 }))
 
@@ -65,14 +69,10 @@ describe('setConfig', () => {
 
 describe('configSchema', () => {
   it('rejects a negative history retain value', () => {
-    expect(() =>
-      configSchema.parse({ history: { retain: -1, enabled: true } })
-    ).toThrow()
+    expect(() => configSchema.parse({ history: { retain: -1, enabled: true } })).toThrow()
   })
 
   it('rejects an unknown ui theme', () => {
-    expect(() =>
-      configSchema.parse({ ui: { theme: 'pink' } })
-    ).toThrow()
+    expect(() => configSchema.parse({ ui: { theme: 'pink' } })).toThrow()
   })
 })

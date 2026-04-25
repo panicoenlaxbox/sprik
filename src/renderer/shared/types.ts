@@ -1,4 +1,10 @@
-export type OverlayState = 'idle' | 'recording' | 'transcribing' | 'processing' | 'cancelled' | 'error'
+export type OverlayState =
+  | 'idle'
+  | 'recording'
+  | 'transcribing'
+  | 'processing'
+  | 'cancelled'
+  | 'error'
 
 export const TRANSCRIPTION_PROVIDERS = {
   groq: {

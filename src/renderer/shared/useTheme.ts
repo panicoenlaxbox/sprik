@@ -6,8 +6,7 @@ export function useTheme(theme: 'system' | 'light' | 'dark' | undefined): void {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
 
     function apply(): void {
-      const dark =
-        theme === 'dark' || (theme !== 'light' && media.matches)
+      const dark = theme === 'dark' || (theme !== 'light' && media.matches)
       root.classList.toggle('dark', dark)
     }
 

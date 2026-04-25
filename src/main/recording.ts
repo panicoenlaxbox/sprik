@@ -32,7 +32,9 @@ export class RecordingOrchestrator {
     private readonly pipeline?: TranscribePipeline,
     private readonly onIdle?: () => void
   ) {
-    worker.onAudio((payload) => { this.handleAudio(payload).catch(console.error) })
+    worker.onAudio((payload) => {
+      this.handleAudio(payload).catch(console.error)
+    })
     worker.onError((err) => this.handleError(err))
   }
 

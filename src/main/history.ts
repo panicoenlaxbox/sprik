@@ -25,10 +25,7 @@ export function getEntries(): HistoryEntry[] {
   return store.get('entries', [])
 }
 
-export function appendEntry(
-  data: Omit<HistoryEntry, 'id' | 'timestamp'>,
-  retain: number
-): void {
+export function appendEntry(data: Omit<HistoryEntry, 'id' | 'timestamp'>, retain: number): void {
   const all = [{ id: randomUUID(), timestamp: new Date().toISOString(), ...data }, ...getEntries()]
   all.slice(retain).forEach(removeEntryFiles)
   store.set('entries', all.slice(0, retain))
@@ -44,7 +41,10 @@ export function deleteEntry(id: string): void {
   const entries = getEntries()
   const entry = entries.find((e) => e.id === id)
   if (entry) removeEntryFiles(entry)
-  store.set('entries', entries.filter((e) => e.id !== id))
+  store.set(
+    'entries',
+    entries.filter((e) => e.id !== id)
+  )
 }
 
 export function clearEntries(): void {

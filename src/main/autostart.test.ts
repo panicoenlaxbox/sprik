@@ -101,7 +101,9 @@ describe('getAutostart', () => {
 
   it('reads openAtLogin from app.getLoginItemSettings on win32', () => {
     Object.defineProperty(process, 'platform', { value: 'win32' })
-    vi.mocked(app.getLoginItemSettings).mockReturnValue({ openAtLogin: true } as ReturnType<typeof app.getLoginItemSettings>)
+    vi.mocked(app.getLoginItemSettings).mockReturnValue({ openAtLogin: true } as ReturnType<
+      typeof app.getLoginItemSettings
+    >)
 
     expect(getAutostart()).toBe(true)
   })

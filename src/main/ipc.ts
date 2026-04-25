@@ -2,7 +2,14 @@ import { z } from 'zod'
 
 export { CHANNELS, type Channel } from './channels'
 
-export const overlayStateSchema = z.enum(['idle', 'recording', 'transcribing', 'processing', 'cancelled', 'error'])
+export const overlayStateSchema = z.enum([
+  'idle',
+  'recording',
+  'transcribing',
+  'processing',
+  'cancelled',
+  'error'
+])
 export type OverlayState = z.infer<typeof overlayStateSchema>
 
 export const recordingAudioPayloadSchema = z.object({

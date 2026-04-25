@@ -6,7 +6,9 @@ vi.mock('child_process', () => ({
   exec: vi.fn((_cmd: string, cb: (err: Error | null) => void) => cb(null))
 }))
 
-const mockExec = vi.mocked(exec as unknown as (cmd: string, cb: (err: Error | null) => void) => void)
+const mockExec = vi.mocked(
+  exec as unknown as (cmd: string, cb: (err: Error | null) => void) => void
+)
 
 afterEach(() => {
   vi.mocked(clipboard.writeText).mockReset()

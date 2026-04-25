@@ -9,7 +9,8 @@ const registry: Record<string, Transcriber> = {
 
 export function getTranscriber(id: string): Transcriber {
   const t = registry[id]
-  if (!t) throw new Error(`Unknown transcriber: "${id}". Available: ${Object.keys(registry).join(', ')}`)
+  if (!t)
+    throw new Error(`Unknown transcriber: "${id}". Available: ${Object.keys(registry).join(', ')}`)
   return t
 }
 

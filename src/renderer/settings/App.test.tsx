@@ -22,7 +22,9 @@ beforeEach(() => {
   vi.mocked(window.api.getApiKeyStatus).mockResolvedValue(mockKeyStatus)
   vi.mocked(window.api.setConfig).mockResolvedValue(undefined)
   vi.mocked(window.api.getApiKey).mockResolvedValue('')
-  vi.mocked(window.api.getRecordingsPath).mockResolvedValue('C:\\Users\\user\\AppData\\Roaming\\murmur')
+  vi.mocked(window.api.getRecordingsPath).mockResolvedValue(
+    'C:\\Users\\user\\AppData\\Roaming\\murmur'
+  )
   vi.mocked(window.api.setApiKey).mockResolvedValue(undefined)
   vi.mocked(window.api.clearApiKey).mockResolvedValue(undefined)
 })

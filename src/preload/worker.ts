@@ -16,6 +16,5 @@ contextBridge.exposeInMainWorld('workerApi', {
   },
   sendAudio: (buffer: ArrayBuffer, durationMs: number, microphone?: string) =>
     ipcRenderer.send('recording:audio', { buffer, durationMs, microphone }),
-  sendError: (message: string) =>
-    ipcRenderer.send('recording:error', message)
+  sendError: (message: string) => ipcRenderer.send('recording:error', message)
 })

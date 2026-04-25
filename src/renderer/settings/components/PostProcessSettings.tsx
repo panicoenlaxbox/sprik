@@ -42,7 +42,12 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
         <div className="ml-6 space-y-3 border-l-2 border-blue-100 dark:border-blue-900/40 pl-4">
           <div className="flex gap-3">
             <div className="flex flex-col gap-1">
-              <label htmlFor="llm-provider-select" className="text-xs text-gray-500 dark:text-gray-400">Provider</label>
+              <label
+                htmlFor="llm-provider-select"
+                className="text-xs text-gray-500 dark:text-gray-400"
+              >
+                Provider
+              </label>
               <select
                 id="llm-provider-select"
                 aria-label="LLM Provider"
@@ -51,13 +56,20 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
                 className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               >
                 {(Object.keys(LLM_PROVIDERS) as LLMProvider[]).map((p) => (
-                  <option key={p} value={p}>{LLM_PROVIDERS[p].label}</option>
+                  <option key={p} value={p}>
+                    {LLM_PROVIDERS[p].label}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor="llm-model-select" className="text-xs text-gray-500 dark:text-gray-400">Model</label>
+              <label
+                htmlFor="llm-model-select"
+                className="text-xs text-gray-500 dark:text-gray-400"
+              >
+                Model
+              </label>
               <select
                 id="llm-model-select"
                 aria-label="LLM Model"
@@ -66,14 +78,18 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
                 className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
               >
                 {LLM_PROVIDERS[config.provider].models.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="system-prompt" className="text-xs text-gray-500 dark:text-gray-400">Instructions</label>
+            <label htmlFor="system-prompt" className="text-xs text-gray-500 dark:text-gray-400">
+              Instructions
+            </label>
             <textarea
               id="system-prompt"
               aria-label="Instructions"

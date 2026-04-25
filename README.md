@@ -60,12 +60,12 @@ pnpm build:linux  # Linux (AppImage + deb)
 
 ## Providers
 
-| Role | Provider | Models |
-|---|---|---|
-| Transcription | Groq | `whisper-large-v3-turbo` (default), `whisper-large-v3`, `distil-whisper-large-v3-en` |
-| Transcription | OpenAI | `whisper-1` |
-| Post-processing | Anthropic | `claude-sonnet-4-6` (default) |
-| Post-processing | OpenAI | `gpt-4o-mini` (default) |
+| Role            | Provider  | Models                                                                               |
+| --------------- | --------- | ------------------------------------------------------------------------------------ |
+| Transcription   | Groq      | `whisper-large-v3-turbo` (default), `whisper-large-v3`, `distil-whisper-large-v3-en` |
+| Transcription   | OpenAI    | `whisper-1`                                                                          |
+| Post-processing | Anthropic | `claude-sonnet-4-6` (default)                                                        |
+| Post-processing | OpenAI    | `gpt-4o-mini` (default)                                                              |
 
 ## IDE Setup
 

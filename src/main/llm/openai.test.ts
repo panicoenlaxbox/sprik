@@ -8,7 +8,7 @@ const validOpts = {
   prompt: 'Fix punctuation and grammar.'
 }
 
-function makeChatResponse(content: string) {
+function makeChatResponse(content: string): ReturnType<typeof HttpResponse.json> {
   return HttpResponse.json({
     id: 'chatcmpl-test',
     object: 'chat.completion',
@@ -40,7 +40,7 @@ describe('openaiProcessor', () => {
 
     server.use(
       http.post('https://api.openai.com/v1/chat/completions', async ({ request }) => {
-        const body = await request.json() as { messages: unknown }
+        const body = (await request.json()) as { messages: unknown }
         capturedMessages = body.messages
         return makeChatResponse('ok')
       })
@@ -59,7 +59,7 @@ describe('openaiProcessor', () => {
 
     server.use(
       http.post('https://api.openai.com/v1/chat/completions', async ({ request }) => {
-        const body = await request.json() as { model: string }
+        const body = (await request.json()) as { model: string }
         capturedModel = body.model
         return makeChatResponse('ok')
       })

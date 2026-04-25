@@ -10,13 +10,13 @@ const api = {
   },
 
   onLog: (cb: (scope: string, message: string, level: string) => void): (() => void) => {
-    const handler = (_: IpcRendererEvent, scope: string, message: string, level: string): void => cb(scope, message, level)
+    const handler = (_: IpcRendererEvent, scope: string, message: string, level: string): void =>
+      cb(scope, message, level)
     ipcRenderer.on(CHANNELS.LOG_FORWARD, handler)
     return () => ipcRenderer.removeListener(CHANNELS.LOG_FORWARD, handler)
   },
 
-  getConfig: (): Promise<Config> =>
-    ipcRenderer.invoke(CHANNELS.SETTINGS_GET),
+  getConfig: (): Promise<Config> => ipcRenderer.invoke(CHANNELS.SETTINGS_GET),
 
   setConfig: (partial: Partial<Config>): Promise<void> =>
     ipcRenderer.invoke(CHANNELS.SETTINGS_SET, partial),
@@ -33,35 +33,26 @@ const api = {
   clearApiKey: (provider: ApiProvider): Promise<void> =>
     ipcRenderer.invoke(CHANNELS.SETTINGS_CLEAR_KEY, provider),
 
-  getHistory: (): Promise<HistoryEntry[]> =>
-    ipcRenderer.invoke(CHANNELS.HISTORY_GET_ALL),
+  getHistory: (): Promise<HistoryEntry[]> => ipcRenderer.invoke(CHANNELS.HISTORY_GET_ALL),
 
-  deleteHistory: (id: string): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.HISTORY_DELETE, id),
+  deleteHistory: (id: string): Promise<void> => ipcRenderer.invoke(CHANNELS.HISTORY_DELETE, id),
 
-  clearHistory: (): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.HISTORY_CLEAR),
+  clearHistory: (): Promise<void> => ipcRenderer.invoke(CHANNELS.HISTORY_CLEAR),
 
-  exportHistory: (): Promise<string> =>
-    ipcRenderer.invoke(CHANNELS.HISTORY_EXPORT),
+  exportHistory: (): Promise<string> => ipcRenderer.invoke(CHANNELS.HISTORY_EXPORT),
 
   copyToClipboard: (text: string): Promise<void> =>
     ipcRenderer.invoke(CHANNELS.CLIPBOARD_WRITE, text),
 
-  pauseShortcuts: (): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.SHORTCUTS_PAUSE),
+  pauseShortcuts: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHORTCUTS_PAUSE),
 
-  resumeShortcuts: (): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.SHORTCUTS_RESUME),
+  resumeShortcuts: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHORTCUTS_RESUME),
 
-  openPath: (path: string): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.SHELL_OPEN_PATH, path),
+  openPath: (path: string): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_PATH, path),
 
-  openRecordingsPath: (): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.SHELL_OPEN_RECORDINGS),
+  openRecordingsPath: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_RECORDINGS),
 
-  getRecordingsPath: (): Promise<string> =>
-    ipcRenderer.invoke(CHANNELS.RECORDINGS_GET_PATH)
+  getRecordingsPath: (): Promise<string> => ipcRenderer.invoke(CHANNELS.RECORDINGS_GET_PATH)
 }
 
 if (process.contextIsolated) {
@@ -71,7 +62,7 @@ if (process.contextIsolated) {
     console.error(error)
   }
 } else {
-  // @ts-ignore
+  // @ts-ignore contextIsolation is false in dev/test — window.api is not typed on Window
   window.api = api
 }
 

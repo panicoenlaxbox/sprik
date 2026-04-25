@@ -4,9 +4,7 @@ import ProviderSelector from './ProviderSelector'
 
 describe('ProviderSelector', () => {
   it('renders provider and model dropdowns with current values', () => {
-    render(
-      <ProviderSelector provider="groq" model="whisper-large-v3-turbo" onChange={vi.fn()} />
-    )
+    render(<ProviderSelector provider="groq" model="whisper-large-v3-turbo" onChange={vi.fn()} />)
 
     expect(screen.getByRole('combobox', { name: /provider/i })).toHaveValue('groq')
     expect(screen.getByRole('combobox', { name: /model/i })).toHaveValue('whisper-large-v3-turbo')
@@ -16,9 +14,7 @@ describe('ProviderSelector', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <ProviderSelector provider="groq" model="whisper-large-v3-turbo" onChange={onChange} />
-    )
+    render(<ProviderSelector provider="groq" model="whisper-large-v3-turbo" onChange={onChange} />)
 
     await user.selectOptions(screen.getByRole('combobox', { name: /provider/i }), 'openai')
 
@@ -29,22 +25,15 @@ describe('ProviderSelector', () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <ProviderSelector provider="groq" model="whisper-large-v3-turbo" onChange={onChange} />
-    )
+    render(<ProviderSelector provider="groq" model="whisper-large-v3-turbo" onChange={onChange} />)
 
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: /model/i }),
-      'whisper-large-v3'
-    )
+    await user.selectOptions(screen.getByRole('combobox', { name: /model/i }), 'whisper-large-v3')
 
     expect(onChange).toHaveBeenCalledWith('groq', 'whisper-large-v3')
   })
 
   it('shows OpenAI models when OpenAI is selected', () => {
-    render(
-      <ProviderSelector provider="openai" model="gpt-4o-mini-transcribe" onChange={vi.fn()} />
-    )
+    render(<ProviderSelector provider="openai" model="gpt-4o-mini-transcribe" onChange={vi.fn()} />)
 
     const modelSelect = screen.getByRole('combobox', { name: /model/i })
     expect(modelSelect).toHaveValue('gpt-4o-mini-transcribe')

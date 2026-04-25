@@ -1,4 +1,9 @@
-import { overlayStateSchema, recordingAudioPayloadSchema, apiProviderSchema, setKeyPayloadSchema } from './ipc'
+import {
+  overlayStateSchema,
+  recordingAudioPayloadSchema,
+  apiProviderSchema,
+  setKeyPayloadSchema
+} from './ipc'
 
 describe('overlayStateSchema', () => {
   it('accepts valid states', () => {

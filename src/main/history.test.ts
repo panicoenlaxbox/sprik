@@ -1,4 +1,11 @@
-import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries, type HistoryEntry } from './history'
+import {
+  appendEntry,
+  getEntries,
+  deleteEntry,
+  clearEntries,
+  exportEntries,
+  type HistoryEntry
+} from './history'
 import { rmSync, existsSync } from 'fs'
 
 vi.mock('fs', () => ({
@@ -23,7 +30,10 @@ beforeEach(() => {
   storeData = {}
 })
 
-const entryData = { processed: 'Hello world', transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' } }
+const entryData = {
+  processed: 'Hello world',
+  transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' }
+}
 
 describe('appendEntry', () => {
   it('stores a new entry with generated id and ISO timestamp', () => {

@@ -1,10 +1,37 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, session, ipcMain, clipboard, Notification, shell } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  Tray,
+  Menu,
+  nativeImage,
+  session,
+  ipcMain,
+  clipboard,
+  Notification,
+  shell
+} from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { createWorkerWindow, createOverlayWindow, createAppWindow } from './windows'
-import { registerShortcuts, registerCancelShortcut, unregisterCancelShortcut, unregisterShortcuts } from './shortcuts'
-import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge, type TranscribePipeline } from './recording'
-import { CHANNELS, type OverlayState, type RecordingAudioPayload, setKeyPayloadSchema, apiProviderSchema } from './ipc'
+import {
+  registerShortcuts,
+  registerCancelShortcut,
+  unregisterCancelShortcut,
+  unregisterShortcuts
+} from './shortcuts'
+import {
+  RecordingOrchestrator,
+  type WorkerBridge,
+  type OverlayBridge,
+  type TranscribePipeline
+} from './recording'
+import {
+  CHANNELS,
+  type OverlayState,
+  type RecordingAudioPayload,
+  setKeyPayloadSchema,
+  apiProviderSchema
+} from './ipc'
 import { getTranscriber } from './transcribers'
 import { getPostProcessor } from './llm'
 import { copyAndPaste } from './paste'
@@ -38,7 +65,9 @@ function openAppWindow(): BrowserWindow {
       })
     }
   })
-  appWindow.on('closed', () => { appWindow = null })
+  appWindow.on('closed', () => {
+    appWindow = null
+  })
   return appWindow
 }
 
@@ -75,10 +104,17 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       const transcriber = getTranscriber(provider)
       let transcript: string
       try {
-        transcript = await transcriber.transcribe(audioPath, { model, language, apiKey: transcriptionApiKey })
+        transcript = await transcriber.transcribe(audioPath, {
+          model,
+          language,
+          apiKey: transcriptionApiKey
+        })
       } catch (err) {
         log('transcription', err instanceof Error ? err.message : String(err), 'error')
-        new Notification({ title: 'Murmur — Transcription failed', body: 'Check your API key and connection.' }).show()
+        new Notification({
+          title: 'Murmur — Transcription failed',
+          body: 'Check your API key and connection.'
+        }).show()
         throw err
       }
 
@@ -95,7 +131,10 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
           })
         } catch (err) {
           log('postProcessing', err instanceof Error ? err.message : String(err), 'error')
-          new Notification({ title: 'Murmur — Post-processing failed', body: 'Check your API key and connection.' }).show()
+          new Notification({
+            title: 'Murmur — Post-processing failed',
+            body: 'Check your API key and connection.'
+          }).show()
           throw err
         }
       }
@@ -119,34 +158,44 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       }
 
       if (config.history.enabled) {
-        appendEntry({
-          processed: text,
-          transcript: config.postProcessing.enabled ? transcript : undefined,
-          path,
-          transcription: { provider, model },
-          postProcessing: config.postProcessing.enabled
-            ? { provider: config.postProcessing.provider, model: config.postProcessing.model }
-            : undefined,
-          language: language || undefined,
-          microphone
-        }, config.history.retain)
+        appendEntry(
+          {
+            processed: text,
+            transcript: config.postProcessing.enabled ? transcript : undefined,
+            path,
+            transcription: { provider, model },
+            postProcessing: config.postProcessing.enabled
+              ? { provider: config.postProcessing.provider, model: config.postProcessing.model }
+              : undefined,
+            language: language || undefined,
+            microphone
+          },
+          config.history.retain
+        )
       }
     }
   }
 }
 
-function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow, onIdle: () => void): RecordingOrchestrator {
+function setupIpcBridges(
+  worker: BrowserWindow,
+  overlay: BrowserWindow,
+  onIdle: () => void
+): RecordingOrchestrator {
   const workerBridge: WorkerBridge = {
     send: (channel, payload) => worker.webContents.send(channel, payload),
     onAudio: (cb) => {
-      ipcMain.on(CHANNELS.RECORDING_AUDIO, (_, payload: { buffer: ArrayBuffer; durationMs: number; microphone?: string }) => {
-        const typed: RecordingAudioPayload = {
-          buffer: Buffer.from(payload.buffer),
-          durationMs: payload.durationMs,
-          microphone: payload.microphone
+      ipcMain.on(
+        CHANNELS.RECORDING_AUDIO,
+        (_, payload: { buffer: ArrayBuffer; durationMs: number; microphone?: string }) => {
+          const typed: RecordingAudioPayload = {
+            buffer: Buffer.from(payload.buffer),
+            durationMs: payload.durationMs,
+            microphone: payload.microphone
+          }
+          cb(typed)
         }
-        cb(typed)
-      })
+      )
     },
     onError: (cb) => {
       ipcMain.on(CHANNELS.RECORDING_ERROR, (_, message: string) => cb(message))
@@ -161,7 +210,12 @@ function setupIpcBridges(worker: BrowserWindow, overlay: BrowserWindow, onIdle: 
     }
   }
 
-  return new RecordingOrchestrator(workerBridge, overlayBridge, buildPipeline(overlayBridge.setState.bind(overlayBridge)), onIdle)
+  return new RecordingOrchestrator(
+    workerBridge,
+    overlayBridge,
+    buildPipeline(overlayBridge.setState.bind(overlayBridge)),
+    onIdle
+  )
 }
 
 function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: () => void }): void {
@@ -215,9 +269,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
 
   ipcMain.handle(CHANNELS.RECORDINGS_GET_PATH, () => app.getPath('userData'))
 
-  ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () =>
-    shell.openPath(app.getPath('userData'))
-  )
+  ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () => shell.openPath(app.getPath('userData')))
 }
 
 app.whenReady().then(() => {
@@ -274,7 +326,10 @@ app.whenReady().then(() => {
   createTray()
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().filter((w) => w !== workerWindow && w !== overlayWindow).length === 0) {
+    if (
+      BrowserWindow.getAllWindows().filter((w) => w !== workerWindow && w !== overlayWindow)
+        .length === 0
+    ) {
       openAppWindow()
     }
   })

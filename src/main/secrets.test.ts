@@ -7,8 +7,12 @@ let storeData: Record<string, string> = {}
 vi.mock('electron-store', () => ({
   default: vi.fn().mockImplementation(() => ({
     get: vi.fn((key: string) => storeData[key]),
-    set: vi.fn((key: string, value: string) => { storeData[key] = value }),
-    delete: vi.fn((key: string) => { delete storeData[key] })
+    set: vi.fn((key: string, value: string) => {
+      storeData[key] = value
+    }),
+    delete: vi.fn((key: string) => {
+      delete storeData[key]
+    })
   }))
 }))
 

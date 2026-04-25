@@ -8,7 +8,11 @@ interface Props {
   onChange: (updates: Partial<Config['recordings']>) => void
 }
 
-export default function StorageSettings({ config, recordingsPath, onChange }: Props): React.JSX.Element {
+export default function StorageSettings({
+  config,
+  recordingsPath,
+  onChange
+}: Props): React.JSX.Element {
   return (
     <div className="space-y-3">
       <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">

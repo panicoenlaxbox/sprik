@@ -33,7 +33,9 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       setKeyStatus(status as ApiKeyStatus)
       setRecordingsPath(recPath as string)
       const initial: Partial<Record<ApiProvider, string>> = {}
-      providers.forEach((p, i) => { if (keys[i]) initial[p] = keys[i] as string })
+      providers.forEach((p, i) => {
+        if (keys[i]) initial[p] = keys[i] as string
+      })
       setPendingKeys(initial)
     })
   }, [])
@@ -60,7 +62,9 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       ])
       setKeyStatus(newStatus as ApiKeyStatus)
       const refreshed: Partial<Record<ApiProvider, string>> = {}
-      providers.forEach((p, i) => { if (keys[i]) refreshed[p] = keys[i] as string })
+      providers.forEach((p, i) => {
+        if (keys[i]) refreshed[p] = keys[i] as string
+      })
       setPendingKeys(refreshed)
       onThemeChange?.(config.ui.theme)
       setSavedBadge(true)
@@ -69,7 +73,6 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       setSaving(false)
     }
   }
-
 
   if (!config || !keyStatus) {
     return (
@@ -87,7 +90,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
 
       <main className="flex-1 p-6 space-y-8 overflow-y-auto">
         <section aria-labelledby="transcription-heading">
-          <h2 id="transcription-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="transcription-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             Transcription
           </h2>
           <div className="flex flex-col gap-3">
@@ -95,7 +101,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               provider={config.transcription.provider}
               model={config.transcription.model}
               onChange={(provider, model) =>
-                setConfigState({ ...config, transcription: { ...config.transcription, provider, model } })
+                setConfigState({
+                  ...config,
+                  transcription: { ...config.transcription, provider, model }
+                })
               }
             />
             <LanguageSelector
@@ -114,13 +123,19 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         </section>
 
         <section aria-labelledby="post-process-heading">
-          <h2 id="post-process-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="post-process-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             Post-processing
           </h2>
           <PostProcessSettings
             config={config.postProcessing}
             onChange={(updates) =>
-              setConfigState({ ...config, postProcessing: { ...config.postProcessing, ...updates } })
+              setConfigState({
+                ...config,
+                postProcessing: { ...config.postProcessing, ...updates }
+              })
             }
           />
           {emptyPrompt && (
@@ -131,14 +146,19 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         </section>
 
         <section aria-labelledby="api-keys-heading">
-          <h2 id="api-keys-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="api-keys-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             API Keys
           </h2>
           <div className="space-y-3">
             {(['anthropic', 'groq', 'openai'] as ApiProvider[]).map((provider) => (
               <ApiKeyInput
                 key={provider}
-                label={provider === 'openai' ? 'OpenAI' : provider === 'groq' ? 'Groq' : 'Anthropic'}
+                label={
+                  provider === 'openai' ? 'OpenAI' : provider === 'groq' ? 'Groq' : 'Anthropic'
+                }
                 isSet={keyStatus[provider]}
                 value={pendingKeys[provider] ?? ''}
                 onChange={(v) => setPendingKeys({ ...pendingKeys, [provider]: v })}
@@ -148,7 +168,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         </section>
 
         <section aria-labelledby="shortcuts-heading">
-          <h2 id="shortcuts-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="shortcuts-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             Shortcuts
           </h2>
           <div className="space-y-3">
@@ -156,14 +179,20 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               label="Toggle recording"
               value={config.shortcuts.toggleRecording}
               onChange={(v) =>
-                setConfigState({ ...config, shortcuts: { ...config.shortcuts, toggleRecording: v } })
+                setConfigState({
+                  ...config,
+                  shortcuts: { ...config.shortcuts, toggleRecording: v }
+                })
               }
             />
             <HotkeyRebinder
               label="Cancel recording"
               value={config.shortcuts.cancelRecording}
               onChange={(v) =>
-                setConfigState({ ...config, shortcuts: { ...config.shortcuts, cancelRecording: v } })
+                setConfigState({
+                  ...config,
+                  shortcuts: { ...config.shortcuts, cancelRecording: v }
+                })
               }
             />
             {shortcutConflict && (
@@ -175,7 +204,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         </section>
 
         <section aria-labelledby="paste-heading">
-          <h2 id="paste-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="paste-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             Paste
           </h2>
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -192,7 +224,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         </section>
 
         <section aria-labelledby="autostart-heading">
-          <h2 id="autostart-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="autostart-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             Startup
           </h2>
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
@@ -210,7 +245,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         </section>
 
         <section aria-labelledby="storage-heading">
-          <h2 id="storage-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="storage-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             Data
           </h2>
           <StorageSettings
@@ -223,7 +261,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         </section>
 
         <section aria-labelledby="appearance-heading">
-          <h2 id="appearance-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <h2
+            id="appearance-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
             Appearance
           </h2>
           <div className="flex items-center gap-3">

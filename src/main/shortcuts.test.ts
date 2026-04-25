@@ -1,5 +1,10 @@
 import { globalShortcut } from 'electron'
-import { registerShortcuts, registerCancelShortcut, unregisterCancelShortcut, unregisterShortcuts } from './shortcuts'
+import {
+  registerShortcuts,
+  registerCancelShortcut,
+  unregisterCancelShortcut,
+  unregisterShortcuts
+} from './shortcuts'
 
 const defaultConfig = { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' }
 const noop = (): void => {}

@@ -2,7 +2,7 @@ import React from 'react'
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
-  { code: 'es', label: 'Spanish' },
+  { code: 'es', label: 'Spanish' }
 ] as const
 
 interface Props {
@@ -13,7 +13,9 @@ interface Props {
 export default function LanguageSelector({ language, onChange }: Props): React.JSX.Element {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor="language-select" className="text-xs text-gray-500 dark:text-gray-400">Language</label>
+      <label htmlFor="language-select" className="text-xs text-gray-500 dark:text-gray-400">
+        Language
+      </label>
       <select
         id="language-select"
         aria-label="Language"
@@ -23,7 +25,9 @@ export default function LanguageSelector({ language, onChange }: Props): React.J
       >
         <option value="">Auto-detect</option>
         {LANGUAGES.map((l) => (
-          <option key={l.code} value={l.code}>{l.label}</option>
+          <option key={l.code} value={l.code}>
+            {l.label}
+          </option>
         ))}
       </select>
     </div>

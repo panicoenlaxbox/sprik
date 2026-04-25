@@ -8,7 +8,11 @@ const validOpts = {
   prompt: 'Fix punctuation and grammar.'
 }
 
-function makeAnthropicResponse(text: string, cacheReadTokens = 0, cacheCreationTokens = 0) {
+function makeAnthropicResponse(
+  text: string,
+  cacheReadTokens = 0,
+  cacheCreationTokens = 0
+): ReturnType<typeof HttpResponse.json> {
   return HttpResponse.json({
     id: 'msg_test',
     type: 'message',
@@ -40,7 +44,7 @@ describe('anthropicProcessor', () => {
 
     server.use(
       http.post('https://api.anthropic.com/v1/messages', async ({ request }) => {
-        const body = await request.json() as { system: unknown }
+        const body = (await request.json()) as { system: unknown }
         capturedSystem = body.system
         return makeAnthropicResponse('ok', 0, 50)
       })
@@ -62,7 +66,7 @@ describe('anthropicProcessor', () => {
 
     server.use(
       http.post('https://api.anthropic.com/v1/messages', async ({ request }) => {
-        const body = await request.json() as { system: unknown }
+        const body = (await request.json()) as { system: unknown }
         capturedSystems.push(body.system)
         const isSecondCall = capturedSystems.length > 1
         return makeAnthropicResponse('ok', isSecondCall ? 100 : 0, isSecondCall ? 0 : 100)
@@ -74,9 +78,7 @@ describe('anthropicProcessor', () => {
 
     expect(capturedSystems).toHaveLength(2)
     for (const sys of capturedSystems) {
-      expect(sys).toEqual([
-        expect.objectContaining({ cache_control: { type: 'ephemeral' } })
-      ])
+      expect(sys).toEqual([expect.objectContaining({ cache_control: { type: 'ephemeral' } })])
     }
   })
 
@@ -85,7 +87,7 @@ describe('anthropicProcessor', () => {
 
     server.use(
       http.post('https://api.anthropic.com/v1/messages', async ({ request }) => {
-        const body = await request.json() as { model: string }
+        const body = (await request.json()) as { model: string }
         capturedModel = body.model
         return makeAnthropicResponse('ok')
       })
@@ -99,7 +101,10 @@ describe('anthropicProcessor', () => {
   it('throws on HTTP 401 (invalid API key)', async () => {
     server.use(
       http.post('https://api.anthropic.com/v1/messages', () =>
-        HttpResponse.json({ type: 'error', error: { type: 'authentication_error', message: 'Invalid API key.' } }, { status: 401 })
+        HttpResponse.json(
+          { type: 'error', error: { type: 'authentication_error', message: 'Invalid API key.' } },
+          { status: 401 }
+        )
       )
     )
 
@@ -109,7 +114,10 @@ describe('anthropicProcessor', () => {
   it('throws on HTTP 529 (overloaded)', async () => {
     server.use(
       http.post('https://api.anthropic.com/v1/messages', () =>
-        HttpResponse.json({ type: 'error', error: { type: 'overloaded_error', message: 'Overloaded.' } }, { status: 529 })
+        HttpResponse.json(
+          { type: 'error', error: { type: 'overloaded_error', message: 'Overloaded.' } },
+          { status: 529 }
+        )
       )
     )
 

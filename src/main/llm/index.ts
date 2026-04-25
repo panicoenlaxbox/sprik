@@ -9,7 +9,10 @@ const registry: Record<string, PostProcessor> = {
 
 export function getPostProcessor(id: string): PostProcessor {
   const p = registry[id]
-  if (!p) throw new Error(`Unknown post-processor: "${id}". Available: ${Object.keys(registry).join(', ')}`)
+  if (!p)
+    throw new Error(
+      `Unknown post-processor: "${id}". Available: ${Object.keys(registry).join(', ')}`
+    )
   return p
 }
 

@@ -9,14 +9,17 @@ export default function MicrophoneSelector({ deviceId, onChange }: Props): React
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([])
 
   useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((all) =>
-      setDevices(all.filter((d) => d.kind === 'audioinput'))
-    ).catch(() => {})
+    navigator.mediaDevices
+      .enumerateDevices()
+      .then((all) => setDevices(all.filter((d) => d.kind === 'audioinput')))
+      .catch(() => {})
   }, [])
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor="mic-select" className="text-xs text-gray-500 dark:text-gray-400">Microphone</label>
+      <label htmlFor="mic-select" className="text-xs text-gray-500 dark:text-gray-400">
+        Microphone
+      </label>
       <select
         id="mic-select"
         aria-label="Microphone"

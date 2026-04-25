@@ -63,9 +63,7 @@ describe('openaiTranscriber', () => {
       )
     )
 
-    await expect(
-      openaiTranscriber.transcribe(testAudioPath, validOpts)
-    ).rejects.toThrow()
+    await expect(openaiTranscriber.transcribe(testAudioPath, validOpts)).rejects.toThrow()
   })
 
   it('throws on HTTP 429 (rate limit)', async () => {
@@ -75,8 +73,6 @@ describe('openaiTranscriber', () => {
       )
     )
 
-    await expect(
-      openaiTranscriber.transcribe(testAudioPath, validOpts)
-    ).rejects.toThrow()
+    await expect(openaiTranscriber.transcribe(testAudioPath, validOpts)).rejects.toThrow()
   })
 })

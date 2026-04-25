@@ -12,13 +12,19 @@ describe('ApiKeyInput', () => {
   it('shows a replace placeholder when a key is already stored but field is empty', () => {
     render(<ApiKeyInput label="OpenAI" isSet={true} value="" onChange={vi.fn()} />)
 
-    expect(screen.getByLabelText(/openai api key/i)).toHaveAttribute('placeholder', 'Enter new key to replace…')
+    expect(screen.getByLabelText(/openai api key/i)).toHaveAttribute(
+      'placeholder',
+      'Enter new key to replace…'
+    )
   })
 
   it('shows generic placeholder when no key is stored', () => {
     render(<ApiKeyInput label="OpenAI" isSet={false} value="" onChange={vi.fn()} />)
 
-    expect(screen.getByLabelText(/openai api key/i)).toHaveAttribute('placeholder', 'Enter API key…')
+    expect(screen.getByLabelText(/openai api key/i)).toHaveAttribute(
+      'placeholder',
+      'Enter API key…'
+    )
   })
 
   it('calls onChange when user types', async () => {
