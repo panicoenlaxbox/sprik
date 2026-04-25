@@ -21,7 +21,7 @@ export interface HistoryEntry {
 
 const store = new Store<{ entries: HistoryEntry[] }>({ name: 'history' })
 
-function getEntries(): HistoryEntry[] {
+export function getEntries(): HistoryEntry[] {
   return store.get('entries', [])
 }
 
@@ -36,11 +36,7 @@ export function appendEntry(
   store.set('entries', entries)
 }
 
-export function getAllEntries(): HistoryEntry[] {
-  return getEntries()
-}
-
-function removeRecording(entry: HistoryEntry): void {
+function removeEntryFiles(entry: HistoryEntry): void {
   if (entry.path && existsSync(entry.path)) {
     rmSync(entry.path, { recursive: true, force: true })
   }
@@ -49,12 +45,12 @@ function removeRecording(entry: HistoryEntry): void {
 export function deleteEntry(id: string): void {
   const entries = getEntries()
   const entry = entries.find((e) => e.id === id)
-  if (entry) removeRecording(entry)
+  if (entry) removeEntryFiles(entry)
   store.set('entries', entries.filter((e) => e.id !== id))
 }
 
-export function clearAll(): void {
-  getEntries().forEach(removeRecording)
+export function clearEntries(): void {
+  getEntries().forEach(removeEntryFiles)
   store.set('entries', [])
 }
 

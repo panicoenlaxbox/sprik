@@ -1,4 +1,4 @@
-import { appendEntry, getAllEntries, deleteEntry, clearAll, exportEntries, type HistoryEntry } from './history'
+import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries, type HistoryEntry } from './history'
 
 let storeData: Record<string, unknown> = {}
 
@@ -22,7 +22,7 @@ const entryData = { processed: 'Hello world', transcription: { provider: 'groq',
 describe('appendEntry', () => {
   it('stores a new entry with generated id and ISO timestamp', () => {
     appendEntry(entryData, 100)
-    const entries = getAllEntries() as HistoryEntry[]
+    const entries = getEntries() as HistoryEntry[]
 
     expect(entries).toHaveLength(1)
     expect(entries[0].processed).toBe('Hello world')
@@ -34,7 +34,7 @@ describe('appendEntry', () => {
   it('prepends new entries so most recent comes first', () => {
     appendEntry({ ...entryData, processed: 'First' }, 100)
     appendEntry({ ...entryData, processed: 'Second' }, 100)
-    const entries = getAllEntries() as HistoryEntry[]
+    const entries = getEntries() as HistoryEntry[]
 
     expect(entries[0].processed).toBe('Second')
     expect(entries[1].processed).toBe('First')
@@ -45,41 +45,41 @@ describe('appendEntry', () => {
       appendEntry({ ...entryData, processed: `Entry ${i}` }, 3)
     }
 
-    expect(getAllEntries()).toHaveLength(3)
+    expect(getEntries()).toHaveLength(3)
   })
 })
 
 describe('deleteEntry', () => {
   it('removes the entry with the given id', () => {
     appendEntry(entryData, 100)
-    const id = (getAllEntries() as HistoryEntry[])[0].id
+    const id = (getEntries() as HistoryEntry[])[0].id
 
     deleteEntry(id)
 
-    expect(getAllEntries()).toHaveLength(0)
+    expect(getEntries()).toHaveLength(0)
   })
 
   it('leaves other entries untouched', () => {
     appendEntry({ ...entryData, processed: 'Keep' }, 100)
     appendEntry({ ...entryData, processed: 'Delete me' }, 100)
-    const id = (getAllEntries() as HistoryEntry[])[0].id
+    const id = (getEntries() as HistoryEntry[])[0].id
 
     deleteEntry(id)
 
-    const remaining = getAllEntries() as HistoryEntry[]
+    const remaining = getEntries() as HistoryEntry[]
     expect(remaining).toHaveLength(1)
     expect(remaining[0].processed).toBe('Keep')
   })
 })
 
-describe('clearAll', () => {
+describe('clearEntries', () => {
   it('empties the history', () => {
     appendEntry(entryData, 100)
     appendEntry(entryData, 100)
 
-    clearAll()
+    clearEntries()
 
-    expect(getAllEntries()).toHaveLength(0)
+    expect(getEntries()).toHaveLength(0)
   })
 })
 

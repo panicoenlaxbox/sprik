@@ -12,7 +12,7 @@ import { getConfig, setConfig } from './store'
 import { copyFileSync, mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
-import { appendEntry, getAllEntries, deleteEntry, clearAll, exportEntries } from './history'
+import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries } from './history'
 import { setAutostart } from './autostart'
 import { setLogRenderer, log } from './logger'
 
@@ -200,9 +200,9 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     clearKey(p)
   })
 
-  ipcMain.handle(CHANNELS.HISTORY_GET_ALL, () => getAllEntries())
+  ipcMain.handle(CHANNELS.HISTORY_GET_ALL, () => getEntries())
   ipcMain.handle(CHANNELS.HISTORY_DELETE, (_, id: string) => deleteEntry(id))
-  ipcMain.handle(CHANNELS.HISTORY_CLEAR, () => clearAll())
+  ipcMain.handle(CHANNELS.HISTORY_CLEAR, () => clearEntries()())
   ipcMain.handle(CHANNELS.HISTORY_EXPORT, () => exportEntries())
   ipcMain.handle(CHANNELS.CLIPBOARD_WRITE, (_, text: string) => clipboard.writeText(text))
 
