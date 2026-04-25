@@ -65,12 +65,14 @@ export function createOverlayWindow(savedPosition?: { x: number; y: number }): B
 
   const win = new BrowserWindow({
     width: 160,
-    height: 48,
+    height: 40,
     x,
     y,
     show: false,
     frame: false,
     transparent: true,
+    backgroundColor: '#00000000',
+    hasShadow: false,
     alwaysOnTop: true,
     focusable: false,
     skipTaskbar: true,
