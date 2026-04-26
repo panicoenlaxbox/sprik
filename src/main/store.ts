@@ -14,23 +14,23 @@ export const configSchema = z.object({
   transcription: z
     .object({
       provider: z.enum(['groq', 'openai']).default('groq'),
-      model: z.string().default('distil-whisper-large-v3-en'),
+      model: z.string().default('whisper-large-v3-turbo'),
       language: z.string().optional(),
       deviceId: z.string().optional()
     })
-    .default({ provider: 'groq', model: 'distil-whisper-large-v3-en' }),
+    .default({ provider: 'groq', model: 'whisper-large-v3-turbo' }),
 
   postProcessing: z
     .object({
       enabled: z.boolean().default(false),
       provider: z.enum(['anthropic', 'openai']).default('anthropic'),
-      model: z.string().default('claude-haiku-4-5-20251001'),
+      model: z.string().default('claude-haiku-4-5'),
       prompt: z.string().default('Clean up the transcription, fix punctuation and grammar.')
     })
     .default({
       enabled: false,
       provider: 'anthropic',
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-haiku-4-5',
       prompt: 'Clean up the transcription, fix punctuation and grammar.'
     }),
 

@@ -28,24 +28,26 @@ pnpm install
 
 For development, copy `.env.example` to `.env.local` and add your API keys.
 
-
 ## Usage
 
 ```bash
 # Development (hot reload)
 pnpm dev
 
-# Run tests
-pnpm test:run
-
-# Run tests with coverage
-pnpm test:coverage
+# Format
+pnpm format
 
 # Type check
 pnpm typecheck
 
 # Lint
 pnpm lint
+
+# Run tests
+pnpm test:run
+
+# Run tests with coverage
+pnpm test:coverage
 ```
 
 ## Build
@@ -58,9 +60,14 @@ pnpm build:linux  # Linux (AppImage + deb)
 
 ## Providers
 
-| Role            | Provider  | Models                                                                                        |
-| --------------- | --------- | --------------------------------------------------------------------------------------------- |
-| Transcription   | Groq      | `distil-whisper-large-v3-en` (default), `whisper-large-v3`, `whisper-large-v3-turbo`          |
-| Transcription   | OpenAI    | `gpt-4o-mini-transcribe`, `gpt-4o-transcribe`, `whisper-1`                                    |
-| Post-processing | Anthropic | `claude-haiku-4-5-20251001` (default), `claude-sonnet-4-6`, `claude-opus-4-7`                 |
-| Post-processing | OpenAI    | `gpt-4o-mini` (default), `gpt-4o`                                                             |
+| Role            | Provider  | Models                                                                                            |
+| --------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| Transcription   | Groq      | `whisper-large-v3-turbo` (default), `whisper-large-v3`                                            |
+| Transcription   | OpenAI    | `gpt-4o-mini-transcribe` (default), `gpt-4o-transcribe`, `gpt-4o-transcribe-diarize`, `whisper-1` |
+| Post-processing | Anthropic | `claude-haiku-4-5` (default), `claude-sonnet-4-6`, `claude-opus-4-7`                              |
+| Post-processing | OpenAI    | `gpt-5.4-mini` (default), `gpt-5.4`, `gpt-5.5`                                                    |
+
+### Documentation
+
+- Groq speech-to-text: https://console.groq.com/docs/speech-to-text
+- OpenAI speech-to-text: https://developers.openai.com/api/docs/guides/speech-to-text

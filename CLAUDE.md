@@ -3,9 +3,10 @@
 Run these three checks before reporting a task as done:
 
 ```
-npm run typecheck
-npm run lint
-npm run test:run
+pnpm format
+pnpm typecheck
+pnpm lint
+pnpm test:run
 ```
 
 All three must pass with zero errors and zero warnings.

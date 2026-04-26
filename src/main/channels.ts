@@ -19,6 +19,7 @@ export const CHANNELS = {
   SHORTCUTS_PAUSE: 'shortcuts:pause',
   SHORTCUTS_RESUME: 'shortcuts:resume',
   SHORTCUTS_GET_STATUS: 'shortcuts:get-status',
+  SYSTEM_GET_LOCALE: 'system:get-locale',
   SHELL_OPEN_PATH: 'shell:open-path',
   SHELL_OPEN_RECORDINGS_PATH: 'shell:open-recordings-path',
   RECORDINGS_GET_PATH: 'recordings:get-path',

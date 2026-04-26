@@ -21,6 +21,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [toggleShortcutFailed, setToggleShortcutFailed] = useState(false)
 
   const [recordingsPath, setRecordingsPath] = useState('')
+  const [systemLocale, setSystemLocale] = useState('')
 
   useEffect(() => {
     const providers: ApiProvider[] = ['anthropic', 'groq', 'openai']
@@ -29,12 +30,14 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       window.api.getApiKeyStatus(),
       window.api.getRecordingsPath(),
       window.api.getShortcutStatus(),
+      window.api.getSystemLocale(),
       ...providers.map((p) => window.api.getApiKey(p))
-    ]).then(([cfg, status, recPath, shortcutStatus, ...keys]) => {
+    ]).then(([cfg, status, recPath, shortcutStatus, locale, ...keys]) => {
       setConfigState(cfg as Config)
       setKeyStatus(status as ApiKeyStatus)
       setRecordingsPath(recPath as string)
       setToggleShortcutFailed(!(shortcutStatus as { toggleRegistered: boolean }).toggleRegistered)
+      setSystemLocale(locale as string)
       const initial: Partial<Record<ApiProvider, string>> = {}
       providers.forEach((p, i) => {
         if (keys[i]) initial[p] = keys[i] as string
@@ -118,6 +121,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             />
             <LanguageSelector
               language={config.transcription.language}
+              systemLocale={systemLocale}
               onChange={(language) =>
                 setConfigState({ ...config, transcription: { ...config.transcription, language } })
               }

@@ -24,6 +24,7 @@ Object.defineProperty(window, 'api', {
     pauseShortcuts: vi.fn(),
     resumeShortcuts: vi.fn(),
     getShortcutStatus: vi.fn(),
+    getSystemLocale: vi.fn(),
     openPath: vi.fn(),
     openRecordingsPath: vi.fn(),
     getRecordingsPath: vi.fn(),

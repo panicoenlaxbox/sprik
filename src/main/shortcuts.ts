@@ -30,7 +30,12 @@ export function registerShortcuts(
     onCollision(config.toggleRecording)
     return { toggleFailed: true }
   }
-  const toggleOk = globalShortcut.register(config.toggleRecording, handlers.onToggle)
+  let toggleOk: boolean
+  try {
+    toggleOk = globalShortcut.register(config.toggleRecording, handlers.onToggle)
+  } catch {
+    toggleOk = false
+  }
   if (!toggleOk) onCollision(config.toggleRecording)
   return { toggleFailed: !toggleOk }
 }
@@ -45,9 +50,13 @@ export function registerCancelShortcut(
   onCollision: ShortcutCollisionReporter = defaultCollision
 ): void {
   globalShortcut.unregister(accelerator)
-  if (!isValidAccelerator(accelerator) || !globalShortcut.register(accelerator, handler)) {
-    onCollision(accelerator)
+  let registered: boolean
+  try {
+    registered = isValidAccelerator(accelerator) && globalShortcut.register(accelerator, handler)
+  } catch {
+    registered = false
   }
+  if (!registered) onCollision(accelerator)
 }
 
 export function unregisterCancelShortcut(accelerator: string): void {

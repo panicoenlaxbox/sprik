@@ -22,6 +22,7 @@ beforeEach(() => {
   vi.mocked(window.api.getApiKeyStatus).mockResolvedValue(mockKeyStatus)
   vi.mocked(window.api.setConfig).mockResolvedValue({ toggleFailed: false })
   vi.mocked(window.api.getShortcutStatus).mockResolvedValue({ toggleRegistered: true })
+  vi.mocked(window.api.getSystemLocale).mockResolvedValue('en')
   vi.mocked(window.api.getApiKey).mockResolvedValue('')
   vi.mocked(window.api.getRecordingsPath).mockResolvedValue(
     'C:\\Users\\user\\AppData\\Roaming\\sprik'

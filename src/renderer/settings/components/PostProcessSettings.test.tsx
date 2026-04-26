@@ -51,7 +51,7 @@ describe('PostProcessSettings', () => {
     render(<PostProcessSettings config={enabledConfig} onChange={onChange} />)
     await user.selectOptions(screen.getByRole('combobox', { name: /llm provider/i }), 'openai')
 
-    expect(onChange).toHaveBeenCalledWith({ provider: 'openai', model: 'gpt-4o' })
+    expect(onChange).toHaveBeenCalledWith({ provider: 'openai', model: 'gpt-5.4-mini' })
   })
 
   it('calls onChange when user edits the prompt', async () => {

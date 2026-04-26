@@ -9,11 +9,16 @@ export type OverlayState =
 export const TRANSCRIPTION_PROVIDERS = {
   groq: {
     label: 'Groq',
-    models: ['distil-whisper-large-v3-en', 'whisper-large-v3', 'whisper-large-v3-turbo'] as const
+    models: ['whisper-large-v3-turbo', 'whisper-large-v3'] as const
   },
   openai: {
     label: 'OpenAI',
-    models: ['gpt-4o-mini-transcribe', 'gpt-4o-transcribe', 'whisper-1'] as const
+    models: [
+      'gpt-4o-mini-transcribe',
+      'gpt-4o-transcribe',
+      'gpt-4o-transcribe-diarize',
+      'whisper-1'
+    ] as const
   }
 } as const
 
@@ -90,6 +95,7 @@ export interface AppApi {
   pauseShortcuts: () => Promise<void>
   resumeShortcuts: () => Promise<void>
   getShortcutStatus: () => Promise<{ toggleRegistered: boolean }>
+  getSystemLocale: () => Promise<string>
   openPath: (path: string) => Promise<void>
   openRecordingsPath: () => Promise<void>
   getRecordingsPath: () => Promise<string>

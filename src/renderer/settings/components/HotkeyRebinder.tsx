@@ -31,7 +31,14 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
     if (e.altKey) parts.push('Alt')
     if (e.shiftKey) parts.push('Shift')
     if (e.metaKey) parts.push('Meta')
-    const keyLabel = e.key === ' ' ? 'Space' : e.key.length === 1 ? e.key.toUpperCase() : e.key
+    const keyLabel =
+      e.key === ' '
+        ? 'Space'
+        : e.key === '+'
+          ? 'Plus'
+          : e.key.length === 1
+            ? e.key.toUpperCase()
+            : e.key
     parts.push(keyLabel)
 
     onChange(parts.join('+'))

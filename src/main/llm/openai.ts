@@ -11,7 +11,7 @@ export const openaiProcessor: PostProcessor = {
 
     const response = await client.chat.completions.create({
       model: opts.model,
-      max_tokens: 1024,
+      max_completion_tokens: 1024,
       messages: [
         { role: 'system', content: opts.prompt },
         { role: 'user', content: text }

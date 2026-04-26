@@ -4,7 +4,7 @@ import type { PostProcessor, PostProcessOpts } from './types'
 export const anthropicProcessor: PostProcessor = {
   id: 'anthropic',
   name: 'Anthropic',
-  models: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5-20251001'] as const,
+  models: ['claude-sonnet-4-6', 'claude-opus-4-7', 'claude-haiku-4-5'] as const,
 
   async process(text: string, opts: PostProcessOpts): Promise<string> {
     const client = new Anthropic({ apiKey: opts.apiKey, maxRetries: 0 })

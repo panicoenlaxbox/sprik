@@ -24,7 +24,7 @@ describe('getConfig', () => {
     expect(config.shortcuts.toggleRecording).toBe('Ctrl+Alt+Space')
     expect(config.shortcuts.cancelRecording).toBe('Escape')
     expect(config.transcription.provider).toBe('groq')
-    expect(config.transcription.model).toBe('distil-whisper-large-v3-en')
+    expect(config.transcription.model).toBe('whisper-large-v3-turbo')
     expect(config.paste.autoPaste).toBe(true)
     expect(config.history.retain).toBe(100)
     expect(config.autostart.enabled).toBe(false)

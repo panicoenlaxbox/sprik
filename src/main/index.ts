@@ -50,6 +50,10 @@ let workerWindow: BrowserWindow | null = null
 let overlayWindow: BrowserWindow | null = null
 let orchestrator: RecordingOrchestrator | null = null
 
+function getSystemLanguage(): string {
+  return app.getLocale().split('-')[0]
+}
+
 function openAppWindow(): BrowserWindow {
   if (appWindow && !appWindow.isDestroyed()) {
     appWindow.focus()
@@ -101,7 +105,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
     async run(audioPath: string, microphone?: string): Promise<void> {
       const config = getConfig()
       const { provider, model, language } = config.transcription
-      const resolvedLanguage = language ?? app.getLocale().split('-')[0]
+      const resolvedLanguage = language ?? getSystemLanguage()
       const transcriptionApiKey = getKey(provider) ?? ''
       const transcriber = getTranscriber(provider)
       let transcript: string
@@ -169,7 +173,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
             postProcessing: config.postProcessing.enabled
               ? { provider: config.postProcessing.provider, model: config.postProcessing.model }
               : undefined,
-            language: language || undefined,
+            language: resolvedLanguage,
             microphone
           },
           config.history.retain
@@ -282,6 +286,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     toggleRegistered: isShortcutRegistered(getConfig().shortcuts.toggleRecording)
   }))
 
+  ipcMain.handle(CHANNELS.SYSTEM_GET_LOCALE, () => getSystemLanguage())
   ipcMain.handle(CHANNELS.SHELL_OPEN_PATH, (_, path: string) => shell.openPath(path))
 
   ipcMain.handle(CHANNELS.RECORDINGS_GET_PATH, () => app.getPath('userData'))

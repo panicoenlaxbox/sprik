@@ -51,6 +51,8 @@ const api = {
   getShortcutStatus: (): Promise<{ toggleRegistered: boolean }> =>
     ipcRenderer.invoke(CHANNELS.SHORTCUTS_GET_STATUS),
 
+  getSystemLocale: (): Promise<string> => ipcRenderer.invoke(CHANNELS.SYSTEM_GET_LOCALE),
+
   openPath: (path: string): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_PATH, path),
 
   openRecordingsPath: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_RECORDINGS_PATH),
