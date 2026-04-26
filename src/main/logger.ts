@@ -5,6 +5,7 @@ import { CHANNELS } from './channels'
 import type { WebContents } from 'electron'
 
 electronLog.transports.file.resolvePathFn = () => join(app.getPath('userData'), 'app.log')
+electronLog.transports.console.level = false
 
 let target: WebContents | null = null
 
@@ -16,6 +17,7 @@ type Level = 'info' | 'warn' | 'error'
 
 export function log(scope: string, message: string, level: Level = 'info'): void {
   electronLog.scope(scope)[level](message)
+  console[level](`[${scope}] ${message}`)
   if (target && !target.isDestroyed()) {
     target.send(CHANNELS.LOG_FORWARD, scope, message, level)
   }

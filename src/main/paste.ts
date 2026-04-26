@@ -1,5 +1,6 @@
 import { clipboard } from 'electron'
 import { exec } from 'child_process'
+import { log } from './logger'
 
 function execPromise(cmd: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -27,6 +28,6 @@ export async function copyAndPaste(text: string, autoPaste = true): Promise<void
     await execPromise(getPasteCommand())
   } catch (err) {
     // Text is already in clipboard — user can paste manually
-    console.warn('[paste] native paste failed, text is in clipboard:', (err as Error).message)
+    log('paste', `native paste failed, text is in clipboard: ${(err as Error).message}`, 'warn')
   }
 }

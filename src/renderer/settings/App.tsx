@@ -18,6 +18,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [pendingKeys, setPendingKeys] = useState<Partial<Record<ApiProvider, string>>>({})
   const [saving, setSaving] = useState(false)
   const [savedBadge, setSavedBadge] = useState(false)
+  const [toggleShortcutFailed, setToggleShortcutFailed] = useState(false)
 
   const [recordingsPath, setRecordingsPath] = useState('')
 
@@ -27,11 +28,13 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       window.api.getConfig(),
       window.api.getApiKeyStatus(),
       window.api.getRecordingsPath(),
+      window.api.getShortcutStatus(),
       ...providers.map((p) => window.api.getApiKey(p))
-    ]).then(([cfg, status, recPath, ...keys]) => {
+    ]).then(([cfg, status, recPath, shortcutStatus, ...keys]) => {
       setConfigState(cfg as Config)
       setKeyStatus(status as ApiKeyStatus)
       setRecordingsPath(recPath as string)
+      setToggleShortcutFailed(!(shortcutStatus as { toggleRegistered: boolean }).toggleRegistered)
       const initial: Partial<Record<ApiProvider, string>> = {}
       providers.forEach((p, i) => {
         if (keys[i]) initial[p] = keys[i] as string
@@ -50,7 +53,8 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
     if (!config || shortcutConflict || emptyPrompt || invalidRetain) return
     setSaving(true)
     try {
-      await window.api.setConfig(config)
+      const { toggleFailed } = await window.api.setConfig(config)
+      setToggleShortcutFailed(toggleFailed)
       const providers: ApiProvider[] = ['anthropic', 'groq', 'openai']
       for (const [provider, key] of Object.entries(pendingKeys) as [ApiProvider, string][]) {
         if (key.trim()) {
@@ -70,8 +74,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       })
       setPendingKeys(refreshed)
       onThemeChange?.(config.ui.theme)
-      setSavedBadge(true)
-      setTimeout(() => setSavedBadge(false), 2000)
+      if (!toggleFailed) {
+        setSavedBadge(true)
+        setTimeout(() => setSavedBadge(false), 2000)
+      }
     } finally {
       setSaving(false)
     }
@@ -181,12 +187,13 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             <HotkeyRebinder
               label="Toggle recording"
               value={config.shortcuts.toggleRecording}
-              onChange={(v) =>
+              onChange={(v) => {
+                setToggleShortcutFailed(false)
                 setConfigState({
                   ...config,
                   shortcuts: { ...config.shortcuts, toggleRecording: v }
                 })
-              }
+              }}
             />
             <HotkeyRebinder
               label="Cancel recording"
@@ -201,6 +208,11 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             {shortcutConflict && (
               <p className="text-xs text-red-600" role="alert">
                 Toggle and Cancel shortcuts cannot be the same.
+              </p>
+            )}
+            {toggleShortcutFailed && !shortcutConflict && (
+              <p className="text-xs text-red-600" role="alert">
+                This shortcut is already in use by another app.
               </p>
             )}
           </div>

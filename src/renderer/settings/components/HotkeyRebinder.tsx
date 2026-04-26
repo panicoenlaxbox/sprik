@@ -24,6 +24,7 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
     e.stopPropagation()
 
     if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return
+    if (e.key.length === 1 && !/^[\x20-\x7E]$/.test(e.key)) return
 
     const parts: string[] = []
     if (e.ctrlKey) parts.push('Ctrl')
@@ -48,7 +49,7 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
           onKeyDown={handleKeyDown}
           onBlur={() => setCapturing(false)}
           value=""
-          placeholder="Press keys… (click outside to cancel)"
+          placeholder="Press keys…"
           aria-label={`Capturing shortcut for ${label}`}
           className="text-sm border border-blue-400 rounded-md px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500 focus:outline-none w-48 placeholder:text-blue-400 dark:placeholder:text-blue-500 dark:text-blue-300"
         />

@@ -77,7 +77,7 @@ export interface AppApi {
   onOverlayState: (cb: (state: OverlayState) => void) => () => void
   onLog: (cb: (scope: string, message: string, level: string) => void) => () => void
   getConfig: () => Promise<Config>
-  setConfig: (partial: Partial<Config>) => Promise<void>
+  setConfig: (partial: Partial<Config>) => Promise<{ toggleFailed: boolean }>
   getApiKeyStatus: () => Promise<ApiKeyStatus>
   getApiKey: (provider: ApiProvider) => Promise<string>
   setApiKey: (provider: ApiProvider, key: string) => Promise<void>
@@ -89,6 +89,7 @@ export interface AppApi {
   copyToClipboard: (text: string) => Promise<void>
   pauseShortcuts: () => Promise<void>
   resumeShortcuts: () => Promise<void>
+  getShortcutStatus: () => Promise<{ toggleRegistered: boolean }>
   openPath: (path: string) => Promise<void>
   openRecordingsPath: () => Promise<void>
   getRecordingsPath: () => Promise<string>

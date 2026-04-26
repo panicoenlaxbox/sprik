@@ -23,6 +23,7 @@ Object.defineProperty(window, 'api', {
     copyToClipboard: vi.fn(),
     pauseShortcuts: vi.fn(),
     resumeShortcuts: vi.fn(),
+    getShortcutStatus: vi.fn(),
     openPath: vi.fn(),
     openRecordingsPath: vi.fn(),
     getRecordingsPath: vi.fn(),

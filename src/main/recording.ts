@@ -32,7 +32,9 @@ export class RecordingOrchestrator {
     private readonly onIdle?: () => void
   ) {
     worker.onAudio((payload) => {
-      this.handleAudio(payload).catch(console.error)
+      this.handleAudio(payload).catch((e: unknown) =>
+        log('recording', e instanceof Error ? e.message : String(e), 'error')
+      )
     })
     worker.onError((err) => this.handleError(err))
   }
@@ -111,7 +113,7 @@ export class RecordingOrchestrator {
   }
 
   private handleError(error: string): void {
-    console.error(`[recording] worker error: ${error}`)
+    log('recording', `worker error: ${error}`, 'error')
     this.deleteTempFile()
     this.reset()
   }

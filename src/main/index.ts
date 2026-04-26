@@ -17,7 +17,8 @@ import {
   registerShortcuts,
   registerCancelShortcut,
   unregisterCancelShortcut,
-  unregisterShortcuts
+  unregisterShortcuts,
+  isShortcutRegistered
 } from './shortcuts'
 import {
   RecordingOrchestrator,
@@ -100,13 +101,14 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
     async run(audioPath: string, microphone?: string): Promise<void> {
       const config = getConfig()
       const { provider, model, language } = config.transcription
+      const resolvedLanguage = language ?? app.getLocale().split('-')[0]
       const transcriptionApiKey = getKey(provider) ?? ''
       const transcriber = getTranscriber(provider)
       let transcript: string
       try {
         transcript = await transcriber.transcribe(audioPath, {
           model,
-          language,
+          language: resolvedLanguage,
           apiKey: transcriptionApiKey
         })
       } catch (err) {
@@ -225,12 +227,16 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     const prevConfig = getConfig()
     setConfig(partial as Parameters<typeof setConfig>[0])
     const newConfig = getConfig()
+    let toggleFailed = false
     if (
       prevConfig.shortcuts.toggleRecording !== newConfig.shortcuts.toggleRecording ||
       prevConfig.shortcuts.cancelRecording !== newConfig.shortcuts.cancelRecording
     ) {
       unregisterShortcuts()
-      registerShortcuts(newConfig.shortcuts, shortcutHandlers)
+      const result = registerShortcuts(newConfig.shortcuts, shortcutHandlers, (a) =>
+        log('shortcuts', `${a} is taken by another app`, 'error')
+      )
+      toggleFailed = result.toggleFailed
     }
     if (prevConfig.autostart.enabled !== newConfig.autostart.enabled) {
       setAutostart(newConfig.autostart.enabled)
@@ -242,6 +248,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     ) {
       overlayWindow.webContents.send(CHANNELS.UI_THEME_CHANGED, newConfig.ui.theme)
     }
+    return { toggleFailed }
   })
 
   ipcMain.handle(CHANNELS.SETTINGS_GET_KEY_STATUS, () => getKeyStatus())
@@ -271,6 +278,9 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.SHORTCUTS_RESUME, () =>
     registerShortcuts(getConfig().shortcuts, shortcutHandlers)
   )
+  ipcMain.handle(CHANNELS.SHORTCUTS_GET_STATUS, () => ({
+    toggleRegistered: isShortcutRegistered(getConfig().shortcuts.toggleRecording)
+  }))
 
   ipcMain.handle(CHANNELS.SHELL_OPEN_PATH, (_, path: string) => shell.openPath(path))
 
@@ -325,7 +335,17 @@ app.whenReady().then(() => {
   })
 
   const config = getConfig()
-  registerShortcuts(config.shortcuts, shortcutHandlers)
+  const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
+    log('shortcuts', `${a} is taken by another app`, 'error')
+  )
+  if (toggleFailed) {
+    const n = new Notification({
+      title: 'Sprik — Shortcut unavailable',
+      body: `${config.shortcuts.toggleRecording} is already in use by another app. Change it in Settings.`
+    })
+    n.on('click', () => openAppWindow())
+    n.show()
+  }
   setAutostart(config.autostart.enabled)
 
   setupSettingsIpc(shortcutHandlers)

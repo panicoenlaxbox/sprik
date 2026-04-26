@@ -18,7 +18,7 @@ const api = {
 
   getConfig: (): Promise<Config> => ipcRenderer.invoke(CHANNELS.SETTINGS_GET),
 
-  setConfig: (partial: Partial<Config>): Promise<void> =>
+  setConfig: (partial: Partial<Config>): Promise<{ toggleFailed: boolean }> =>
     ipcRenderer.invoke(CHANNELS.SETTINGS_SET, partial),
 
   getApiKeyStatus: (): Promise<Record<ApiProvider, boolean>> =>
@@ -47,6 +47,9 @@ const api = {
   pauseShortcuts: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHORTCUTS_PAUSE),
 
   resumeShortcuts: (): Promise<void> => ipcRenderer.invoke(CHANNELS.SHORTCUTS_RESUME),
+
+  getShortcutStatus: (): Promise<{ toggleRegistered: boolean }> =>
+    ipcRenderer.invoke(CHANNELS.SHORTCUTS_GET_STATUS),
 
   openPath: (path: string): Promise<void> => ipcRenderer.invoke(CHANNELS.SHELL_OPEN_PATH, path),
 
