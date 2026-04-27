@@ -67,7 +67,13 @@ export const configSchema = z.object({
     .object({
       saveAudio: z.boolean().default(false)
     })
-    .default({ saveAudio: false })
+    .default({ saveAudio: false }),
+
+  overlay: z
+    .object({
+      showTimer: z.boolean().default(false)
+    })
+    .default({ showTimer: false })
 })
 
 export type Config = z.infer<typeof configSchema>

@@ -1,6 +1,10 @@
-# After every change
+# Language
 
-Run `pnpm format && pnpm typecheck && pnpm lint && pnpm test:run` — all must pass with zero errors and warnings.
+All code must be in English — including comments, user-facing messages, log strings, and error text.
+
+# Checks
+
+After every change, run `pnpm format && pnpm typecheck && pnpm lint && pnpm test:run` — all must pass with zero errors and warnings.
 
 # Logging
 

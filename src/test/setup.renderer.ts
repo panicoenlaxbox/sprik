@@ -29,7 +29,8 @@ Object.defineProperty(window, 'api', {
     openRecordingsPath: vi.fn(),
     getRecordingsPath: vi.fn(),
     onThemeChange: vi.fn(() => () => {}),
-    onHistoryEntryAdded: vi.fn(() => () => {})
+    onHistoryEntryAdded: vi.fn(() => () => {}),
+    cancelRecording: vi.fn()
   },
   writable: true
 })

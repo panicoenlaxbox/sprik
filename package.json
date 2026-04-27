@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "description": "Speech-to-text desktop app powered by OpenAI / Groq",
   "main": "./out/main/index.mjs",
-  "author": "sergio.leon@analyticalways.com",
+  "author": {
+    "name": "Sergio León",
+    "email": "panicoenlaxbox@gmail.com"
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",

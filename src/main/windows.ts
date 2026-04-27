@@ -66,7 +66,7 @@ export function createOverlayWindow(savedPosition?: { x: number; y: number }): B
   const y = savedPosition?.y ?? height - 80
 
   const win = new BrowserWindow({
-    width: 160,
+    width: 260,
     height: 40,
     x,
     y,

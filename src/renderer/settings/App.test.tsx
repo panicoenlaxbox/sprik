@@ -11,7 +11,8 @@ const mockConfig: Config = {
   history: { retain: 100, enabled: true },
   autostart: { enabled: false },
   ui: { theme: 'system' },
-  recordings: { saveAudio: false }
+  recordings: { saveAudio: false },
+  overlay: { showTimer: false }
 }
 
 const mockKeyStatus: ApiKeyStatus = { openai: false, groq: true, anthropic: false }

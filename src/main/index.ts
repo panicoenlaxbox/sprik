@@ -102,7 +102,12 @@ function setupPermissions(): void {
 
 function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePipeline {
   return {
-    async run(audioPath: string, durationMs?: number, microphone?: string): Promise<void> {
+    async run(
+      audioPath: string,
+      durationMs?: number,
+      microphone?: string,
+      signal?: AbortSignal
+    ): Promise<void> {
       const config = getConfig()
       const { provider, model, language } = config.transcription
       const resolvedLanguage = language ?? getSystemLanguage()
@@ -127,6 +132,8 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         throw err
       }
 
+      if (signal?.aborted) return
+
       let text = transcript
       let postProcessingDurationMs: number | undefined
       if (config.postProcessing.enabled) {
@@ -149,6 +156,8 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
           }).show()
           throw err
         }
+
+        if (signal?.aborted) return
       }
 
       await copyAndPaste(text, config.paste.autoPaste)
@@ -297,6 +306,8 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.RECORDINGS_GET_PATH, () => app.getPath('userData'))
 
   ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () => shell.openPath(app.getPath('userData')))
+
+  ipcMain.handle(CHANNELS.RECORDING_CANCEL, () => orchestrator?.cancel())
 
   ipcMain.on(CHANNELS.LOG_WORKER, (_, scope: string, message: string, level: string) => {
     log(scope, message, level as Parameters<typeof log>[2])

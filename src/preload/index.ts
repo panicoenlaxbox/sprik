@@ -69,7 +69,9 @@ const api = {
     const handler = (_: IpcRendererEvent, entry: HistoryEntry): void => cb(entry)
     ipcRenderer.on(CHANNELS.HISTORY_ENTRY_ADDED, handler)
     return () => ipcRenderer.removeListener(CHANNELS.HISTORY_ENTRY_ADDED, handler)
-  }
+  },
+
+  cancelRecording: (): Promise<void> => ipcRenderer.invoke(CHANNELS.RECORDING_CANCEL)
 }
 
 if (process.contextIsolated) {

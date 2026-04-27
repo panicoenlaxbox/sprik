@@ -130,6 +130,54 @@ describe('RecordingOrchestrator', () => {
 
       expect(worker.send).not.toHaveBeenCalled()
     })
+
+    it('aborts the pipeline and does not call reset when cancelled while pipeline is running', async () => {
+      const worker = makeWorkerBridge()
+      const overlay = makeOverlayBridge()
+      let capturedSignal: AbortSignal | undefined
+      const pipeline = {
+        run: vi.fn(async (_path: string, _dur?: number, _mic?: string, signal?: AbortSignal) => {
+          capturedSignal = signal
+          await new Promise<void>((resolve) => setTimeout(resolve, 100))
+          if (signal?.aborted) return
+        })
+      }
+      const onIdle = vi.fn()
+      const orc = new RecordingOrchestrator(worker, overlay, pipeline, onIdle)
+
+      vi.useFakeTimers()
+      orc.start()
+      worker.triggerAudio({ buffer: Buffer.from('fake'), durationMs: 500 })
+
+      orc.cancel()
+      expect(capturedSignal?.aborted).toBe(true)
+      expect(orc.getState()).toBe('idle')
+
+      await vi.runAllTimersAsync()
+
+      expect(overlay.states.filter((s) => s === 'idle')).toHaveLength(1)
+      expect(onIdle).toHaveBeenCalledOnce()
+
+      vi.useRealTimers()
+    })
+
+    it('does not paste or reset when audio arrives after cancel', async () => {
+      const worker = makeWorkerBridge()
+      const overlay = makeOverlayBridge()
+      const pipeline = { run: vi.fn().mockResolvedValue(undefined) }
+      const onIdle = vi.fn()
+      const orc = new RecordingOrchestrator(worker, overlay, pipeline, onIdle)
+
+      orc.start()
+      orc.cancel()
+      expect(orc.getState()).toBe('idle')
+
+      worker.triggerAudio({ buffer: Buffer.from('fake'), durationMs: 500 })
+      await Promise.resolve()
+
+      expect(pipeline.run).not.toHaveBeenCalled()
+      expect(onIdle).toHaveBeenCalledOnce()
+    })
   })
 
   describe('error handling', () => {

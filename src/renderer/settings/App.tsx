@@ -327,6 +327,29 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           </div>
         </section>
 
+        <section aria-labelledby="overlay-heading">
+          <h2
+            id="overlay-heading"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+          >
+            Overlay
+          </h2>
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={config.overlay.showTimer}
+              onChange={(e) =>
+                setConfigState({
+                  ...config,
+                  overlay: { ...config.overlay, showTimer: e.target.checked }
+                })
+              }
+              className="rounded"
+            />
+            Show elapsed time
+          </label>
+        </section>
+
         <section aria-labelledby="appearance-heading">
           <h2
             id="appearance-heading"

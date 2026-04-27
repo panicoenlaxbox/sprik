@@ -17,13 +17,19 @@ export interface OverlayBridge {
 }
 
 export interface TranscribePipeline {
-  run(audioPath: string, durationMs?: number, microphone?: string): Promise<void>
+  run(
+    audioPath: string,
+    durationMs?: number,
+    microphone?: string,
+    signal?: AbortSignal
+  ): Promise<void>
 }
 
 export class RecordingOrchestrator {
   private state: RecordingState = 'idle'
   private tempPath: string | null = null
   private cancelledTimer: ReturnType<typeof setTimeout> | null = null
+  private abortController: AbortController | null = null
 
   constructor(
     private readonly worker: WorkerBridge,
@@ -66,6 +72,7 @@ export class RecordingOrchestrator {
 
   cancel(): void {
     if (this.state === 'idle') return
+    this.abortController?.abort()
     this.worker.send(CHANNELS.RECORDING_CANCEL)
     this.deleteTempFile()
     this.state = 'idle'
@@ -98,14 +105,29 @@ export class RecordingOrchestrator {
     writeFileSync(this.tempPath, payload.buffer)
     log('recording', `saved ${this.tempPath} (${payload.durationMs}ms)`)
 
+    if (this.state === 'idle') {
+      this.deleteTempFile()
+      return
+    }
+
     if (this.pipeline) {
+      this.abortController = new AbortController()
       try {
-        await this.pipeline.run(this.tempPath, payload.durationMs, payload.microphone)
-        this.deleteTempFile()
-        this.reset()
+        await this.pipeline.run(
+          this.tempPath,
+          payload.durationMs,
+          payload.microphone,
+          this.abortController.signal
+        )
+        if (this.getState() !== 'idle') {
+          this.deleteTempFile()
+          this.reset()
+        }
       } catch {
-        this.deleteTempFile()
-        this.showError()
+        if (this.getState() !== 'idle') {
+          this.deleteTempFile()
+          this.showError()
+        }
       }
     } else {
       this.reset()
