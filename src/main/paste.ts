@@ -1,4 +1,4 @@
-import { clipboard } from 'electron'
+import { clipboard, Notification } from 'electron'
 import { exec } from 'child_process'
 import { log } from './logger'
 
@@ -27,7 +27,10 @@ export async function copyAndPaste(text: string, autoPaste = true): Promise<void
   try {
     await execPromise(getPasteCommand())
   } catch (err) {
-    // Text is already in clipboard — user can paste manually
     log('paste', `native paste failed, text is in clipboard: ${(err as Error).message}`, 'warn')
+    new Notification({
+      title: 'Sprik — Auto-paste failed',
+      body: 'Text copied to clipboard — paste it manually.'
+    }).show()
   }
 }
