@@ -11,11 +11,8 @@
   ],
   "compilerOptions": {
     "composite": true,
+    "outDir": "out",
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["src/renderer/shared/*"]
-    },
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   }
 }
