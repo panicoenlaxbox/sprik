@@ -1,0 +1,31 @@
+name: Build mac (quick)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (macos-latest)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install
+
+      - name: Build installer
+        run: pnpm build:mac
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist-mac-quick
+          path: dist/
+          retention-days: 1
