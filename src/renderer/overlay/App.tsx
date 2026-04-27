@@ -56,7 +56,7 @@ export default function App(): React.JSX.Element {
   return (
     <div
       style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-      className="w-fit flex items-center gap-2 px-3 py-2 mx-1 rounded-full bg-white dark:bg-zinc-900 text-gray-900 dark:text-white text-sm select-none border border-gray-200 dark:border-0 whitespace-nowrap"
+      className="w-fit flex items-center gap-2 px-3 py-2 mx-1 rounded-full bg-white dark:bg-zinc-900 text-gray-900 dark:text-white text-sm font-medium select-none border border-gray-400 dark:border-zinc-600 whitespace-nowrap"
     >
       {state === 'recording' && (
         <>
