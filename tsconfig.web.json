@@ -7,6 +7,7 @@
     "src/renderer/overlay/**/*",
     "src/renderer/worker/**/*",
     "src/renderer/shared/**/*",
+    "src/shared/**/*",
     "src/preload/*.d.ts"
   ],
   "compilerOptions": {
