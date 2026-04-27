@@ -129,7 +129,7 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
                   aria-label="LLM Azure Deployment"
                   value={config.model}
                   onChange={(e) => onChange({ model: e.target.value })}
-                  placeholder="my-deployment"
+                  placeholder="your-deployment"
                   className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500"
                 />
               </div>

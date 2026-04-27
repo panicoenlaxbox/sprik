@@ -97,7 +97,7 @@ export default function ProviderSelector({
               aria-label="Azure Deployment"
               value={model}
               onChange={(e) => onChange(provider, e.target.value, endpoint)}
-              placeholder="my-deployment"
+              placeholder="your-deployment"
               className="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500"
             />
           </div>
