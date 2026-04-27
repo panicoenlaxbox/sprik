@@ -25,6 +25,9 @@ mac:
   extendInfo:
     - NSMicrophoneUsageDescription: Sprik needs microphone access to record your voice for transcription.
   notarize: false
+  target:
+    - target: dmg
+      arch: [universal]
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:

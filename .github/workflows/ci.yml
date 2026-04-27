@@ -75,4 +75,4 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: dist/*.exe
-          # generate_release_notes: true
+          body: ''
