@@ -6,6 +6,7 @@ import PostProcessSettings from './components/PostProcessSettings'
 import StorageSettings from './components/StorageSettings'
 import MicrophoneSelector from './components/MicrophoneSelector'
 import LanguageSelector from './components/LanguageSelector'
+import { API_PROVIDERS } from '../shared/types'
 import type { Config, ApiProvider, ApiKeyStatus } from '../shared/types'
 
 interface Props {
@@ -24,14 +25,13 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [systemLocale, setSystemLocale] = useState('')
 
   useEffect(() => {
-    const providers: ApiProvider[] = ['anthropic', 'groq', 'openai']
     Promise.all([
       window.api.getConfig(),
       window.api.getApiKeyStatus(),
       window.api.getRecordingsPath(),
       window.api.getShortcutStatus(),
       window.api.getSystemLocale(),
-      ...providers.map((p) => window.api.getApiKey(p))
+      ...API_PROVIDERS.map((p) => window.api.getApiKey(p))
     ]).then(([cfg, status, recPath, shortcutStatus, locale, ...keys]) => {
       setConfigState(cfg as Config)
       setKeyStatus(status as ApiKeyStatus)
@@ -39,7 +39,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       setToggleShortcutFailed(!(shortcutStatus as { toggleRegistered: boolean }).toggleRegistered)
       setSystemLocale(locale as string)
       const initial: Partial<Record<ApiProvider, string>> = {}
-      providers.forEach((p, i) => {
+      API_PROVIDERS.forEach((p, i) => {
         if (keys[i]) initial[p] = keys[i] as string
       })
       setPendingKeys(initial)
@@ -58,7 +58,6 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
     try {
       const { toggleFailed } = await window.api.setConfig(config)
       setToggleShortcutFailed(toggleFailed)
-      const providers: ApiProvider[] = ['anthropic', 'groq', 'openai']
       for (const [provider, key] of Object.entries(pendingKeys) as [ApiProvider, string][]) {
         if (key.trim()) {
           await window.api.setApiKey(provider, key.trim())
@@ -68,11 +67,11 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       }
       const [newStatus, ...keys] = await Promise.all([
         window.api.getApiKeyStatus(),
-        ...providers.map((p) => window.api.getApiKey(p))
+        ...API_PROVIDERS.map((p) => window.api.getApiKey(p))
       ])
       setKeyStatus(newStatus as ApiKeyStatus)
       const refreshed: Partial<Record<ApiProvider, string>> = {}
-      providers.forEach((p, i) => {
+      API_PROVIDERS.forEach((p, i) => {
         if (keys[i]) refreshed[p] = keys[i] as string
       })
       setPendingKeys(refreshed)
@@ -166,7 +165,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             API Keys
           </h2>
           <div className="space-y-3">
-            {(['anthropic', 'groq', 'openai'] as ApiProvider[]).map((provider) => (
+            {API_PROVIDERS.map((provider) => (
               <ApiKeyInput
                 key={provider}
                 label={

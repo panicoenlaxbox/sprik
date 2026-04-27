@@ -1,18 +1,9 @@
 # After every change
 
-Run these three checks before reporting a task as done:
-
-```
-pnpm format
-pnpm typecheck
-pnpm lint
-pnpm test:run
-```
-
-All three must pass with zero errors and zero warnings.
+Run `pnpm format && pnpm typecheck && pnpm lint && pnpm test:run` — all must pass with zero errors and warnings.
 
 # Logging
 
-Always use `log(scope, message, level)` from [src/main/logger.ts](src/main/logger.ts). Never use `console.*` directly in the main process: `log()` internally calls `console[level]` (visible in DevTools), writes to `app.log`, and forwards to the renderer via IPC.
-
-`console.*` is fine in the renderer (`renderer/`) and preload (`preload/`), where [logger.ts](src/main/logger.ts) is not available.
+- **main**: use `log(scope, message, level)` from `src/main/logger.ts` — never `console.*`
+- **renderer/worker**: use `window.workerApi.log(scope, message, level)` — never `console.*`
+- **other renderers / preload**: `console.*` is fine

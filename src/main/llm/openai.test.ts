@@ -50,7 +50,7 @@ describe('openaiProcessor', () => {
 
     expect(capturedMessages).toEqual([
       { role: 'system', content: validOpts.prompt },
-      { role: 'user', content: 'hello' }
+      { role: 'user', content: '<transcription>hello</transcription>' }
     ])
   })
 

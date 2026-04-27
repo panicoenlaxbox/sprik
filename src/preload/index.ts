@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
-import { CHANNELS } from '../main/channels'
+import { CHANNELS } from '../shared/channels'
 import type { Config, ApiProvider, OverlayState, HistoryEntry } from '../renderer/shared/types'
 
 const api = {
@@ -63,6 +63,12 @@ const api = {
     const handler = (_: IpcRendererEvent, theme: 'system' | 'light' | 'dark'): void => cb(theme)
     ipcRenderer.on(CHANNELS.UI_THEME_CHANGED, handler)
     return () => ipcRenderer.removeListener(CHANNELS.UI_THEME_CHANGED, handler)
+  },
+
+  onHistoryEntryAdded: (cb: (entry: HistoryEntry) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, entry: HistoryEntry): void => cb(entry)
+    ipcRenderer.on(CHANNELS.HISTORY_ENTRY_ADDED, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.HISTORY_ENTRY_ADDED, handler)
   }
 }
 

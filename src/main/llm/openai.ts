@@ -14,7 +14,7 @@ export const openaiProcessor: PostProcessor = {
       max_completion_tokens: 1024,
       messages: [
         { role: 'system', content: opts.prompt },
-        { role: 'user', content: text }
+        { role: 'user', content: `<transcription>${text}</transcription>` }
       ]
     })
 

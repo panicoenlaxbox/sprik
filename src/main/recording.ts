@@ -17,7 +17,7 @@ export interface OverlayBridge {
 }
 
 export interface TranscribePipeline {
-  run(audioPath: string, microphone?: string): Promise<void>
+  run(audioPath: string, durationMs?: number, microphone?: string): Promise<void>
 }
 
 export class RecordingOrchestrator {
@@ -100,7 +100,7 @@ export class RecordingOrchestrator {
 
     if (this.pipeline) {
       try {
-        await this.pipeline.run(this.tempPath, payload.microphone)
+        await this.pipeline.run(this.tempPath, payload.durationMs, payload.microphone)
         this.deleteTempFile()
         this.reset()
       } catch {

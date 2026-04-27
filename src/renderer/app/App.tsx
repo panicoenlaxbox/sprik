@@ -50,8 +50,13 @@ export default function App(): React.JSX.Element {
         ))}
       </nav>
 
-      <div className="flex-1 overflow-auto min-h-0">
-        {view === 'settings' ? <SettingsView onThemeChange={setTheme} /> : <HistoryView />}
+      <div className="flex-1 overflow-auto min-h-0 relative">
+        <div className={view === 'settings' ? 'h-full' : 'hidden'}>
+          <SettingsView onThemeChange={setTheme} />
+        </div>
+        <div className={view === 'history' ? 'h-full' : 'hidden'}>
+          <HistoryView />
+        </div>
       </div>
     </div>
   )

@@ -9,21 +9,24 @@ declare global {
       onCancel: (cb: () => void) => () => void
       sendAudio: (buffer: ArrayBuffer, durationMs: number, microphone?: string) => void
       sendError: (message: string) => void
+      log: (scope: string, message: string, level: string) => void
     }
   }
 }
+
+import { USB_DEVICE_ID_RE } from '../../shared/utils'
 
 let mediaRecorder: MediaRecorder | null = null
 let chunks: Blob[] = []
 let startedAt = 0
 
 async function startRecording(deviceId?: string): Promise<void> {
-  console.log('[worker] startRecording called')
+  window.workerApi.log('worker', 'startRecording called', 'info')
   chunks = []
   try {
     const constraint = deviceId ? { audio: { deviceId: { exact: deviceId } } } : { audio: true }
     const stream = await navigator.mediaDevices.getUserMedia(constraint)
-    console.log('[worker] got mic stream')
+    window.workerApi.log('worker', 'got mic stream', 'info')
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' })
 
     mediaRecorder.ondataavailable = (e): void => {
@@ -34,7 +37,8 @@ async function startRecording(deviceId?: string): Promise<void> {
       const durationMs = Date.now() - startedAt
       const blob = new Blob(chunks, { type: 'audio/webm;codecs=opus' })
       const buffer = await blob.arrayBuffer()
-      const microphone = stream.getAudioTracks()[0]?.label || undefined
+      const microphone =
+        stream.getAudioTracks()[0]?.label.replace(USB_DEVICE_ID_RE, '') || undefined
       window.workerApi.sendAudio(buffer, durationMs, microphone)
       stream.getTracks().forEach((t) => t.stop())
     }
@@ -43,7 +47,7 @@ async function startRecording(deviceId?: string): Promise<void> {
     mediaRecorder.start(250)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    console.error('[worker] getUserMedia error:', message)
+    window.workerApi.log('worker', `getUserMedia error: ${message}`, 'error')
     window.workerApi.sendError(message)
   }
 }

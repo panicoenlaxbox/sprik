@@ -18,17 +18,6 @@ export default function StorageSettings({
       <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
         <input
           type="checkbox"
-          checked={config.saveText}
-          onChange={(e) => onChange({ saveText: e.target.checked })}
-          aria-label="Save transcript"
-          className="rounded"
-        />
-        Save transcript
-      </label>
-
-      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-        <input
-          type="checkbox"
           checked={config.saveAudio}
           onChange={(e) => onChange({ saveAudio: e.target.checked })}
           aria-label="Save audio"

@@ -19,7 +19,7 @@ export const anthropicProcessor: PostProcessor = {
           cache_control: { type: 'ephemeral' }
         }
       ],
-      messages: [{ role: 'user', content: text }]
+      messages: [{ role: 'user', content: `<transcription>${text}</transcription>` }]
     })
 
     const block = response.content[0]

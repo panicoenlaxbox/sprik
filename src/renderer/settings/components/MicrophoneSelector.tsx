@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { USB_DEVICE_ID_RE } from '../../../shared/utils'
 
 interface Props {
   deviceId: string | undefined
@@ -30,7 +31,7 @@ export default function MicrophoneSelector({ deviceId, onChange }: Props): React
         <option value="">System default</option>
         {devices.map((d, i) => (
           <option key={d.deviceId} value={d.deviceId}>
-            {d.label || `Microphone ${i + 1}`}
+            {d.label.replace(USB_DEVICE_ID_RE, '') || `Microphone ${i + 1}`}
           </option>
         ))}
       </select>

@@ -11,7 +11,7 @@ const mockConfig: Config = {
   history: { retain: 100, enabled: true },
   autostart: { enabled: false },
   ui: { theme: 'system' },
-  recordings: { saveText: false, saveAudio: false }
+  recordings: { saveAudio: false }
 }
 
 const mockKeyStatus: ApiKeyStatus = { openai: false, groq: true, anthropic: false }
@@ -155,12 +155,12 @@ describe('Settings App', () => {
     await waitFor(() => screen.getByText('Settings'))
 
     expect(screen.queryByLabelText(/keep last/i)).not.toBeInTheDocument()
-    expect(screen.queryByLabelText(/save transcript/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/save audio/i)).not.toBeInTheDocument()
 
     await user.click(screen.getByLabelText(/enable history/i))
 
     expect(screen.getByLabelText(/keep last/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/save transcript/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/save audio/i)).toBeInTheDocument()
   })
 
   it('blocks save and shows error when retain is less than 1', async () => {

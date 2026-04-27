@@ -17,6 +17,10 @@ export interface HistoryEntry {
   postProcessing?: ModelRef
   language?: string
   microphone?: string
+  postProcessingPrompt?: string
+  recordingDurationMs?: number
+  transcriptionDurationMs?: number
+  postProcessingDurationMs?: number
 }
 
 const store = new Store<{ entries: HistoryEntry[] }>({ name: 'history' })
@@ -25,10 +29,15 @@ export function getEntries(): HistoryEntry[] {
   return store.get('entries', [])
 }
 
-export function appendEntry(data: Omit<HistoryEntry, 'id' | 'timestamp'>, retain: number): void {
-  const all = [{ id: randomUUID(), timestamp: new Date().toISOString(), ...data }, ...getEntries()]
+export function appendEntry(
+  data: Omit<HistoryEntry, 'id' | 'timestamp'>,
+  retain: number
+): HistoryEntry {
+  const entry: HistoryEntry = { id: randomUUID(), timestamp: new Date().toISOString(), ...data }
+  const all = [entry, ...getEntries()]
   all.slice(retain).forEach(removeEntryFiles)
   store.set('entries', all.slice(0, retain))
+  return entry
 }
 
 function removeEntryFiles(entry: HistoryEntry): void {

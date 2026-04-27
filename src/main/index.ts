@@ -37,7 +37,7 @@ import { getTranscriber } from './transcribers'
 import { getPostProcessor } from './llm'
 import { copyAndPaste } from './paste'
 import { getConfig, setConfig } from './store'
-import { copyFileSync, mkdirSync, writeFileSync } from 'fs'
+import { copyFileSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
 import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries } from './history'
@@ -102,19 +102,22 @@ function setupPermissions(): void {
 
 function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePipeline {
   return {
-    async run(audioPath: string, microphone?: string): Promise<void> {
+    async run(audioPath: string, durationMs?: number, microphone?: string): Promise<void> {
       const config = getConfig()
       const { provider, model, language } = config.transcription
       const resolvedLanguage = language ?? getSystemLanguage()
       const transcriptionApiKey = getKey(provider) ?? ''
       const transcriber = getTranscriber(provider)
       let transcript: string
+      let transcriptionDurationMs: number
       try {
+        const t0 = Date.now()
         transcript = await transcriber.transcribe(audioPath, {
           model,
           language: resolvedLanguage,
           apiKey: transcriptionApiKey
         })
+        transcriptionDurationMs = Date.now() - t0
       } catch (err) {
         log('transcription', err instanceof Error ? err.message : String(err), 'error')
         new Notification({
@@ -125,16 +128,19 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       }
 
       let text = transcript
+      let postProcessingDurationMs: number | undefined
       if (config.postProcessing.enabled) {
         setOverlayState('processing')
         const postProcessingApiKey = getKey(config.postProcessing.provider) ?? ''
         const processor = getPostProcessor(config.postProcessing.provider)
         try {
+          const t0 = Date.now()
           text = await processor.process(transcript, {
             model: config.postProcessing.model,
             prompt: config.postProcessing.prompt,
             apiKey: postProcessingApiKey
           })
+          postProcessingDurationMs = Date.now() - t0
         } catch (err) {
           log('postProcessing', err instanceof Error ? err.message : String(err), 'error')
           new Notification({
@@ -148,23 +154,15 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       await copyAndPaste(text, config.paste.autoPaste)
 
       let path: string | undefined
-      if (config.recordings.saveText || config.recordings.saveAudio) {
+      if (config.recordings.saveAudio) {
         const sessionDir = join(app.getPath('userData'), 'recordings', `${Date.now()}`)
         mkdirSync(sessionDir, { recursive: true })
-        if (config.recordings.saveAudio) {
-          copyFileSync(audioPath, join(sessionDir, 'audio.webm'))
-        }
-        if (config.recordings.saveText) {
-          writeFileSync(join(sessionDir, 'transcript.txt'), transcript, 'utf8')
-          if (config.postProcessing.enabled) {
-            writeFileSync(join(sessionDir, 'processed.txt'), text, 'utf8')
-          }
-        }
+        copyFileSync(audioPath, join(sessionDir, 'audio.webm'))
         path = sessionDir
       }
 
       if (config.history.enabled) {
-        appendEntry(
+        const newEntry = appendEntry(
           {
             processed: text,
             transcript: config.postProcessing.enabled ? transcript : undefined,
@@ -173,11 +171,18 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
             postProcessing: config.postProcessing.enabled
               ? { provider: config.postProcessing.provider, model: config.postProcessing.model }
               : undefined,
+            postProcessingPrompt: config.postProcessing.enabled
+              ? config.postProcessing.prompt
+              : undefined,
             language: resolvedLanguage,
-            microphone
+            microphone,
+            recordingDurationMs: durationMs,
+            transcriptionDurationMs,
+            postProcessingDurationMs
           },
           config.history.retain
         )
+        appWindow?.webContents.send(CHANNELS.HISTORY_ENTRY_ADDED, newEntry)
       }
     }
   }
@@ -292,6 +297,10 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.RECORDINGS_GET_PATH, () => app.getPath('userData'))
 
   ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () => shell.openPath(app.getPath('userData')))
+
+  ipcMain.on(CHANNELS.LOG_WORKER, (_, scope: string, message: string, level: string) => {
+    log(scope, message, level as Parameters<typeof log>[2])
+  })
 }
 
 app.whenReady().then(() => {
@@ -317,6 +326,11 @@ app.whenReady().then(() => {
         const cfg = getConfig()
         const key = getKey(cfg.transcription.provider)
         if (!key) {
+          log(
+            'recording',
+            `no API key configured for provider: ${cfg.transcription.provider}`,
+            'warn'
+          )
           const n = new Notification({
             title: 'Sprik — No API key',
             body: 'Set an API key in Settings before recording.'

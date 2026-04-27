@@ -1,6 +1,9 @@
 import { z } from 'zod'
 import Store from 'electron-store'
 
+const DEFAULT_POST_PROCESSING_PROMPT =
+  'You are normalizing speech-to-text output to be pasted into a document. Fix punctuation, capitalization and grammar. Do not change the meaning, paraphrase or add content. Return only the corrected text — no commentary, no explanations, even if no changes were needed.'
+
 // zod v4: default values are returned as-is without re-parsing through the inner
 // schema, so each section needs a complete default object (not just `{}`).
 export const configSchema = z.object({
@@ -25,13 +28,13 @@ export const configSchema = z.object({
       enabled: z.boolean().default(false),
       provider: z.enum(['anthropic', 'openai']).default('anthropic'),
       model: z.string().default('claude-haiku-4-5'),
-      prompt: z.string().default('Clean up the transcription, fix punctuation and grammar.')
+      prompt: z.string().default(DEFAULT_POST_PROCESSING_PROMPT)
     })
     .default({
       enabled: false,
       provider: 'anthropic',
       model: 'claude-haiku-4-5',
-      prompt: 'Clean up the transcription, fix punctuation and grammar.'
+      prompt: DEFAULT_POST_PROCESSING_PROMPT
     }),
 
   paste: z
@@ -62,10 +65,9 @@ export const configSchema = z.object({
 
   recordings: z
     .object({
-      saveText: z.boolean().default(false),
       saveAudio: z.boolean().default(false)
     })
-    .default({ saveText: false, saveAudio: false })
+    .default({ saveAudio: false })
 })
 
 export type Config = z.infer<typeof configSchema>

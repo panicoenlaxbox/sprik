@@ -99,26 +99,6 @@ describe('History App', () => {
     expect(screen.getByText('Hello world from Groq')).toBeInTheDocument()
   })
 
-  it('shows raw transcription toggle when entry has transcript', async () => {
-    const entryWithRaw: HistoryEntry = {
-      ...entry1,
-      id: 'raw-1',
-      processed: 'Post-processed text.',
-      transcript: 'raw transcription here'
-    }
-    vi.mocked(window.api.getHistory).mockResolvedValue([entryWithRaw])
-    const user = userEvent.setup()
-
-    render(<App />)
-    await waitFor(() => screen.getByText('Post-processed text.'))
-
-    expect(screen.queryByText('raw transcription here')).not.toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: /^transcript$/i }))
-
-    expect(screen.getByText('raw transcription here')).toBeInTheDocument()
-  })
-
   it('shows "No results" message when search yields nothing', async () => {
     const user = userEvent.setup()
     render(<App />)

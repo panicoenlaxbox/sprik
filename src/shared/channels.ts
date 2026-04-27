@@ -24,7 +24,9 @@ export const CHANNELS = {
   SHELL_OPEN_RECORDINGS_PATH: 'shell:open-recordings-path',
   RECORDINGS_GET_PATH: 'recordings:get-path',
   LOG_FORWARD: 'log:forward',
-  UI_THEME_CHANGED: 'ui:theme-changed'
+  LOG_WORKER: 'log:worker',
+  UI_THEME_CHANGED: 'ui:theme-changed',
+  HISTORY_ENTRY_ADDED: 'history:entry-added'
 } as const
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS]

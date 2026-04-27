@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export { CHANNELS, type Channel } from './channels'
+export { CHANNELS, type Channel } from '../shared/channels'
 
 export const overlayStateSchema = z.enum([
   'idle',

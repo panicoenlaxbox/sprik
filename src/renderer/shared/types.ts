@@ -35,8 +35,12 @@ export interface HistoryEntry {
   timestamp: string
   transcription: ModelRef
   postProcessing?: ModelRef
+  postProcessingPrompt?: string
   language?: string
   microphone?: string
+  recordingDurationMs?: number
+  transcriptionDurationMs?: number
+  postProcessingDurationMs?: number
 }
 
 export interface Config {
@@ -70,12 +74,12 @@ export interface Config {
     theme: 'system' | 'light' | 'dark'
   }
   recordings: {
-    saveText: boolean
     saveAudio: boolean
   }
 }
 
 export type ApiProvider = 'openai' | 'groq' | 'anthropic'
+export const API_PROVIDERS: ApiProvider[] = ['anthropic', 'groq', 'openai']
 export type ApiKeyStatus = Record<ApiProvider, boolean>
 
 export interface AppApi {
@@ -100,6 +104,7 @@ export interface AppApi {
   openRecordingsPath: () => Promise<void>
   getRecordingsPath: () => Promise<string>
   onThemeChange: (cb: (theme: 'system' | 'light' | 'dark') => void) => () => void
+  onHistoryEntryAdded: (cb: (entry: HistoryEntry) => void) => () => void
 }
 
 declare global {
