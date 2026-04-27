@@ -1,4 +1,4 @@
-name: Build others
+name: CI ubuntu macOS
 
 on:
   workflow_dispatch:
