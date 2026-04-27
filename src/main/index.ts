@@ -8,7 +8,8 @@ import {
   ipcMain,
   clipboard,
   Notification,
-  shell
+  shell,
+  systemPreferences
 } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -133,6 +134,15 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         throw err
       }
 
+      if (!transcript) {
+        log('transcription', 'empty transcript returned', 'error')
+        new Notification({
+          title: 'Sprik — Transcription failed',
+          body: 'No speech detected or API returned an empty result.'
+        }).show()
+        throw new Error('empty transcript')
+      }
+
       if (signal?.aborted) return
 
       let text = transcript
@@ -157,6 +167,15 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
             body: 'Check your API key and connection.'
           }).show()
           throw err
+        }
+
+        if (!text) {
+          log('postProcessing', 'empty result returned', 'error')
+          new Notification({
+            title: 'Sprik — Post-processing failed',
+            body: 'API returned an empty result.'
+          }).show()
+          throw new Error('empty post-processing result')
         }
 
         if (signal?.aborted) return
@@ -327,8 +346,12 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   })
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   electronApp.setAppUserModelId('com.sprik.app')
+
+  if (process.platform === 'darwin') {
+    await systemPreferences.askForMediaAccess('microphone')
+  }
 
   setupPermissions()
 
