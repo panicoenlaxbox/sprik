@@ -15,13 +15,13 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 9
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -43,19 +43,19 @@ jobs:
     # Switch to windows-latest if code signing is ever needed.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 9
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
 
       - name: Install Wine for Windows cross-compilation
-        run: sudo apt-get update && sudo apt-get install -y wine wine64
+        run: sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install -y wine wine32 wine64
 
       - run: pnpm install
 
