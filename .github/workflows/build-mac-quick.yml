@@ -27,5 +27,5 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: dist-mac-quick
-          path: dist/
+          path: dist/*.dmg
           retention-days: 1
