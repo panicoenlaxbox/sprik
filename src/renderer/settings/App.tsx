@@ -111,10 +111,11 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             <ProviderSelector
               provider={config.transcription.provider}
               model={config.transcription.model}
-              onChange={(provider, model) =>
+              endpoint={config.transcription.endpoint}
+              onChange={(provider, model, endpoint) =>
                 setConfigState({
                   ...config,
-                  transcription: { ...config.transcription, provider, model }
+                  transcription: { ...config.transcription, provider, model, endpoint }
                 })
               }
             />
@@ -169,7 +170,13 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               <ApiKeyInput
                 key={provider}
                 label={
-                  provider === 'openai' ? 'OpenAI' : provider === 'groq' ? 'Groq' : 'Anthropic'
+                  provider === 'openai'
+                    ? 'OpenAI'
+                    : provider === 'groq'
+                      ? 'Groq'
+                      : provider === 'azure'
+                        ? 'Microsoft Foundry'
+                        : 'Anthropic'
                 }
                 isSet={keyStatus[provider]}
                 value={pendingKeys[provider] ?? ''}

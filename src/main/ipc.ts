@@ -18,7 +18,7 @@ export const recordingAudioPayloadSchema = z.object({
 })
 export type RecordingAudioPayload = { buffer: Buffer; durationMs: number; microphone?: string }
 
-export const apiProviderSchema = z.enum(['openai', 'groq', 'anthropic'])
+export const apiProviderSchema = z.enum(['openai', 'groq', 'anthropic', 'azure'])
 export type ApiProvider = z.infer<typeof apiProviderSchema>
 
 export const setKeyPayloadSchema = z.object({

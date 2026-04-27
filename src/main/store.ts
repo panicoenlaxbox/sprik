@@ -16,19 +16,21 @@ export const configSchema = z.object({
 
   transcription: z
     .object({
-      provider: z.enum(['groq', 'openai']).default('groq'),
+      provider: z.enum(['groq', 'openai', 'azure']).default('groq'),
       model: z.string().default('whisper-large-v3-turbo'),
       language: z.string().optional(),
-      deviceId: z.string().optional()
+      deviceId: z.string().optional(),
+      endpoint: z.string().optional()
     })
     .default({ provider: 'groq', model: 'whisper-large-v3-turbo' }),
 
   postProcessing: z
     .object({
       enabled: z.boolean().default(false),
-      provider: z.enum(['anthropic', 'openai']).default('anthropic'),
+      provider: z.enum(['anthropic', 'openai', 'azure']).default('anthropic'),
       model: z.string().default('claude-haiku-4-5'),
-      prompt: z.string().default(DEFAULT_POST_PROCESSING_PROMPT)
+      prompt: z.string().default(DEFAULT_POST_PROCESSING_PROMPT),
+      endpoint: z.string().optional()
     })
     .default({
       enabled: false,

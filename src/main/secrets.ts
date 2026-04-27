@@ -1,7 +1,7 @@
 import { safeStorage } from 'electron'
 import Store from 'electron-store'
 
-export type ApiProvider = 'openai' | 'groq' | 'anthropic'
+export type ApiProvider = 'openai' | 'groq' | 'anthropic' | 'azure'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const store = new Store<any>({ name: 'secrets' })
@@ -10,7 +10,8 @@ const memoryFallback = new Map<string, string>()
 const ENV_KEYS: Record<ApiProvider, string> = {
   openai: 'OPENAI_API_KEY',
   groq: 'GROQ_API_KEY',
-  anthropic: 'ANTHROPIC_API_KEY'
+  anthropic: 'ANTHROPIC_API_KEY',
+  azure: 'AZURE_API_KEY'
 }
 
 export function setKey(provider: ApiProvider, key: string): void {
@@ -47,6 +48,7 @@ export function getKeyStatus(): Record<ApiProvider, boolean> {
   return {
     openai: getKey('openai') !== null,
     groq: getKey('groq') !== null,
-    anthropic: getKey('anthropic') !== null
+    anthropic: getKey('anthropic') !== null,
+    azure: getKey('azure') !== null
   }
 }

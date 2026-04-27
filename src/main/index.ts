@@ -109,7 +109,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       signal?: AbortSignal
     ): Promise<void> {
       const config = getConfig()
-      const { provider, model, language } = config.transcription
+      const { provider, model, language, endpoint } = config.transcription
       const resolvedLanguage = language ?? getSystemLanguage()
       const transcriptionApiKey = getKey(provider) ?? ''
       const transcriber = getTranscriber(provider)
@@ -120,7 +120,8 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         transcript = await transcriber.transcribe(audioPath, {
           model,
           language: resolvedLanguage,
-          apiKey: transcriptionApiKey
+          apiKey: transcriptionApiKey,
+          endpoint
         })
         transcriptionDurationMs = Date.now() - t0
       } catch (err) {
@@ -145,7 +146,8 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
           text = await processor.process(transcript, {
             model: config.postProcessing.model,
             prompt: config.postProcessing.prompt,
-            apiKey: postProcessingApiKey
+            apiKey: postProcessingApiKey,
+            endpoint: config.postProcessing.endpoint
           })
           postProcessingDurationMs = Date.now() - t0
         } catch (err) {

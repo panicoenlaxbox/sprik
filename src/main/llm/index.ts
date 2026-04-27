@@ -1,10 +1,12 @@
 import { anthropicProcessor } from './anthropic'
 import { openaiProcessor } from './openai'
+import { azureProcessor } from './azure'
 import type { PostProcessor } from './types'
 
 const registry: Record<string, PostProcessor> = {
   anthropic: anthropicProcessor,
-  openai: openaiProcessor
+  openai: openaiProcessor,
+  azure: azureProcessor
 }
 
 export function getPostProcessor(id: string): PostProcessor {

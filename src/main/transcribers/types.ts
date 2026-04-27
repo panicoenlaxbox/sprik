@@ -2,6 +2,7 @@ export interface TranscribeOpts {
   model: string
   language?: string
   apiKey: string
+  endpoint?: string
 }
 
 export interface Transcriber {

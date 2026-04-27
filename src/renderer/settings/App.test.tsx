@@ -15,7 +15,7 @@ const mockConfig: Config = {
   overlay: { showTimer: false }
 }
 
-const mockKeyStatus: ApiKeyStatus = { openai: false, groq: true, anthropic: false }
+const mockKeyStatus: ApiKeyStatus = { openai: false, groq: true, anthropic: false, azure: false }
 
 beforeEach(() => {
   vi.clearAllMocks()

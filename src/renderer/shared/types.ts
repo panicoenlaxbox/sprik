@@ -19,6 +19,10 @@ export const TRANSCRIPTION_PROVIDERS = {
       'gpt-4o-transcribe-diarize',
       'whisper-1'
     ] as const
+  },
+  azure: {
+    label: 'Microsoft Foundry',
+    models: [] as readonly string[]
   }
 } as const
 
@@ -49,16 +53,18 @@ export interface Config {
     cancelRecording: string
   }
   transcription: {
-    provider: 'groq' | 'openai'
+    provider: 'groq' | 'openai' | 'azure'
     model: string
     language?: string
     deviceId?: string
+    endpoint?: string
   }
   postProcessing: {
     enabled: boolean
-    provider: 'anthropic' | 'openai'
+    provider: 'anthropic' | 'openai' | 'azure'
     model: string
     prompt: string
+    endpoint?: string
   }
   paste: {
     autoPaste: boolean
@@ -81,8 +87,8 @@ export interface Config {
   }
 }
 
-export type ApiProvider = 'openai' | 'groq' | 'anthropic'
-export const API_PROVIDERS: ApiProvider[] = ['anthropic', 'groq', 'openai']
+export type ApiProvider = 'openai' | 'groq' | 'anthropic' | 'azure'
+export const API_PROVIDERS: ApiProvider[] = ['anthropic', 'azure', 'groq', 'openai']
 export type ApiKeyStatus = Record<ApiProvider, boolean>
 
 export interface AppApi {
