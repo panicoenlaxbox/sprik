@@ -29,6 +29,7 @@ export const TRANSCRIPTION_PROVIDERS = {
 export interface ModelRef {
   provider: string
   model: string
+  endpoint?: string
 }
 
 export interface HistoryEntry {

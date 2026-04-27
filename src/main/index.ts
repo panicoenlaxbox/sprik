@@ -178,9 +178,20 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
             processed: text,
             transcript: config.postProcessing.enabled ? transcript : undefined,
             path,
-            transcription: { provider, model },
+            transcription: {
+              provider,
+              model,
+              endpoint: provider === 'azure' ? endpoint : undefined
+            },
             postProcessing: config.postProcessing.enabled
-              ? { provider: config.postProcessing.provider, model: config.postProcessing.model }
+              ? {
+                  provider: config.postProcessing.provider,
+                  model: config.postProcessing.model,
+                  endpoint:
+                    config.postProcessing.provider === 'azure'
+                      ? config.postProcessing.endpoint
+                      : undefined
+                }
               : undefined,
             postProcessingPrompt: config.postProcessing.enabled
               ? config.postProcessing.prompt

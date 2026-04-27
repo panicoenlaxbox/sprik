@@ -12,12 +12,10 @@ export default function ApiKeyInput({ label, isSet, value, onChange }: Props): R
   const [showKey, setShowKey] = useState(false)
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-600 dark:text-gray-400 w-20 shrink-0 whitespace-nowrap">
-        {label}
-      </span>
+    <div className="contents">
+      <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">{label}</span>
 
-      <div className="relative flex-1">
+      <div className="relative">
         <input
           type={showKey ? 'text' : 'password'}
           aria-label={`${label} API key`}

@@ -46,8 +46,8 @@ export default function HotkeyRebinder({ label, value, onChange }: Props): React
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm text-gray-600 dark:text-gray-400 w-36">{label}</span>
+    <div className="contents">
+      <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">{label}</span>
 
       {capturing ? (
         <input

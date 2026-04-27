@@ -165,7 +165,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           >
             API Keys
           </h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-[max-content_1fr] items-center gap-x-3 gap-y-3">
             {API_PROVIDERS.map((provider) => (
               <ApiKeyInput
                 key={provider}
@@ -194,27 +194,29 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             Shortcuts
           </h2>
           <div className="space-y-3">
-            <HotkeyRebinder
-              label="Toggle recording"
-              value={config.shortcuts.toggleRecording}
-              onChange={(v) => {
-                setToggleShortcutFailed(false)
-                setConfigState({
-                  ...config,
-                  shortcuts: { ...config.shortcuts, toggleRecording: v }
-                })
-              }}
-            />
-            <HotkeyRebinder
-              label="Cancel recording"
-              value={config.shortcuts.cancelRecording}
-              onChange={(v) =>
-                setConfigState({
-                  ...config,
-                  shortcuts: { ...config.shortcuts, cancelRecording: v }
-                })
-              }
-            />
+            <div className="grid grid-cols-[max-content_auto] items-center gap-x-3 gap-y-3">
+              <HotkeyRebinder
+                label="Toggle recording"
+                value={config.shortcuts.toggleRecording}
+                onChange={(v) => {
+                  setToggleShortcutFailed(false)
+                  setConfigState({
+                    ...config,
+                    shortcuts: { ...config.shortcuts, toggleRecording: v }
+                  })
+                }}
+              />
+              <HotkeyRebinder
+                label="Cancel recording"
+                value={config.shortcuts.cancelRecording}
+                onChange={(v) =>
+                  setConfigState({
+                    ...config,
+                    shortcuts: { ...config.shortcuts, cancelRecording: v }
+                  })
+                }
+              />
+            </div>
             {shortcutConflict && (
               <p className="text-xs text-red-600" role="alert">
                 Toggle and Cancel shortcuts cannot be the same.

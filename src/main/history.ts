@@ -1,27 +1,9 @@
 import Store from 'electron-store'
 import { randomUUID } from 'crypto'
 import { rmSync, existsSync } from 'fs'
+import type { HistoryEntry } from '../renderer/shared/types'
 
-export interface ModelRef {
-  provider: string
-  model: string
-}
-
-export interface HistoryEntry {
-  id: string
-  processed: string
-  transcript?: string
-  path?: string
-  timestamp: string
-  transcription: ModelRef
-  postProcessing?: ModelRef
-  language?: string
-  microphone?: string
-  postProcessingPrompt?: string
-  recordingDurationMs?: number
-  transcriptionDurationMs?: number
-  postProcessingDurationMs?: number
-}
+export type { HistoryEntry } from '../renderer/shared/types'
 
 const store = new Store<{ entries: HistoryEntry[] }>({ name: 'history' })
 
