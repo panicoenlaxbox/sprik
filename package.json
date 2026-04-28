@@ -1,6 +1,6 @@
 {
   "name": "sprik",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Speech-to-text desktop app powered by OpenAI / Groq",
   "main": "./out/main/index.mjs",
   "author": {
