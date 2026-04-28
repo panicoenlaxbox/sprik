@@ -1,6 +1,12 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { CHANNELS } from '../shared/channels'
-import type { Config, ApiProvider, OverlayState, HistoryEntry } from '../renderer/shared/types'
+import type {
+  Config,
+  ApiProvider,
+  OverlayState,
+  HistoryEntry,
+  UpdateStatus
+} from '../renderer/shared/types'
 
 const api = {
   onOverlayState: (cb: (state: OverlayState) => void): (() => void) => {
@@ -71,7 +77,24 @@ const api = {
     return () => ipcRenderer.removeListener(CHANNELS.HISTORY_ENTRY_ADDED, handler)
   },
 
-  cancelRecording: (): Promise<void> => ipcRenderer.invoke(CHANNELS.RECORDING_CANCEL)
+  cancelRecording: (): Promise<void> => ipcRenderer.invoke(CHANNELS.RECORDING_CANCEL),
+
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke(CHANNELS.UPDATE_GET_VERSION),
+
+  isAutoUpdateSupported: (): boolean => process.platform === 'win32',
+
+  onUpdateStatus: (cb: (status: UpdateStatus) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, status: UpdateStatus): void => cb(status)
+    ipcRenderer.on(CHANNELS.UPDATE_STATUS, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.UPDATE_STATUS, handler)
+  },
+
+  checkForUpdates: (): Promise<void> => ipcRenderer.invoke(CHANNELS.UPDATE_CHECK),
+
+  installUpdate: (): Promise<void> => ipcRenderer.invoke(CHANNELS.UPDATE_INSTALL),
+
+  openExternalUrl: (url: string): Promise<void> =>
+    ipcRenderer.invoke(CHANNELS.SHELL_OPEN_EXTERNAL, url)
 }
 
 if (process.contextIsolated) {

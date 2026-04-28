@@ -44,6 +44,8 @@ import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
 import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries } from './history'
 import { setAutostart } from './autostart'
 import { setLogRenderer, log } from './logger'
+import { autoUpdater } from 'electron-updater'
+import { initUpdater } from './updater'
 
 let tray: Tray | null = null
 let appWindow: BrowserWindow | null = null
@@ -63,6 +65,7 @@ function openAppWindow(): BrowserWindow {
   appWindow = createAppWindow()
   appWindow.on('ready-to-show', () => {
     setLogRenderer(appWindow!.webContents)
+    initUpdater(appWindow!)
     if (is.dev) {
       appWindow!.webContents.on('before-input-event', (_, input) => {
         if (input.key === 'F12' && input.type === 'keyDown') {
@@ -338,8 +341,19 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.RECORDINGS_GET_PATH, () => app.getPath('userData'))
 
   ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () => shell.openPath(app.getPath('userData')))
+  ipcMain.handle(CHANNELS.SHELL_OPEN_EXTERNAL, (_, url: string) => shell.openExternal(url))
 
   ipcMain.handle(CHANNELS.RECORDING_CANCEL, () => orchestrator?.cancel())
+
+  ipcMain.handle(CHANNELS.UPDATE_GET_VERSION, () => app.getVersion())
+
+  ipcMain.handle(CHANNELS.UPDATE_CHECK, () => {
+    if (process.platform === 'win32') autoUpdater.checkForUpdates()
+  })
+
+  ipcMain.handle(CHANNELS.UPDATE_INSTALL, () => {
+    if (process.platform === 'win32') autoUpdater.quitAndInstall()
+  })
 
   ipcMain.on(CHANNELS.LOG_WORKER, (_, scope: string, message: string, level: string) => {
     log(scope, message, level as Parameters<typeof log>[2])

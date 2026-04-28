@@ -30,7 +30,10 @@ export default function HotkeyRebinder({
     e.preventDefault()
     e.stopPropagation()
 
-    if (e.key === 'Escape') { setCapturing(false); return }
+    if (e.key === 'Escape') {
+      setCapturing(false)
+      return
+    }
     if (['Control', 'Alt', 'Shift', 'Meta'].includes(e.key)) return
     if (e.key.length === 1 && !/^[\x20-\x7E]$/.test(e.key)) return
 

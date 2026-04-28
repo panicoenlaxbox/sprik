@@ -93,6 +93,15 @@ export type ApiProvider = 'openai' | 'groq' | 'anthropic' | 'azure'
 export const API_PROVIDERS: ApiProvider[] = ['anthropic', 'azure', 'groq', 'openai']
 export type ApiKeyStatus = Record<ApiProvider, boolean>
 
+export type UpdateStatus =
+  | { phase: 'idle' }
+  | { phase: 'checking' }
+  | { phase: 'up-to-date' }
+  | { phase: 'available'; version: string }
+  | { phase: 'downloading'; version: string; percent: number }
+  | { phase: 'ready'; version: string }
+  | { phase: 'error'; message: string }
+
 export interface AppApi {
   onOverlayState: (cb: (state: OverlayState) => void) => () => void
   onLog: (cb: (scope: string, message: string, level: string) => void) => () => void
@@ -117,6 +126,12 @@ export interface AppApi {
   onThemeChange: (cb: (theme: 'system' | 'light' | 'dark') => void) => () => void
   onHistoryEntryAdded: (cb: (entry: HistoryEntry) => void) => () => void
   cancelRecording: () => Promise<void>
+  getAppVersion: () => Promise<string>
+  isAutoUpdateSupported: () => boolean
+  onUpdateStatus: (cb: (status: UpdateStatus) => void) => () => void
+  checkForUpdates: () => Promise<void>
+  installUpdate: () => Promise<void>
+  openExternalUrl: (url: string) => Promise<void>
 }
 
 declare global {

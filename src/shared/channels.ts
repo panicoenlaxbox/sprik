@@ -26,7 +26,12 @@ export const CHANNELS = {
   LOG_FORWARD: 'log:forward',
   LOG_WORKER: 'log:worker',
   UI_THEME_CHANGED: 'ui:theme-changed',
-  HISTORY_ENTRY_ADDED: 'history:entry-added'
+  HISTORY_ENTRY_ADDED: 'history:entry-added',
+  UPDATE_STATUS: 'update:status',
+  UPDATE_CHECK: 'update:check',
+  UPDATE_INSTALL: 'update:install',
+  UPDATE_GET_VERSION: 'update:get-version',
+  SHELL_OPEN_EXTERNAL: 'shell:open-external'
 } as const
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS]

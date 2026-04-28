@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, Clock, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Settings, Clock, Info, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import SettingsView from '../settings/App'
 import HistoryView from '../history/App'
+import AboutView from '../about/App'
 import { useTheme } from '../shared/useTheme'
-import type { Config } from '../shared/types'
+import type { Config, UpdateStatus } from '../shared/types'
 
-type View = 'settings' | 'history'
+type View = 'settings' | 'history' | 'about'
 
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<View>('settings')
@@ -15,6 +16,7 @@ export default function App(): React.JSX.Element {
     theme: 'system',
     sidebarExpanded: false
   })
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ phase: 'idle' })
 
   useTheme(theme)
 
@@ -35,6 +37,8 @@ export default function App(): React.JSX.Element {
     []
   )
 
+  useEffect(() => window.api.onUpdateStatus(setUpdateStatus), [])
+
   async function toggleSidebar(): Promise<void> {
     const next = !expanded
     setExpanded(next)
@@ -43,9 +47,12 @@ export default function App(): React.JSX.Element {
     await window.api.setConfig({ ui: nextUi })
   }
 
-  const navItems: { id: View; icon: React.JSX.Element; label: string }[] = [
+  const updateReady = updateStatus.phase === 'ready'
+
+  const navItems: { id: View; icon: React.JSX.Element; label: string; badge?: boolean }[] = [
     { id: 'settings', icon: <Settings size={20} />, label: 'Settings' },
-    { id: 'history', icon: <Clock size={20} />, label: 'History' }
+    { id: 'history', icon: <Clock size={20} />, label: 'History' },
+    { id: 'about', icon: <Info size={20} />, label: 'About', badge: updateReady }
   ]
 
   return (
@@ -67,7 +74,7 @@ export default function App(): React.JSX.Element {
         </div>
 
         <div className="flex flex-col gap-1 px-2 pt-2">
-          {navItems.map(({ id, icon, label }) => (
+          {navItems.map(({ id, icon, label, badge }) => (
             <button
               key={id}
               onClick={() => setView(id)}
@@ -79,7 +86,12 @@ export default function App(): React.JSX.Element {
                   : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-400'
               }`}
             >
-              {icon}
+              <span className="relative shrink-0">
+                {icon}
+                {badge && (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
+                )}
+              </span>
               {expanded && <span className="text-sm font-medium whitespace-nowrap">{label}</span>}
             </button>
           ))}
@@ -97,6 +109,9 @@ export default function App(): React.JSX.Element {
         </div>
         <div className={view === 'history' ? 'h-full' : 'hidden'}>
           <HistoryView />
+        </div>
+        <div className={view === 'about' ? 'h-full' : 'hidden'}>
+          <AboutView />
         </div>
       </div>
     </div>
