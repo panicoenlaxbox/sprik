@@ -51,12 +51,17 @@ jobs:
           - os: windows-latest
             build_cmd: build:win
             artifact_name: dist-windows
+            artifact_files: dist/*.exe
           - os: ubuntu-latest
             build_cmd: build:linux
             artifact_name: dist-linux
+            artifact_files: |
+              dist/*.AppImage
+              dist/*.deb
           - os: macos-latest
             build_cmd: build:mac
             artifact_name: dist-mac
+            artifact_files: dist/*.dmg
     steps:
       - uses: actions/checkout@v6
 
@@ -81,7 +86,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifact_name }}
-          path: dist/
+          path: ${{ matrix.artifact_files }}
           retention-days: 1
 
       - name: Create GitHub Release (Windows)
