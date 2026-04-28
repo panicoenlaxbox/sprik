@@ -44,7 +44,9 @@ import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
 import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries } from './history'
 import { setAutostart } from './autostart'
 import { setLogRenderer, log } from './logger'
-import { autoUpdater } from 'electron-updater'
+import pkg from 'electron-updater'
+
+const { autoUpdater } = pkg
 import { initUpdater } from './updater'
 
 let tray: Tray | null = null
@@ -131,14 +133,14 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       } catch (err) {
         log('transcription', err instanceof Error ? err.message : String(err), 'error')
         new Notification({
-          title: 'Sprik — Transcription failed',
-          body: 'Check your API key and connection.'
+          title: 'Sprik — Could not process transcript',
+          body: 'API key or connection issue.'
         }).show()
         throw err
       }
 
       if (!transcript) {
-        log('transcription', 'empty transcript returned', 'error')
+        log('transcription', 'empty transcript returned', 'warn')
         new Notification({
           title: 'Sprik — Transcription failed',
           body: 'No speech detected or API returned an empty result.'
@@ -166,14 +168,14 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         } catch (err) {
           log('postProcessing', err instanceof Error ? err.message : String(err), 'error')
           new Notification({
-            title: 'Sprik — Post-processing failed',
-            body: 'Check your API key and connection.'
+            title: 'Sprik — Could not process transcript',
+            body: 'API key or connection issue.'
           }).show()
           throw err
         }
 
         if (!text) {
-          log('postProcessing', 'empty result returned', 'error')
+          log('postProcessing', 'empty result returned', 'warn')
           new Notification({
             title: 'Sprik — Post-processing failed',
             body: 'API returned an empty result.'
@@ -287,7 +289,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     ) {
       unregisterShortcuts()
       const result = registerShortcuts(newConfig.shortcuts, shortcutHandlers, (a) =>
-        log('shortcuts', `${a} is taken by another app`, 'error')
+        log('shortcuts', `${a} is taken by another app`, 'warn')
       )
       toggleFailed = result.toggleFailed
     }
@@ -348,7 +350,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.UPDATE_GET_VERSION, () => app.getVersion())
 
   ipcMain.handle(CHANNELS.UPDATE_CHECK, () => {
-    if (process.platform === 'win32') autoUpdater.checkForUpdates()
+    if (process.platform === 'win32') autoUpdater.checkForUpdates().catch(() => {})
   })
 
   ipcMain.handle(CHANNELS.UPDATE_INSTALL, () => {
@@ -416,7 +418,7 @@ app.whenReady().then(async () => {
 
   const config = getConfig()
   const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
-    log('shortcuts', `${a} is taken by another app`, 'error')
+    log('shortcuts', `${a} is taken by another app`, 'warn')
   )
   if (toggleFailed) {
     const n = new Notification({

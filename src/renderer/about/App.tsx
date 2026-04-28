@@ -117,9 +117,14 @@ function UpdateStatusMessage({ status }: { status: UpdateStatus }): React.JSX.El
       )
     case 'error':
       return (
-        <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-          <AlertCircle size={15} />
-          Could not check for updates
+        <div className="flex items-start gap-2 text-sm text-red-600 dark:text-red-400">
+          <AlertCircle size={15} className="mt-0.5 shrink-0" />
+          <div>
+            <p>Could not check for updates</p>
+            {status.message && (
+              <p className="text-xs text-red-400 dark:text-red-500 mt-0.5">{status.message}</p>
+            )}
+          </div>
         </div>
       )
   }

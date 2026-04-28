@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, Clock, Info, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Settings, History, Info, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import SettingsView from '../settings/App'
 import HistoryView from '../history/App'
 import AboutView from '../about/App'
@@ -51,7 +51,7 @@ export default function App(): React.JSX.Element {
 
   const navItems: { id: View; icon: React.JSX.Element; label: string; badge?: boolean }[] = [
     { id: 'settings', icon: <Settings size={20} />, label: 'Settings' },
-    { id: 'history', icon: <Clock size={20} />, label: 'History' },
+    { id: 'history', icon: <History size={20} />, label: 'History' },
     { id: 'about', icon: <Info size={20} />, label: 'About', badge: updateReady }
   ]
 

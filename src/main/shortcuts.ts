@@ -14,7 +14,7 @@ export interface ShortcutHandlers {
 export type ShortcutCollisionReporter = (accelerator: string) => void
 
 const defaultCollision: ShortcutCollisionReporter = (a) =>
-  log('shortcuts', `${a} is taken by another app`, 'error')
+  log('shortcuts', `${a} is taken by another app`, 'warn')
 
 function isValidAccelerator(acc: string): boolean {
   return acc.split('').every((c) => c.charCodeAt(0) <= 127)

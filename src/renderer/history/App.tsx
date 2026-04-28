@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FolderOpen, Copy, Trash2, Check, X, Info } from 'lucide-react'
+import { FolderOpen, Copy, Trash2, Check, X, Eye } from 'lucide-react'
 import { JSONTree } from 'react-json-tree'
 import type { HistoryEntry } from '../shared/types'
 import { relativeFromNow, absoluteFormat } from '../shared/relativeTime'
@@ -170,7 +170,7 @@ export default function App(): React.JSX.Element {
                       aria-label="Details"
                       className={`p-1.5 rounded transition-colors ${selectedEntry?.id === entry.id ? 'text-blue-500 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-blue-600 dark:hover:text-blue-400'}`}
                     >
-                      <Info size={14} />
+                      <Eye size={14} />
                     </button>
                     <button
                       onClick={() => handleCopy(entry.id, entry.processed)}
