@@ -46,16 +46,13 @@ describe('History App', () => {
 
   it('requires confirmation before deleting an individual entry', async () => {
     const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<App />)
     await waitFor(() => screen.getAllByRole('button', { name: /^delete$/i }))
 
     await user.click(screen.getAllByRole('button', { name: /^delete$/i })[0])
 
-    expect(window.api.deleteHistory).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: /^confirm$/i })).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: /^confirm$/i }))
-
+    expect(window.confirm).toHaveBeenCalledWith('Delete this entry?')
     expect(window.api.deleteHistory).toHaveBeenCalledWith('abc-1')
     expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument()
   })
@@ -70,30 +67,27 @@ describe('History App', () => {
     expect(window.api.copyToClipboard).toHaveBeenCalledWith('Hello world from Groq')
   })
 
-  it('requires confirmation before deleting all history', async () => {
+  it('deletes all history when confirmed via native dialog', async () => {
     const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
     render(<App />)
     await waitFor(() => screen.getByRole('button', { name: /delete all/i }))
 
     await user.click(screen.getByRole('button', { name: /delete all/i }))
 
-    expect(window.api.clearHistory).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: /confirm/i })).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: /confirm/i }))
-
+    expect(window.confirm).toHaveBeenCalledWith('Delete all entries?')
     expect(window.api.clearHistory).toHaveBeenCalled()
     expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument()
     expect(screen.getByText(/no recordings yet/i)).toBeInTheDocument()
   })
 
-  it('cancels delete-all when Cancel is clicked', async () => {
+  it('cancels delete-all when native dialog is dismissed', async () => {
     const user = userEvent.setup()
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
     render(<App />)
     await waitFor(() => screen.getByRole('button', { name: /delete all/i }))
 
     await user.click(screen.getByRole('button', { name: /delete all/i }))
-    await user.click(screen.getByRole('button', { name: /cancel/i }))
 
     expect(window.api.clearHistory).not.toHaveBeenCalled()
     expect(screen.getByText('Hello world from Groq')).toBeInTheDocument()

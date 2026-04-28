@@ -61,9 +61,10 @@ export const configSchema = z.object({
   ui: z
     .object({
       theme: z.enum(['system', 'light', 'dark']).default('system'),
-      overlayPosition: z.object({ x: z.number(), y: z.number() }).optional()
+      overlayPosition: z.object({ x: z.number(), y: z.number() }).optional(),
+      sidebarExpanded: z.boolean().default(false)
     })
-    .default({ theme: 'system' }),
+    .default({ theme: 'system', sidebarExpanded: false }),
 
   recordings: z
     .object({

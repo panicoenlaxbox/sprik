@@ -79,6 +79,7 @@ export interface Config {
   }
   ui: {
     theme: 'system' | 'light' | 'dark'
+    sidebarExpanded: boolean
   }
   recordings: {
     saveAudio: boolean

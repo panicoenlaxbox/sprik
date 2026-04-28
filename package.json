@@ -30,6 +30,7 @@
     "@anthropic-ai/sdk": "0.91.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "date-fns": "^4.1.0",
     "electron-log": "^5.4.3",
     "electron-store": "^11.0.2",
     "groq-sdk": "^1.1.2",

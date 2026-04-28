@@ -13,6 +13,9 @@ interface Props {
   onThemeChange?: (theme: 'system' | 'light' | 'dark') => void
 }
 
+const DEFAULT_TOGGLE = 'Ctrl+Alt+Space'
+const DEFAULT_CANCEL = 'Escape'
+
 export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [config, setConfigState] = useState<Config | null>(null)
   const [keyStatus, setKeyStatus] = useState<ApiKeyStatus | null>(null)
@@ -198,6 +201,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               <HotkeyRebinder
                 label="Toggle recording"
                 value={config.shortcuts.toggleRecording}
+                defaultValue={DEFAULT_TOGGLE}
                 onChange={(v) => {
                   setToggleShortcutFailed(false)
                   setConfigState({
@@ -209,6 +213,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               <HotkeyRebinder
                 label="Cancel recording"
                 value={config.shortcuts.cancelRecording}
+                defaultValue={DEFAULT_CANCEL}
                 onChange={(v) =>
                   setConfigState({
                     ...config,
@@ -372,7 +377,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               value={config.ui.theme}
               onChange={(e) => {
                 const theme = e.target.value as 'system' | 'light' | 'dark'
-                setConfigState({ ...config, ui: { theme } })
+                setConfigState({ ...config, ui: { ...config.ui, theme } })
                 onThemeChange?.(theme)
               }}
               className="w-fit text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-100"

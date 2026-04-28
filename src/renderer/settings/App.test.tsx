@@ -10,7 +10,7 @@ const mockConfig: Config = {
   paste: { autoPaste: true },
   history: { retain: 100, enabled: true },
   autostart: { enabled: false },
-  ui: { theme: 'system' },
+  ui: { theme: 'system', sidebarExpanded: false },
   recordings: { saveAudio: false },
   overlay: { showTimer: false }
 }

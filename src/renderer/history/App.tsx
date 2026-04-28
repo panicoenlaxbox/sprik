@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { FolderOpen, Copy, Trash2, Check, X, Info } from 'lucide-react'
 import { JSONTree } from 'react-json-tree'
 import type { HistoryEntry } from '../shared/types'
+import { relativeFromNow, absoluteFormat } from '../shared/relativeTime'
 
 const DARK_THEME = {
   scheme: 'sprik-dark',
@@ -59,11 +60,10 @@ export default function App(): React.JSX.Element {
   const [entries, setEntries] = useState<HistoryEntry[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
-  const [confirmClear, setConfirmClear] = useState(false)
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null)
   const [jsonCopied, setJsonCopied] = useState(false)
+  const [tick, setTick] = useState(0)
 
   const isDark = useIsDark()
 
@@ -77,18 +77,26 @@ export default function App(): React.JSX.Element {
     })
   }, [])
 
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60_000)
+    return () => clearInterval(id)
+  }, [])
+
+  void tick
+
   const filtered = entries.filter((e) => e.processed.toLowerCase().includes(search.toLowerCase()))
 
   async function handleDelete(id: string): Promise<void> {
+    if (!window.confirm('Delete this entry?')) return
     await window.api.deleteHistory(id)
     setEntries((prev) => prev.filter((e) => e.id !== id))
     if (selectedEntry?.id === id) setSelectedEntry(null)
   }
 
   async function handleClear(): Promise<void> {
+    if (!window.confirm('Delete all entries?')) return
     await window.api.clearHistory()
     setEntries([])
-    setConfirmClear(false)
     setSelectedEntry(null)
   }
 
@@ -128,31 +136,13 @@ export default function App(): React.JSX.Element {
           aria-label="Search history"
           className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500"
         />
-        {confirmClear ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 dark:text-gray-400">Delete all?</span>
-            <button
-              onClick={handleClear}
-              className="px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700"
-            >
-              Confirm
-            </button>
-            <button
-              onClick={() => setConfirmClear(false)}
-              className="px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-900"
-            >
-              Cancel
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setConfirmClear(true)}
-            disabled={entries.length === 0}
-            className="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
-          >
-            Delete all
-          </button>
-        )}
+        <button
+          onClick={handleClear}
+          disabled={entries.length === 0}
+          className="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+        >
+          Delete all
+        </button>
       </div>
 
       <main className="flex-1 overflow-y-auto p-6">
@@ -190,42 +180,21 @@ export default function App(): React.JSX.Element {
                     >
                       {copiedId === entry.id ? <Check size={14} /> : <Copy size={14} />}
                     </button>
-                    {confirmDeleteId === entry.id ? (
-                      <>
-                        <button
-                          onClick={() => {
-                            handleDelete(entry.id)
-                            setConfirmDeleteId(null)
-                          }}
-                          title="Confirm"
-                          aria-label="Confirm"
-                          className="p-1.5 text-white bg-red-500 rounded hover:bg-red-600"
-                        >
-                          <Check size={14} />
-                        </button>
-                        <button
-                          onClick={() => setConfirmDeleteId(null)}
-                          title="Cancel"
-                          aria-label="Cancel delete"
-                          className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 rounded"
-                        >
-                          <X size={14} />
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => setConfirmDeleteId(entry.id)}
-                        title="Delete"
-                        aria-label="Delete"
-                        className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-500 rounded"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleDelete(entry.id)}
+                      title="Delete"
+                      aria-label="Delete"
+                      className="p-1.5 text-gray-400 dark:text-gray-500 hover:text-red-500 rounded"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  {new Date(entry.timestamp).toLocaleString()}
+                <p
+                  className="text-xs text-gray-500 dark:text-gray-400 mt-2"
+                  title={absoluteFormat(entry.timestamp)}
+                >
+                  {relativeFromNow(entry.timestamp)}
                 </p>
               </li>
             ))}
@@ -243,8 +212,18 @@ export default function App(): React.JSX.Element {
       <div
         className={`absolute inset-y-0 right-0 w-1/2 bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 shadow-xl flex flex-col z-20 transition-transform duration-200 ${selectedEntry ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Details</span>
+        <div className="flex items-start justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <div>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Details</span>
+            {selectedEntry && (
+              <p
+                className="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+                title={absoluteFormat(selectedEntry.timestamp)}
+              >
+                {relativeFromNow(selectedEntry.timestamp)}
+              </p>
+            )}
+          </div>
           <div className="flex items-center gap-1">
             {selectedEntry?.path && (
               <button
