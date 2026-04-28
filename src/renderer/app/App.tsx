@@ -14,7 +14,8 @@ export default function App(): React.JSX.Element {
   const [expanded, setExpanded] = useState(false)
   const [uiConfig, setUiConfig] = useState<Config['ui']>({
     theme: 'system',
-    sidebarExpanded: false
+    sidebarExpanded: false,
+    detailsPanelWidth: 320
   })
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ phase: 'idle' })
 
@@ -60,20 +61,7 @@ export default function App(): React.JSX.Element {
       <nav
         className={`${expanded ? 'w-48' : 'w-14'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-[width] duration-200 overflow-hidden shrink-0`}
       >
-        <div
-          className={`h-[60px] flex items-center shrink-0 px-2 ${expanded ? 'justify-end' : 'justify-center'}`}
-        >
-          <button
-            onClick={toggleSidebar}
-            title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-            aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-            className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-          >
-            {expanded ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-1 px-2 pt-2">
+        <div className="flex-1 flex flex-col gap-1 px-2 pt-4">
           {navItems.map(({ id, icon, label, badge }) => (
             <button
               key={id}
@@ -95,6 +83,17 @@ export default function App(): React.JSX.Element {
               {expanded && <span className="text-sm font-medium whitespace-nowrap">{label}</span>}
             </button>
           ))}
+        </div>
+
+        <div className={`shrink-0 px-2 pb-3 flex ${expanded ? 'justify-start' : 'justify-center'}`}>
+          <button
+            onClick={toggleSidebar}
+            title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            {expanded ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
+          </button>
         </div>
       </nav>
 

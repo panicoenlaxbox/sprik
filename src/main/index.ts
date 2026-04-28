@@ -12,6 +12,7 @@ import {
   systemPreferences
 } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { repository } from '../../package.json'
 import icon from '../../resources/icon.png?asset'
 import { createWorkerWindow, createOverlayWindow, createAppWindow } from './windows'
 import {
@@ -347,6 +348,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.RECORDING_CANCEL, () => orchestrator?.cancel())
 
   ipcMain.handle(CHANNELS.UPDATE_GET_VERSION, () => app.getVersion())
+  ipcMain.handle(CHANNELS.APP_GET_REPO_URL, () => repository)
 
   ipcMain.handle(CHANNELS.UPDATE_CHECK, () => {
     if (process.platform === 'win32') autoUpdater.checkForUpdates().catch(() => {})

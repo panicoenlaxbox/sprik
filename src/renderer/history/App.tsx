@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { FolderOpen, Copy, Trash2, Check, X, Eye } from 'lucide-react'
 import { JSONTree } from 'react-json-tree'
 import type { HistoryEntry } from '../shared/types'
@@ -64,6 +64,9 @@ export default function App(): React.JSX.Element {
   const [selectedEntry, setSelectedEntry] = useState<HistoryEntry | null>(null)
   const [jsonCopied, setJsonCopied] = useState(false)
   const [tick, setTick] = useState(0)
+  const [panelWidth, setPanelWidth] = useState(320)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragging = useRef(false)
 
   const isDark = useIsDark()
 
@@ -75,6 +78,10 @@ export default function App(): React.JSX.Element {
     return window.api.onHistoryEntryAdded((entry) => {
       setEntries((prev) => [entry, ...prev])
     })
+  }, [])
+
+  useEffect(() => {
+    window.api.getConfig().then((cfg) => setPanelWidth(cfg.ui.detailsPanelWidth))
   }, [])
 
   useEffect(() => {
@@ -106,6 +113,35 @@ export default function App(): React.JSX.Element {
     setTimeout(() => setCopiedId(null), 1500)
   }
 
+  function handleResizeStart(e: React.MouseEvent): void {
+    e.preventDefault()
+    dragging.current = true
+    document.body.style.cursor = 'ew-resize'
+    document.body.style.userSelect = 'none'
+    let lastWidth = panelWidth
+
+    function onMove(ev: MouseEvent): void {
+      if (!dragging.current || !containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      lastWidth = Math.round(Math.min(rect.width * 0.8, Math.max(280, rect.right - ev.clientX)))
+      setPanelWidth(lastWidth)
+    }
+
+    function onUp(): void {
+      dragging.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      window.api
+        .getConfig()
+        .then((cfg) => window.api.setConfig({ ui: { ...cfg.ui, detailsPanelWidth: lastWidth } }))
+    }
+
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
+  }
+
   async function handleCopyJson(): Promise<void> {
     if (!selectedEntry) return
     await window.api.copyToClipboard(JSON.stringify(selectedEntry, null, 2))
@@ -122,7 +158,10 @@ export default function App(): React.JSX.Element {
   }
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-950 flex flex-col relative overflow-hidden">
+    <div
+      ref={containerRef}
+      className="h-full bg-gray-50 dark:bg-gray-950 flex flex-col relative overflow-hidden"
+    >
       <header className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-50">History</h1>
       </header>
@@ -210,8 +249,19 @@ export default function App(): React.JSX.Element {
       )}
 
       <div
-        className={`absolute inset-y-0 right-0 w-1/2 bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 shadow-xl flex flex-col z-20 transition-transform duration-200 ${selectedEntry ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`absolute inset-y-0 right-0 bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-700 shadow-xl flex flex-col z-20 transition-transform duration-200 ${selectedEntry ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{ width: panelWidth }}
       >
+        <div
+          className="absolute left-0 inset-y-0 w-3 cursor-ew-resize z-30"
+          onMouseDown={handleResizeStart}
+          onDoubleClick={() => {
+            setPanelWidth(320)
+            window.api
+              .getConfig()
+              .then((cfg) => window.api.setConfig({ ui: { ...cfg.ui, detailsPanelWidth: 320 } }))
+          }}
+        />
         <div className="flex items-start justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <div>
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Details</span>

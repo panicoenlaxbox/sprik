@@ -9,8 +9,9 @@ After every change, run `pnpm format && pnpm typecheck && pnpm lint && pnpm test
 # ASCII vs Unicode
 
 Use only ASCII characters in any string that may appear in terminal, logs, test output, or console:
+
 - Ellipsis: `...` not `…` (U+2026)
-- Em dash: ` - ` not `—` (U+2014)
+- Em dash: `-` not `—` (U+2014)
 - Arrows: `->` / `<-` not `→` / `←`
 
 UI-only strings rendered exclusively in the browser (placeholders, labels, notification titles, etc) may use Unicode.

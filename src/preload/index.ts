@@ -94,7 +94,9 @@ const api = {
   installUpdate: (): Promise<void> => ipcRenderer.invoke(CHANNELS.UPDATE_INSTALL),
 
   openExternalUrl: (url: string): Promise<void> =>
-    ipcRenderer.invoke(CHANNELS.SHELL_OPEN_EXTERNAL, url)
+    ipcRenderer.invoke(CHANNELS.SHELL_OPEN_EXTERNAL, url),
+
+  getRepoUrl: (): Promise<string> => ipcRenderer.invoke(CHANNELS.APP_GET_REPO_URL)
 }
 
 if (process.contextIsolated) {

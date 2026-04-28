@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { RefreshCw, Download, RotateCcw, AlertCircle, CheckCircle } from 'lucide-react'
+import {
+  RefreshCw,
+  Download,
+  RotateCcw,
+  AlertCircle,
+  CheckCircle,
+  ExternalLink
+} from 'lucide-react'
 import type { UpdateStatus } from '../shared/types'
 
 export default function App(): React.JSX.Element {
   const [version, setVersion] = useState('')
+  const [repoUrl, setRepoUrl] = useState('')
   const [status, setStatus] = useState<UpdateStatus>({ phase: 'idle' })
   const isAutoUpdateSupported = window.api.isAutoUpdateSupported()
 
   useEffect(() => {
     window.api.getAppVersion().then(setVersion)
+    window.api.getRepoUrl().then(setRepoUrl)
     return window.api.onUpdateStatus(setStatus)
   }, [])
 
@@ -26,6 +35,19 @@ export default function App(): React.JSX.Element {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Sprik</h2>
           {version && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Version {version}</p>
+          )}
+          {repoUrl && (
+            <a
+              href={repoUrl}
+              onClick={(e) => {
+                e.preventDefault()
+                window.api.openExternalUrl(repoUrl)
+              }}
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 mt-2 transition-colors"
+            >
+              <ExternalLink size={14} />
+              {repoUrl.replace('https://', '')}
+            </a>
           )}
         </div>
 

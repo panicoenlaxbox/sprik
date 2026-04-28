@@ -23,6 +23,23 @@ beforeEach(() => {
   vi.mocked(window.api.deleteHistory).mockResolvedValue(undefined)
   vi.mocked(window.api.clearHistory).mockResolvedValue(undefined)
   vi.mocked(window.api.copyToClipboard).mockResolvedValue(undefined)
+  vi.mocked(window.api.getConfig).mockResolvedValue({
+    shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' },
+    transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' },
+    postProcessing: {
+      enabled: false,
+      provider: 'anthropic',
+      model: 'claude-haiku-4-5',
+      prompt: ''
+    },
+    paste: { autoPaste: true },
+    history: { retain: 100, enabled: true },
+    autostart: { enabled: false },
+    ui: { theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 },
+    recordings: { saveAudio: false },
+    overlay: { showTimer: false },
+    updates: { autoCheck: true }
+  })
 })
 
 describe('History App', () => {

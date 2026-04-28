@@ -80,6 +80,7 @@ export interface Config {
   ui: {
     theme: 'system' | 'light' | 'dark'
     sidebarExpanded: boolean
+    detailsPanelWidth: number
   }
   recordings: {
     saveAudio: boolean
@@ -135,6 +136,7 @@ export interface AppApi {
   checkForUpdates: () => Promise<void>
   installUpdate: () => Promise<void>
   openExternalUrl: (url: string) => Promise<void>
+  getRepoUrl: () => Promise<string>
 }
 
 declare global {
