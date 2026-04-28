@@ -64,7 +64,7 @@ describe('copyAndPaste', () => {
     expect(mockExec).not.toHaveBeenCalled()
   })
 
-  it('does not throw when native paste command fails — text stays in clipboard', async () => {
+  it('does not throw when native paste command fails - text stays in clipboard', async () => {
     mockExec.mockImplementationOnce((_, cb) => cb(new Error('xdotool not found')))
 
     await expect(copyAndPaste('hello world')).resolves.toBeUndefined()

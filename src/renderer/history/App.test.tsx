@@ -28,7 +28,7 @@ beforeEach(() => {
 describe('History App', () => {
   it('shows a loading state then renders entries', async () => {
     render(<App />)
-    expect(screen.getByText('Loading…')).toBeInTheDocument()
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText('Hello world from Groq')).toBeInTheDocument())
     expect(screen.getByText('Another transcription via OpenAI')).toBeInTheDocument()
   })

@@ -70,7 +70,7 @@ export default function HotkeyRebinder({
             onKeyDown={handleKeyDown}
             onBlur={() => setCapturing(false)}
             value=""
-            placeholder="Press keys…"
+            placeholder="Press keys..."
             aria-label={`Capturing shortcut for ${label}`}
             className="text-sm border border-blue-400 rounded-md px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500 focus:outline-none w-48 placeholder:text-blue-400 dark:placeholder:text-blue-500 dark:text-blue-300"
           />

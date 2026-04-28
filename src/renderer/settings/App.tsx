@@ -91,7 +91,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   if (!config || !keyStatus) {
     return (
       <div className="h-full bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
       </div>
     )
   }
@@ -396,7 +396,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           disabled={saving}
           className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? 'Saving…' : 'Save'}
+          {saving ? 'Saving...' : 'Save'}
         </button>
         {savedBadge && (
           <span className="text-sm text-green-600" role="status">

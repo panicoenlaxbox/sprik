@@ -61,19 +61,19 @@ export default function App(): React.JSX.Element {
       {state === 'recording' && (
         <>
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span>Recording…{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+          <span>Recording...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
         </>
       )}
       {state === 'transcribing' && (
         <>
           <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-          <span>Transcribing…{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+          <span>Transcribing...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
         </>
       )}
       {state === 'processing' && (
         <>
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-          <span>Processing…{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+          <span>Processing...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
         </>
       )}
       {state === 'cancelled' && (

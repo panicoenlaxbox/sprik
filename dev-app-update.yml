@@ -1,0 +1,4 @@
+provider: github
+owner: panicoenlaxbox
+repo: sprik
+updaterCacheDirName: sprik-updater

@@ -116,7 +116,7 @@ export default function App(): React.JSX.Element {
   if (loading) {
     return (
       <div className="h-full bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">Loading…</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
       </div>
     )
   }
@@ -130,7 +130,7 @@ export default function App(): React.JSX.Element {
       <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center gap-3">
         <input
           type="search"
-          placeholder="Search…"
+          placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label="Search history"

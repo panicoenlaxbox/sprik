@@ -78,7 +78,7 @@ function UpdateStatusMessage({ status }: { status: UpdateStatus }): React.JSX.El
     case 'idle':
       return null
     case 'checking':
-      return <p className="text-sm text-gray-500 dark:text-gray-400">Checking for updates…</p>
+      return <p className="text-sm text-gray-500 dark:text-gray-400">Checking for updates...</p>
     case 'up-to-date':
       return (
         <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
@@ -90,7 +90,7 @@ function UpdateStatusMessage({ status }: { status: UpdateStatus }): React.JSX.El
       return (
         <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
           <Download size={15} />
-          Update {status.version} available, downloading…
+          Update {status.version} available, downloading...
         </div>
       )
     case 'downloading':
@@ -98,7 +98,7 @@ function UpdateStatusMessage({ status }: { status: UpdateStatus }): React.JSX.El
         <div className="text-sm text-blue-600 dark:text-blue-400">
           <div className="flex items-center gap-2 mb-1">
             <Download size={15} />
-            Downloading {status.version}… {status.percent}%
+            Downloading {status.version}... {status.percent}%
           </div>
           <div className="w-48 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div

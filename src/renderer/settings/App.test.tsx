@@ -35,7 +35,7 @@ beforeEach(() => {
 describe('Settings App', () => {
   it('shows a loading state then renders config', async () => {
     render(<App />)
-    expect(screen.getByText('Loading…')).toBeInTheDocument()
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
     await waitFor(() => expect(screen.getByText('Settings')).toBeInTheDocument())
     expect(screen.getByRole('combobox', { name: /provider/i })).toHaveValue('groq')
   })

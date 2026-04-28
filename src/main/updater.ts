@@ -7,7 +7,7 @@ import type { UpdateStatus } from '../renderer/shared/types'
 const { autoUpdater } = pkg
 const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000
 
-export function initUpdater(appWindow: BrowserWindow): void {
+export function initUpdater(getWindow: () => BrowserWindow | null): void {
   if (process.platform !== 'win32') return
 
   autoUpdater.autoDownload = true
@@ -20,13 +20,14 @@ export function initUpdater(appWindow: BrowserWindow): void {
   let pendingVersion = ''
 
   function send(status: UpdateStatus): void {
-    if (!appWindow.isDestroyed()) {
-      appWindow.webContents.send(CHANNELS.UPDATE_STATUS, status)
+    const win = getWindow()
+    if (win && !win.isDestroyed()) {
+      win.webContents.send(CHANNELS.UPDATE_STATUS, status)
     }
   }
 
   autoUpdater.on('checking-for-update', () => {
-    log('updater', 'Checking for update…')
+    log('updater', 'Checking for update...')
     send({ phase: 'checking' })
   })
 
@@ -45,7 +46,7 @@ export function initUpdater(appWindow: BrowserWindow): void {
   autoUpdater.on('download-progress', (p) => {
     const percent = Math.round(p.percent)
     if (Math.floor(percent / 10) > Math.floor(lastLoggedPercent / 10)) {
-      log('updater', `Downloading ${pendingVersion}… ${percent}%`)
+      log('updater', `Downloading ${pendingVersion}... ${percent}%`)
       lastLoggedPercent = percent
     }
     send({ phase: 'downloading', version: pendingVersion, percent })

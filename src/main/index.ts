@@ -67,7 +67,6 @@ function openAppWindow(): BrowserWindow {
   appWindow = createAppWindow()
   appWindow.on('ready-to-show', () => {
     setLogRenderer(appWindow!.webContents)
-    initUpdater(appWindow!)
     if (is.dev) {
       appWindow!.webContents.on('before-input-event', (_, input) => {
         if (input.key === 'F12' && input.type === 'keyDown') {
@@ -374,6 +373,8 @@ app.whenReady().then(async () => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
+  initUpdater(() => appWindow)
 
   workerWindow = createWorkerWindow()
   overlayWindow = createOverlayWindow(getConfig().ui.overlayPosition)

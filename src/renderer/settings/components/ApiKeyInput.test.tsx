@@ -14,7 +14,7 @@ describe('ApiKeyInput', () => {
 
     expect(screen.getByLabelText(/openai api key/i)).toHaveAttribute(
       'placeholder',
-      'Enter new key to replace…'
+      'Enter new key to replace...'
     )
   })
 
@@ -23,7 +23,7 @@ describe('ApiKeyInput', () => {
 
     expect(screen.getByLabelText(/openai api key/i)).toHaveAttribute(
       'placeholder',
-      'Enter API key…'
+      'Enter API key...'
     )
   })
 

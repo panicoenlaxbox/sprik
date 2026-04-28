@@ -28,7 +28,7 @@ function makeOverlayBridge(): OverlayBridge & { states: OverlayState[] } {
 
 describe('RecordingOrchestrator', () => {
   describe('start / stop flow (happy path)', () => {
-    it('transitions idle → recording when start() is called', () => {
+    it('transitions idle -> recording when start() is called', () => {
       const worker = makeWorkerBridge()
       const overlay = makeOverlayBridge()
       const orc = new RecordingOrchestrator(worker, overlay)

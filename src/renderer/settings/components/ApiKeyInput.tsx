@@ -21,7 +21,7 @@ export default function ApiKeyInput({ label, isSet, value, onChange }: Props): R
           aria-label={`${label} API key`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={isSet ? 'Enter new key to replace…' : 'Enter API key…'}
+          placeholder={isSet ? 'Enter new key to replace...' : 'Enter API key...'}
           autoComplete="new-password"
           className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 pr-9 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 placeholder:text-gray-400 dark:placeholder:text-gray-500 dark:bg-gray-800 dark:text-gray-100"
         />

@@ -1,5 +1,4 @@
 import { globalShortcut } from 'electron'
-import { log } from './logger'
 
 export interface ShortcutConfig {
   toggleRecording: string
@@ -13,9 +12,6 @@ export interface ShortcutHandlers {
 
 export type ShortcutCollisionReporter = (accelerator: string) => void
 
-const defaultCollision: ShortcutCollisionReporter = (a) =>
-  log('shortcuts', `${a} is taken by another app`, 'warn')
-
 function isValidAccelerator(acc: string): boolean {
   return acc.split('').every((c) => c.charCodeAt(0) <= 127)
 }
@@ -23,7 +19,7 @@ function isValidAccelerator(acc: string): boolean {
 export function registerShortcuts(
   config: ShortcutConfig,
   handlers: ShortcutHandlers,
-  onCollision: ShortcutCollisionReporter = defaultCollision
+  onCollision: ShortcutCollisionReporter = () => {}
 ): { toggleFailed: boolean } {
   globalShortcut.unregister(config.toggleRecording)
   if (!isValidAccelerator(config.toggleRecording)) {
@@ -47,7 +43,7 @@ export function isShortcutRegistered(accelerator: string): boolean {
 export function registerCancelShortcut(
   accelerator: string,
   handler: () => void,
-  onCollision: ShortcutCollisionReporter = defaultCollision
+  onCollision: ShortcutCollisionReporter = () => {}
 ): void {
   globalShortcut.unregister(accelerator)
   let registered: boolean
