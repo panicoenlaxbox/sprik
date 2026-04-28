@@ -12,7 +12,8 @@ const mockConfig: Config = {
   autostart: { enabled: false },
   ui: { theme: 'system', sidebarExpanded: false },
   recordings: { saveAudio: false },
-  overlay: { showTimer: false }
+  overlay: { showTimer: false },
+  updates: { autoCheck: true }
 }
 
 const mockKeyStatus: ApiKeyStatus = { openai: false, groq: true, anthropic: false, azure: false }

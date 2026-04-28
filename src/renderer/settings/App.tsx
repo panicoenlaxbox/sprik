@@ -262,18 +262,33 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           >
             Startup
           </h2>
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={config.autostart.enabled}
-              onChange={(e) =>
-                setConfigState({ ...config, autostart: { enabled: e.target.checked } })
-              }
-              className="rounded"
-              aria-label="Launch Sprik at login"
-            />
-            Launch at login
-          </label>
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={config.autostart.enabled}
+                onChange={(e) =>
+                  setConfigState({ ...config, autostart: { enabled: e.target.checked } })
+                }
+                className="rounded"
+                aria-label="Launch Sprik at login"
+              />
+              Launch at login
+            </label>
+            {window.api.isAutoUpdateSupported() && (
+              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.updates.autoCheck}
+                  onChange={(e) =>
+                    setConfigState({ ...config, updates: { autoCheck: e.target.checked } })
+                  }
+                  className="rounded"
+                />
+                Check automatically for updates
+              </label>
+            )}
+          </div>
         </section>
 
         <section aria-labelledby="history-heading">

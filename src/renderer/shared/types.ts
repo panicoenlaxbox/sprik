@@ -87,6 +87,9 @@ export interface Config {
   overlay: {
     showTimer: boolean
   }
+  updates: {
+    autoCheck: boolean
+  }
 }
 
 export type ApiProvider = 'openai' | 'groq' | 'anthropic' | 'azure'

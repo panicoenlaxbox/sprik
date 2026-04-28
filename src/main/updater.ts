@@ -2,6 +2,7 @@ import { app, type BrowserWindow } from 'electron'
 import pkg from 'electron-updater'
 import { CHANNELS } from '../shared/channels'
 import { log } from './logger'
+import { getConfig } from './store'
 import type { UpdateStatus } from '../renderer/shared/types'
 
 const { autoUpdater } = pkg
@@ -62,6 +63,12 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
     send({ phase: 'error', message: err.message })
   })
 
-  autoUpdater.checkForUpdates().catch(() => {})
-  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), CHECK_INTERVAL_MS)
+  if (getConfig().updates.autoCheck) {
+    autoUpdater.checkForUpdates().catch(() => {})
+  }
+  setInterval(() => {
+    if (getConfig().updates.autoCheck) {
+      autoUpdater.checkForUpdates().catch(() => {})
+    }
+  }, CHECK_INTERVAL_MS)
 }

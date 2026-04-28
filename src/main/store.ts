@@ -76,7 +76,13 @@ export const configSchema = z.object({
     .object({
       showTimer: z.boolean().default(false)
     })
-    .default({ showTimer: false })
+    .default({ showTimer: false }),
+
+  updates: z
+    .object({
+      autoCheck: z.boolean().default(true)
+    })
+    .default({ autoCheck: true })
 })
 
 export type Config = z.infer<typeof configSchema>
