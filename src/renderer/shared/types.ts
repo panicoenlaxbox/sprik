@@ -87,6 +87,7 @@ export interface Config {
   }
   overlay: {
     showTimer: boolean
+    invertColors: boolean
   }
   updates: {
     autoCheck: boolean
@@ -137,6 +138,7 @@ export interface AppApi {
   installUpdate: () => Promise<void>
   openExternalUrl: (url: string) => Promise<void>
   getRepoUrl: () => Promise<string>
+  resetOverlayPosition: () => Promise<void>
 }
 
 declare global {

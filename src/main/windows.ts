@@ -60,10 +60,13 @@ export function createWorkerWindow(): BrowserWindow {
   return win
 }
 
-export function createOverlayWindow(savedPosition?: { x: number; y: number }): BrowserWindow {
+export function defaultOverlayPosition(): { x: number; y: number } {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
-  const x = savedPosition?.x ?? Math.round(width / 2 - 110)
-  const y = savedPosition?.y ?? height - 80
+  return { x: Math.round(width / 2 - 110), y: height - 80 }
+}
+
+export function createOverlayWindow(savedPosition?: { x: number; y: number }): BrowserWindow {
+  const { x, y } = savedPosition ?? defaultOverlayPosition()
 
   const win = new BrowserWindow({
     width: 260,

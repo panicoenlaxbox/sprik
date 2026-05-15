@@ -96,7 +96,9 @@ const api = {
   openExternalUrl: (url: string): Promise<void> =>
     ipcRenderer.invoke(CHANNELS.SHELL_OPEN_EXTERNAL, url),
 
-  getRepoUrl: (): Promise<string> => ipcRenderer.invoke(CHANNELS.APP_GET_REPO_URL)
+  getRepoUrl: (): Promise<string> => ipcRenderer.invoke(CHANNELS.APP_GET_REPO_URL),
+
+  resetOverlayPosition: (): Promise<void> => ipcRenderer.invoke(CHANNELS.OVERLAY_RESET_POSITION)
 }
 
 if (process.contextIsolated) {

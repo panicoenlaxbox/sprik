@@ -37,7 +37,7 @@ beforeEach(() => {
     autostart: { enabled: false },
     ui: { theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 },
     recordings: { saveAudio: false },
-    overlay: { showTimer: false },
+    overlay: { showTimer: false, invertColors: true },
     updates: { autoCheck: true }
   })
 })

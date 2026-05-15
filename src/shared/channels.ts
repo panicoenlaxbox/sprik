@@ -32,7 +32,8 @@ export const CHANNELS = {
   UPDATE_INSTALL: 'update:install',
   UPDATE_GET_VERSION: 'update:get-version',
   SHELL_OPEN_EXTERNAL: 'shell:open-external',
-  APP_GET_REPO_URL: 'app:get-repo-url'
+  APP_GET_REPO_URL: 'app:get-repo-url',
+  OVERLAY_RESET_POSITION: 'overlay:reset-position'
 } as const
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS]

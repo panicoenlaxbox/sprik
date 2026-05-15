@@ -75,9 +75,10 @@ export const configSchema = z.object({
 
   overlay: z
     .object({
-      showTimer: z.boolean().default(false)
+      showTimer: z.boolean().default(false),
+      invertColors: z.boolean().default(true)
     })
-    .default({ showTimer: false }),
+    .default({ showTimer: false, invertColors: true }),
 
   updates: z
     .object({
@@ -92,7 +93,22 @@ export type Config = z.infer<typeof configSchema>
 const store = new Store<any>({ name: 'config' })
 
 export function getConfig(): Config {
-  return configSchema.parse(store.store)
+  // zod v4 does not apply field-level defaults when the parent section already
+  // exists in the store (only object-level defaults kick in for absent sections).
+  // Deep-merge every section with the schema defaults so new fields added to an
+  // existing section always have a value without any manual patching.
+  const raw = store.store as Record<string, unknown>
+  const defaults = configSchema.parse({}) as Record<string, unknown>
+  const patched = Object.fromEntries(
+    Object.entries(defaults).map(([key, def]) => {
+      const stored = raw[key]
+      if (stored !== null && typeof stored === 'object' && !Array.isArray(stored)) {
+        return [key, { ...(def as object), ...(stored as object) }]
+      }
+      return [key, stored !== undefined ? stored : def]
+    })
+  )
+  return configSchema.parse(patched)
 }
 
 export function setConfig(updates: Partial<Config>): void {

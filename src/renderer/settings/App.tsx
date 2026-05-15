@@ -23,6 +23,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [saving, setSaving] = useState(false)
   const [savedBadge, setSavedBadge] = useState(false)
   const [toggleShortcutFailed, setToggleShortcutFailed] = useState(false)
+  const [positionReset, setPositionReset] = useState(false)
 
   const [recordingsPath, setRecordingsPath] = useState('')
   const [systemLocale, setSystemLocale] = useState('')
@@ -377,6 +378,38 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             />
             Show elapsed time
           </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer mt-2">
+            <input
+              type="checkbox"
+              checked={config.overlay.invertColors}
+              onChange={(e) =>
+                setConfigState({
+                  ...config,
+                  overlay: { ...config.overlay, invertColors: e.target.checked }
+                })
+              }
+              className="rounded"
+            />
+            High contrast
+          </label>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={async () => {
+                await window.api.resetOverlayPosition()
+                setPositionReset(true)
+                setTimeout(() => setPositionReset(false), 2000)
+              }}
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 underline underline-offset-2 cursor-pointer"
+            >
+              Reset overlay position
+            </button>
+            {positionReset && (
+              <span className="text-sm text-green-600" role="status">
+                Position reset
+              </span>
+            )}
+          </div>
         </section>
 
         <section aria-labelledby="appearance-heading">

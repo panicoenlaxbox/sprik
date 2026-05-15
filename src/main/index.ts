@@ -14,7 +14,12 @@ import {
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { repository } from '../../package.json'
 import icon from '../../resources/icon.png?asset'
-import { createWorkerWindow, createOverlayWindow, createAppWindow } from './windows'
+import {
+  createWorkerWindow,
+  createOverlayWindow,
+  createAppWindow,
+  defaultOverlayPosition
+} from './windows'
 import {
   registerShortcuts,
   registerCancelShortcut,
@@ -344,6 +349,14 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
 
   ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () => shell.openPath(app.getPath('userData')))
   ipcMain.handle(CHANNELS.SHELL_OPEN_EXTERNAL, (_, url: string) => shell.openExternal(url))
+
+  ipcMain.handle(CHANNELS.OVERLAY_RESET_POSITION, () => {
+    if (!overlayWindow || overlayWindow.isDestroyed()) return
+    const { x, y } = defaultOverlayPosition()
+    overlayWindow.setPosition(x, y)
+    const cfg = getConfig()
+    setConfig({ ui: { ...cfg.ui, overlayPosition: undefined } })
+  })
 
   ipcMain.handle(CHANNELS.RECORDING_CANCEL, () => orchestrator?.cancel())
 
