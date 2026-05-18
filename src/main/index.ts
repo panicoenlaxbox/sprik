@@ -268,6 +268,7 @@ function setupIpcBridges(
     setState: (state: OverlayState) => {
       overlay.webContents.send(CHANNELS.OVERLAY_STATE, state)
       overlay.setIgnoreMouseEvents(state === 'idle', { forward: true })
+      if (state !== 'idle') overlay.moveTop()
       log('overlay', `state = ${state}`)
     }
   }

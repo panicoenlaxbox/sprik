@@ -93,6 +93,7 @@ export function createOverlayWindow(savedPosition?: { x: number; y: number }): B
 
   win.once('ready-to-show', () => {
     win.showInactive()
+    win.setAlwaysOnTop(true, 'screen-saver')
     win.setIgnoreMouseEvents(true, { forward: true })
   })
 
