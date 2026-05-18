@@ -398,6 +398,7 @@ app.whenReady().then(async () => {
     const [x, y] = overlayWindow!.getPosition()
     const cfg = getConfig()
     setConfig({ ui: { ...cfg.ui, overlayPosition: { x, y } } })
+    appWindow?.webContents.send(CHANNELS.OVERLAY_POSITION_CHANGED, { x, y })
   })
 
   const shortcutHandlers = {
@@ -433,19 +434,22 @@ app.whenReady().then(async () => {
     unregisterCancelShortcut(getConfig().shortcuts.cancelRecording)
   })
 
-  const config = getConfig()
-  const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
-    log('shortcuts', `${a} is taken by another app`, 'warn')
-  )
-  if (toggleFailed) {
-    const n = new Notification({
-      title: 'Sprik — Shortcut unavailable',
-      body: `${config.shortcuts.toggleRecording} is already in use by another app. Change it in Settings.`
-    })
-    n.on('click', () => openAppWindow())
-    n.show()
-  }
-  setAutostart(config.autostart.enabled)
+  setAutostart(getConfig().autostart.enabled)
+
+  workerWindow.webContents.once('did-finish-load', () => {
+    const config = getConfig()
+    const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
+      log('shortcuts', `${a} is taken by another app`, 'warn')
+    )
+    if (toggleFailed) {
+      const n = new Notification({
+        title: 'Sprik — Shortcut unavailable',
+        body: `${config.shortcuts.toggleRecording} is already in use by another app. Change it in Settings.`
+      })
+      n.on('click', () => openAppWindow())
+      n.show()
+    }
+  })
 
   setupSettingsIpc(shortcutHandlers)
 

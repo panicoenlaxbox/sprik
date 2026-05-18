@@ -1,6 +1,6 @@
 {
   "name": "sprik",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Speech-to-text desktop app powered by AI",
   "repository": "https://github.com/panicoenlaxbox/sprik",
   "main": "./out/main/index.mjs",

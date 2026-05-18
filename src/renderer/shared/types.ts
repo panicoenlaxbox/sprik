@@ -81,6 +81,7 @@ export interface Config {
     theme: 'system' | 'light' | 'dark'
     sidebarExpanded: boolean
     detailsPanelWidth: number
+    overlayPosition?: { x: number; y: number }
   }
   recordings: {
     saveAudio: boolean
@@ -139,6 +140,7 @@ export interface AppApi {
   openExternalUrl: (url: string) => Promise<void>
   getRepoUrl: () => Promise<string>
   resetOverlayPosition: () => Promise<void>
+  onOverlayPositionChanged: (cb: (pos: { x: number; y: number }) => void) => () => void
 }
 
 declare global {

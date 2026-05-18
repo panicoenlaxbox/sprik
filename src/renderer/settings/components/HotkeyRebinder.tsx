@@ -16,15 +16,26 @@ export default function HotkeyRebinder({
 }: Props): React.JSX.Element {
   const [capturing, setCapturing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const pausedRef = useRef(false)
 
   useEffect(() => {
     if (capturing) {
+      pausedRef.current = true
       inputRef.current?.focus()
       window.api.pauseShortcuts()
-    } else {
+    } else if (pausedRef.current) {
+      pausedRef.current = false
       window.api.resumeShortcuts()
     }
   }, [capturing])
+
+  useEffect(() => {
+    return () => {
+      if (pausedRef.current) {
+        void window.api.resumeShortcuts()
+      }
+    }
+  }, [])
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
     e.preventDefault()

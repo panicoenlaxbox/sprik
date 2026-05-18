@@ -29,6 +29,14 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [systemLocale, setSystemLocale] = useState('')
 
   useEffect(() => {
+    return window.api.onOverlayPositionChanged((pos) => {
+      setConfigState((prev) =>
+        prev ? { ...prev, ui: { ...prev.ui, overlayPosition: pos } } : prev
+      )
+    })
+  }, [])
+
+  useEffect(() => {
     Promise.all([
       window.api.getConfig(),
       window.api.getApiKeyStatus(),
@@ -395,14 +403,16 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           <div className="mt-3 flex items-center gap-3">
             <button
               type="button"
+              disabled={!config.ui.overlayPosition}
               onClick={async () => {
                 await window.api.resetOverlayPosition()
+                setConfigState({ ...config, ui: { ...config.ui, overlayPosition: undefined } })
                 setPositionReset(true)
                 setTimeout(() => setPositionReset(false), 2000)
               }}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 underline underline-offset-2 cursor-pointer"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 underline underline-offset-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Reset overlay position
+              Reset position
             </button>
             {positionReset && (
               <span className="text-sm text-green-600" role="status">

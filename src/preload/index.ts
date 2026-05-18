@@ -98,7 +98,13 @@ const api = {
 
   getRepoUrl: (): Promise<string> => ipcRenderer.invoke(CHANNELS.APP_GET_REPO_URL),
 
-  resetOverlayPosition: (): Promise<void> => ipcRenderer.invoke(CHANNELS.OVERLAY_RESET_POSITION)
+  resetOverlayPosition: (): Promise<void> => ipcRenderer.invoke(CHANNELS.OVERLAY_RESET_POSITION),
+
+  onOverlayPositionChanged: (cb: (pos: { x: number; y: number }) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, pos: { x: number; y: number }): void => cb(pos)
+    ipcRenderer.on(CHANNELS.OVERLAY_POSITION_CHANGED, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.OVERLAY_POSITION_CHANGED, handler)
+  }
 }
 
 if (process.contextIsolated) {
