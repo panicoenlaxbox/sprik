@@ -251,17 +251,28 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           >
             Paste
           </h2>
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={config.paste.autoPaste}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="paste-mode" className="text-xs text-gray-500 dark:text-gray-400">
+              After transcription
+            </label>
+            <select
+              id="paste-mode"
+              value={config.paste.pasteMode}
               onChange={(e) =>
-                setConfigState({ ...config, paste: { autoPaste: e.target.checked } })
+                setConfigState({
+                  ...config,
+                  paste: {
+                    pasteMode: e.target.value as Config['paste']['pasteMode']
+                  }
+                })
               }
-              className="rounded"
-            />
-            Auto-paste after transcription
-          </label>
+              className="text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1.5"
+            >
+              <option value="clipboard-and-focus">Copy to clipboard & paste at focus</option>
+              <option value="clipboard-only">Copy to clipboard only</option>
+              <option value="focus-only">Paste at focus only</option>
+            </select>
+          </div>
         </section>
 
         <section aria-labelledby="autostart-heading">

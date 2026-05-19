@@ -50,21 +50,38 @@ describe('getPasteCommand', () => {
 })
 
 describe('copyAndPaste', () => {
-  it('writes text to clipboard and executes native paste', async () => {
+  it('clipboard-and-focus: writes to clipboard and executes native paste', async () => {
+    await copyAndPaste('hello world', 'clipboard-and-focus')
+
+    expect(clipboard.writeText).toHaveBeenCalledWith('hello world')
+    expect(mockExec).toHaveBeenCalledOnce()
+  })
+
+  it('clipboard-only: writes to clipboard without native paste', async () => {
+    await copyAndPaste('hello world', 'clipboard-only')
+
+    expect(clipboard.writeText).toHaveBeenCalledWith('hello world')
+    expect(mockExec).not.toHaveBeenCalled()
+  })
+
+  it('focus-only: pastes text and restores previous clipboard content', async () => {
+    vi.mocked(clipboard.readText).mockReturnValue('previous content')
+
+    await copyAndPaste('hello world', 'focus-only')
+
+    expect(clipboard.writeText).toHaveBeenNthCalledWith(1, 'hello world')
+    expect(mockExec).toHaveBeenCalledOnce()
+    expect(clipboard.writeText).toHaveBeenNthCalledWith(2, 'previous content')
+  })
+
+  it('defaults to clipboard-and-focus when no mode is given', async () => {
     await copyAndPaste('hello world')
 
     expect(clipboard.writeText).toHaveBeenCalledWith('hello world')
     expect(mockExec).toHaveBeenCalledOnce()
   })
 
-  it('only writes to clipboard when autoPaste is false', async () => {
-    await copyAndPaste('hello world', false)
-
-    expect(clipboard.writeText).toHaveBeenCalledWith('hello world')
-    expect(mockExec).not.toHaveBeenCalled()
-  })
-
-  it('does not throw when native paste command fails - text stays in clipboard', async () => {
+  it('does not throw when native paste command fails', async () => {
     mockExec.mockImplementationOnce((_, cb) => cb(new Error('xdotool not found')))
 
     await expect(copyAndPaste('hello world')).resolves.toBeUndefined()

@@ -32,7 +32,7 @@ beforeEach(() => {
       model: 'claude-haiku-4-5',
       prompt: ''
     },
-    paste: { autoPaste: true },
+    paste: { pasteMode: 'clipboard-and-focus' },
     history: { retain: 100, enabled: true },
     autostart: { enabled: false },
     ui: { theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 },

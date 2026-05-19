@@ -19,18 +19,44 @@ export function getPasteCommand(): string {
   return process.env['XDG_SESSION_TYPE'] === 'wayland' ? 'ydotool key ctrl+v' : 'xdotool key ctrl+v'
 }
 
-export async function copyAndPaste(text: string, autoPaste = true): Promise<void> {
+export type PasteMode = 'clipboard-and-focus' | 'clipboard-only' | 'focus-only'
+
+export async function copyAndPaste(
+  text: string,
+  mode: PasteMode = 'clipboard-and-focus'
+): Promise<void> {
+  if (mode === 'clipboard-only') {
+    clipboard.writeText(text)
+    return
+  }
+
+  if (mode === 'focus-only') {
+    const previous = clipboard.readText()
+    clipboard.writeText(text)
+    try {
+      await execPromise(getPasteCommand())
+    } catch (err) {
+      log('paste', `native paste failed: ${(err as Error).message}`, 'warn')
+      new Notification({
+        title: 'Sprik - Auto-paste failed',
+        body: 'Text copied to clipboard - paste it manually.'
+      }).show()
+      return
+    } finally {
+      clipboard.writeText(previous)
+    }
+    return
+  }
+
+  // clipboard-and-focus
   clipboard.writeText(text)
-
-  if (!autoPaste) return
-
   try {
     await execPromise(getPasteCommand())
   } catch (err) {
     log('paste', `native paste failed, text is in clipboard: ${(err as Error).message}`, 'warn')
     new Notification({
-      title: 'Sprik — Auto-paste failed',
-      body: 'Text copied to clipboard — paste it manually.'
+      title: 'Sprik - Auto-paste failed',
+      body: 'Text copied to clipboard - paste it manually.'
     }).show()
   }
 }

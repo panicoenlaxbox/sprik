@@ -18,9 +18,6 @@ vi.mock('electron-store', () => ({
 
 beforeEach(() => {
   storeData = {}
-  delete process.env['OPENAI_API_KEY']
-  delete process.env['GROQ_API_KEY']
-  delete process.env['ANTHROPIC_API_KEY']
   vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValue(true)
 })
 
@@ -32,13 +29,8 @@ describe('setKey / getKey round-trip', () => {
     expect(getKey('openai')).toBe('sk-test-123')
   })
 
-  it('returns null when no key is stored and no env var set', () => {
+  it('returns null when no key is stored', () => {
     expect(getKey('groq')).toBeNull()
-  })
-
-  it('returns the env var as a fallback when no key is stored', () => {
-    process.env['OPENAI_API_KEY'] = 'sk-env-key'
-    expect(getKey('openai')).toBe('sk-env-key')
   })
 })
 

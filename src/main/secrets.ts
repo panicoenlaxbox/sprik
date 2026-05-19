@@ -7,13 +7,6 @@ export type ApiProvider = 'openai' | 'groq' | 'anthropic' | 'azure'
 const store = new Store<any>({ name: 'secrets' })
 const memoryFallback = new Map<string, string>()
 
-const ENV_KEYS: Record<ApiProvider, string> = {
-  openai: 'OPENAI_API_KEY',
-  groq: 'GROQ_API_KEY',
-  anthropic: 'ANTHROPIC_API_KEY',
-  azure: 'AZURE_API_KEY'
-}
-
 export function setKey(provider: ApiProvider, key: string): void {
   if (safeStorage.isEncryptionAvailable()) {
     const encrypted = safeStorage.encryptString(key).toString('base64')
@@ -33,7 +26,7 @@ export function getKey(provider: ApiProvider): string | null {
     const memKey = memoryFallback.get(provider)
     if (memKey) return memKey
   }
-  return process.env[ENV_KEYS[provider]] ?? null
+  return null
 }
 
 export function clearKey(provider: ApiProvider): void {

@@ -7,7 +7,7 @@ const mockConfig: Config = {
   shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' },
   transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' },
   postProcessing: { enabled: false, provider: 'anthropic', model: 'claude-sonnet-4-6', prompt: '' },
-  paste: { autoPaste: true },
+  paste: { pasteMode: 'clipboard-and-focus' },
   history: { retain: 100, enabled: true },
   autostart: { enabled: false },
   ui: { theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 },
@@ -92,16 +92,19 @@ describe('Settings App', () => {
     expect(window.api.clearApiKey).toHaveBeenCalledWith('groq')
   })
 
-  it('toggles the auto-paste checkbox and saves it', async () => {
+  it('changes the paste mode select and saves it', async () => {
     const user = userEvent.setup()
     render(<App />)
     await waitFor(() => screen.getByText('Settings'))
 
-    await user.click(screen.getByRole('checkbox', { name: /auto-paste/i }))
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /after transcription/i }),
+      'clipboard-only'
+    )
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     expect(window.api.setConfig).toHaveBeenCalledWith(
-      expect.objectContaining({ paste: { autoPaste: false } })
+      expect.objectContaining({ paste: { pasteMode: 'clipboard-only' } })
     )
   })
 

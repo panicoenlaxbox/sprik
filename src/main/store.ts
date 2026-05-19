@@ -41,9 +41,11 @@ export const configSchema = z.object({
 
   paste: z
     .object({
-      autoPaste: z.boolean().default(true)
+      pasteMode: z
+        .enum(['clipboard-and-focus', 'clipboard-only', 'focus-only'])
+        .default('clipboard-and-focus')
     })
-    .default({ autoPaste: true }),
+    .default({ pasteMode: 'clipboard-and-focus' }),
 
   history: z
     .object({

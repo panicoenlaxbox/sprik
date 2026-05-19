@@ -191,7 +191,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         if (signal?.aborted) return
       }
 
-      await copyAndPaste(text, config.paste.autoPaste)
+      await copyAndPaste(text, config.paste.pasteMode)
 
       let path: string | undefined
       if (config.recordings.saveAudio) {

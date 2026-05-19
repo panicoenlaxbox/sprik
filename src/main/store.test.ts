@@ -25,7 +25,7 @@ describe('getConfig', () => {
     expect(config.shortcuts.cancelRecording).toBe('Escape')
     expect(config.transcription.provider).toBe('groq')
     expect(config.transcription.model).toBe('whisper-large-v3-turbo')
-    expect(config.paste.autoPaste).toBe(true)
+    expect(config.paste.pasteMode).toBe('clipboard-and-focus')
     expect(config.history.retain).toBe(100)
     expect(config.autostart.enabled).toBe(false)
   })
@@ -52,10 +52,10 @@ describe('setConfig', () => {
   })
 
   it('overwrites previous values', () => {
-    setConfig({ paste: { autoPaste: false } })
-    setConfig({ paste: { autoPaste: true } })
+    setConfig({ paste: { pasteMode: 'clipboard-only' } })
+    setConfig({ paste: { pasteMode: 'clipboard-and-focus' } })
 
-    expect(getConfig().paste.autoPaste).toBe(true)
+    expect(getConfig().paste.pasteMode).toBe('clipboard-and-focus')
   })
 
   it('throws and does not save when the schema is violated', () => {

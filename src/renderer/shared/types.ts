@@ -68,7 +68,7 @@ export interface Config {
     endpoint?: string
   }
   paste: {
-    autoPaste: boolean
+    pasteMode: 'clipboard-and-focus' | 'clipboard-only' | 'focus-only'
   }
   history: {
     retain: number
