@@ -104,7 +104,18 @@ const api = {
     const handler = (_: IpcRendererEvent, pos: { x: number; y: number }): void => cb(pos)
     ipcRenderer.on(CHANNELS.OVERLAY_POSITION_CHANGED, handler)
     return () => ipcRenderer.removeListener(CHANNELS.OVERLAY_POSITION_CHANGED, handler)
-  }
+  },
+
+  onOverlaySettingsChange: (cb: (overlay: Config['overlay']) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, overlay: Config['overlay']): void => cb(overlay)
+    ipcRenderer.on(CHANNELS.OVERLAY_SETTINGS_CHANGED, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.OVERLAY_SETTINGS_CHANGED, handler)
+  },
+
+  previewOverlay: (partial: {
+    overlay?: Config['overlay']
+    theme?: Config['ui']['theme']
+  }): Promise<void> => ipcRenderer.invoke(CHANNELS.OVERLAY_PREVIEW, partial)
 }
 
 if (process.contextIsolated) {

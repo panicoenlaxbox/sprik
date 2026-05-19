@@ -112,7 +112,7 @@ describe('Settings App', () => {
     await waitFor(() => screen.getByText('Settings'))
 
     await user.click(screen.getByLabelText(/enable post-processing/i))
-    await user.type(screen.getByLabelText(/instructions/i), 'Fix punctuation.')
+    await user.type(screen.getByRole('textbox', { name: /instructions/i }), 'Fix punctuation.')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     expect(window.api.setConfig).toHaveBeenCalledWith(

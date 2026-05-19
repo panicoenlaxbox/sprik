@@ -17,6 +17,8 @@ export default function App(): React.JSX.Element {
   const [invertColors, setInvertColors] = useState(true)
   const [elapsed, setElapsed] = useState(0)
   const startTimeRef = useRef<number>(0)
+  const prevStateRef = useRef<OverlayState>('idle')
+  const nextStateRef = useRef<OverlayState>('idle')
 
   useTheme(theme)
 
@@ -31,25 +33,37 @@ export default function App(): React.JSX.Element {
 
   useEffect(() => {
     const unsubscribe = window.api.onOverlayState((s) => {
-      if (s !== 'idle') {
-        window.api.getConfig().then((cfg) => setShowTimer(cfg.overlay.showTimer))
-      }
+      nextStateRef.current = s as OverlayState
       setState(s as OverlayState)
     })
     return unsubscribe
   }, [])
 
   useEffect(() => {
+    return window.api.onOverlaySettingsChange((overlay) => {
+      setShowTimer(overlay.showTimer)
+      setInvertColors(overlay.invertColors)
+    })
+  }, [])
+
+  useEffect(() => {
     if (TIMED_STATES.includes(state)) {
-      startTimeRef.current = Date.now()
+      const carryOver = TIMED_STATES.includes(prevStateRef.current)
+      if (!carryOver) {
+        startTimeRef.current = Date.now()
+      }
       const id = setInterval(() => {
         setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000))
       }, 1000)
+      prevStateRef.current = state
       return () => {
         clearInterval(id)
-        setElapsed(0)
+        if (!TIMED_STATES.includes(nextStateRef.current)) {
+          setElapsed(0)
+        }
       }
     }
+    prevStateRef.current = state
     return undefined
   }, [state])
 

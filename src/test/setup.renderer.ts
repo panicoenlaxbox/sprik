@@ -37,7 +37,9 @@ Object.defineProperty(window, 'api', {
     checkForUpdates: vi.fn(),
     installUpdate: vi.fn(),
     openExternalUrl: vi.fn(),
-    onOverlayPositionChanged: vi.fn(() => () => {})
+    onOverlayPositionChanged: vi.fn(() => () => {}),
+    onOverlaySettingsChange: vi.fn(() => () => {}),
+    previewOverlay: vi.fn()
   },
   writable: true
 })

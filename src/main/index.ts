@@ -9,7 +9,8 @@ import {
   clipboard,
   Notification,
   shell,
-  systemPreferences
+  systemPreferences,
+  dialog
 } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { repository } from '../../package.json'
@@ -57,6 +58,7 @@ import { initUpdater } from './updater'
 
 let tray: Tray | null = null
 let appWindow: BrowserWindow | null = null
+let quitting = false
 let workerWindow: BrowserWindow | null = null
 let overlayWindow: BrowserWindow | null = null
 let orchestrator: RecordingOrchestrator | null = null
@@ -71,6 +73,23 @@ function openAppWindow(): BrowserWindow {
     return appWindow
   }
   appWindow = createAppWindow()
+  appWindow.webContents.on('will-prevent-unload', (event) => {
+    if (quitting) {
+      event.preventDefault()
+      return
+    }
+    const choice = dialog.showMessageBoxSync(appWindow!, {
+      type: 'question',
+      buttons: ['Discard changes', 'Cancel'],
+      defaultId: 1,
+      cancelId: 1,
+      title: 'Unsaved changes',
+      message: 'Settings have not been saved.',
+      detail: 'Close without saving?'
+    })
+    if (choice === 0) event.preventDefault()
+  })
+
   appWindow.on('ready-to-show', () => {
     setLogRenderer(appWindow!.webContents)
     if (is.dev) {
@@ -82,6 +101,11 @@ function openAppWindow(): BrowserWindow {
     }
   })
   appWindow.on('closed', () => {
+    if (overlayWindow && !overlayWindow.isDestroyed()) {
+      const cfg = getConfig()
+      overlayWindow.webContents.send(CHANNELS.OVERLAY_SETTINGS_CHANGED, cfg.overlay)
+      overlayWindow.webContents.send(CHANNELS.UI_THEME_CHANGED, cfg.ui.theme)
+    }
     appWindow = null
   })
   return appWindow
@@ -309,6 +333,14 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     ) {
       overlayWindow.webContents.send(CHANNELS.UI_THEME_CHANGED, newConfig.ui.theme)
     }
+    if (
+      (prevConfig.overlay.showTimer !== newConfig.overlay.showTimer ||
+        prevConfig.overlay.invertColors !== newConfig.overlay.invertColors) &&
+      overlayWindow &&
+      !overlayWindow.isDestroyed()
+    ) {
+      overlayWindow.webContents.send(CHANNELS.OVERLAY_SETTINGS_CHANGED, newConfig.overlay)
+    }
     return { toggleFailed }
   })
 
@@ -350,6 +382,16 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
 
   ipcMain.handle(CHANNELS.SHELL_OPEN_RECORDINGS_PATH, () => shell.openPath(app.getPath('userData')))
   ipcMain.handle(CHANNELS.SHELL_OPEN_EXTERNAL, (_, url: string) => shell.openExternal(url))
+
+  ipcMain.handle(
+    CHANNELS.OVERLAY_PREVIEW,
+    (_, partial: { overlay?: ReturnType<typeof getConfig>['overlay']; theme?: string }) => {
+      if (!overlayWindow || overlayWindow.isDestroyed()) return
+      if (partial.overlay)
+        overlayWindow.webContents.send(CHANNELS.OVERLAY_SETTINGS_CHANGED, partial.overlay)
+      if (partial.theme) overlayWindow.webContents.send(CHANNELS.UI_THEME_CHANGED, partial.theme)
+    }
+  )
 
   ipcMain.handle(CHANNELS.OVERLAY_RESET_POSITION, () => {
     if (!overlayWindow || overlayWindow.isDestroyed()) return
@@ -393,6 +435,7 @@ if (!gotTheLock) {
 
   app.whenReady().then(async () => {
     electronApp.setAppUserModelId('com.sprik.app')
+    Menu.setApplicationMenu(null)
 
     if (process.platform === 'darwin') {
       await systemPreferences.askForMediaAccess('microphone')
@@ -409,6 +452,7 @@ if (!gotTheLock) {
     workerWindow = createWorkerWindow()
     overlayWindow = createOverlayWindow(getConfig().ui.overlayPosition)
     overlayWindow.on('moved', () => {
+      overlayWindow!.setSize(260, 44)
       const [x, y] = overlayWindow!.getPosition()
       const cfg = getConfig()
       setConfig({ ui: { ...cfg.ui, overlayPosition: { x, y } } })
@@ -462,6 +506,7 @@ if (!gotTheLock) {
         })
         n.on('click', () => openAppWindow())
         n.show()
+        openAppWindow()
       }
     })
 
@@ -476,6 +521,10 @@ if (!gotTheLock) {
       ) {
         openAppWindow()
       }
+    })
+
+    app.on('before-quit', () => {
+      quitting = true
     })
 
     app.on('will-quit', () => {

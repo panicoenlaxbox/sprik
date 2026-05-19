@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, History, Info, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Settings, History, Info, PanelLeftClose, PanelLeftOpen, RotateCcw, X } from 'lucide-react'
 import SettingsView from '../settings/App'
 import HistoryView from '../history/App'
 import AboutView from '../about/App'
@@ -18,6 +18,7 @@ export default function App(): React.JSX.Element {
     detailsPanelWidth: 320
   })
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ phase: 'idle' })
+  const [updateDismissed, setUpdateDismissed] = useState(false)
 
   useTheme(theme)
 
@@ -38,7 +39,14 @@ export default function App(): React.JSX.Element {
     []
   )
 
-  useEffect(() => window.api.onUpdateStatus(setUpdateStatus), [])
+  useEffect(
+    () =>
+      window.api.onUpdateStatus((s) => {
+        setUpdateStatus(s)
+        if (s.phase === 'ready') setUpdateDismissed(false)
+      }),
+    []
+  )
 
   async function toggleSidebar(): Promise<void> {
     const next = !expanded
@@ -57,7 +65,7 @@ export default function App(): React.JSX.Element {
   ]
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="relative flex h-screen bg-gray-50 dark:bg-gray-950">
       <nav
         className={`${expanded ? 'w-48' : 'w-14'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-[width] duration-200 overflow-hidden shrink-0`}
       >
@@ -113,6 +121,27 @@ export default function App(): React.JSX.Element {
           <AboutView />
         </div>
       </div>
+      {updateReady && !updateDismissed && updateStatus.phase === 'ready' && (
+        <div className="absolute bottom-4 right-4 flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50">
+          <RotateCcw size={16} className="text-blue-600 dark:text-blue-400 shrink-0" />
+          <span className="text-sm text-gray-700 dark:text-gray-200 whitespace-nowrap">
+            Version {updateStatus.version} ready to install
+          </span>
+          <button
+            onClick={() => window.api.installUpdate()}
+            className="px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          >
+            Restart now
+          </button>
+          <button
+            onClick={() => setUpdateDismissed(true)}
+            aria-label="Dismiss"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

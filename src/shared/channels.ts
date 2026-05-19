@@ -34,7 +34,9 @@ export const CHANNELS = {
   SHELL_OPEN_EXTERNAL: 'shell:open-external',
   APP_GET_REPO_URL: 'app:get-repo-url',
   OVERLAY_RESET_POSITION: 'overlay:reset-position',
-  OVERLAY_POSITION_CHANGED: 'overlay:position-changed'
+  OVERLAY_POSITION_CHANGED: 'overlay:position-changed',
+  OVERLAY_SETTINGS_CHANGED: 'overlay:settings-changed',
+  OVERLAY_PREVIEW: 'overlay:preview'
 } as const
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS]

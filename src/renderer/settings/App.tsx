@@ -24,6 +24,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [savedBadge, setSavedBadge] = useState(false)
   const [toggleShortcutFailed, setToggleShortcutFailed] = useState(false)
   const [positionReset, setPositionReset] = useState(false)
+  const [savedSnapshot, setSavedSnapshot] = useState<{
+    config: Config
+    pendingKeys: Partial<Record<ApiProvider, string>>
+  } | null>(null)
 
   const [recordingsPath, setRecordingsPath] = useState('')
   const [systemLocale, setSystemLocale] = useState('')
@@ -32,6 +36,11 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
     return window.api.onOverlayPositionChanged((pos) => {
       setConfigState((prev) =>
         prev ? { ...prev, ui: { ...prev.ui, overlayPosition: pos } } : prev
+      )
+      setSavedSnapshot((prev) =>
+        prev
+          ? { ...prev, config: { ...prev.config, ui: { ...prev.config.ui, overlayPosition: pos } } }
+          : prev
       )
     })
   }, [])
@@ -55,14 +64,42 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         if (keys[i]) initial[p] = keys[i] as string
       })
       setPendingKeys(initial)
+      setSavedSnapshot({ config: cfg as Config, pendingKeys: initial })
     })
   }, [])
+
+  const isDirty =
+    savedSnapshot !== null &&
+    (JSON.stringify(config) !== JSON.stringify(savedSnapshot.config) ||
+      JSON.stringify(pendingKeys) !== JSON.stringify(savedSnapshot.pendingKeys))
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent): void => {
+      if (isDirty) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
 
   const shortcutConflict = config?.shortcuts.toggleRecording === config?.shortcuts.cancelRecording
   const emptyPrompt = config?.postProcessing.enabled && !config.postProcessing.prompt.trim()
   const invalidRetain =
     config?.history.enabled &&
     (!Number.isInteger(config.history.retain) || config.history.retain < 1)
+
+  function handleDiscard(): void {
+    if (!savedSnapshot) return
+    setConfigState(savedSnapshot.config)
+    setPendingKeys(savedSnapshot.pendingKeys)
+    onThemeChange?.(savedSnapshot.config.ui.theme)
+    void window.api.previewOverlay({
+      overlay: savedSnapshot.config.overlay,
+      theme: savedSnapshot.config.ui.theme
+    })
+  }
 
   async function handleSave(): Promise<void> {
     if (!config || shortcutConflict || emptyPrompt || invalidRetain) return
@@ -87,6 +124,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
         if (keys[i]) refreshed[p] = keys[i] as string
       })
       setPendingKeys(refreshed)
+      setSavedSnapshot({ config, pendingKeys: refreshed })
       onThemeChange?.(config.ui.theme)
       if (!toggleFailed) {
         setSavedBadge(true)
@@ -244,15 +282,12 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           </div>
         </section>
 
-        <section aria-labelledby="paste-heading">
-          <h2
-            id="paste-heading"
-            className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
-          >
-            Paste
-          </h2>
+        <section aria-label="Paste">
           <div className="flex flex-col gap-1">
-            <label htmlFor="paste-mode" className="text-xs text-gray-500 dark:text-gray-400">
+            <label
+              htmlFor="paste-mode"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
               After transcription
             </label>
             <select
@@ -264,7 +299,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
                   pasteMode: e.target.value as Config['pasteMode']
                 })
               }
-              className="text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1.5"
+              className="w-fit text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1.5"
             >
               <option value="clipboard-and-focus">Copy to clipboard &amp; paste at focus</option>
               <option value="clipboard-only">Copy to clipboard only</option>
@@ -391,12 +426,11 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             <input
               type="checkbox"
               checked={config.overlay.showTimer}
-              onChange={(e) =>
-                setConfigState({
-                  ...config,
-                  overlay: { ...config.overlay, showTimer: e.target.checked }
-                })
-              }
+              onChange={(e) => {
+                const next = { ...config.overlay, showTimer: e.target.checked }
+                setConfigState({ ...config, overlay: next })
+                void window.api.previewOverlay({ overlay: next })
+              }}
               className="rounded"
             />
             Show elapsed time
@@ -405,12 +439,11 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             <input
               type="checkbox"
               checked={config.overlay.invertColors}
-              onChange={(e) =>
-                setConfigState({
-                  ...config,
-                  overlay: { ...config.overlay, invertColors: e.target.checked }
-                })
-              }
+              onChange={(e) => {
+                const next = { ...config.overlay, invertColors: e.target.checked }
+                setConfigState({ ...config, overlay: next })
+                void window.api.previewOverlay({ overlay: next })
+              }}
               className="rounded"
             />
             High contrast
@@ -421,7 +454,20 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               disabled={!config.ui.overlayPosition}
               onClick={async () => {
                 await window.api.resetOverlayPosition()
-                setConfigState({ ...config, ui: { ...config.ui, overlayPosition: undefined } })
+                setConfigState((prev) =>
+                  prev ? { ...prev, ui: { ...prev.ui, overlayPosition: undefined } } : prev
+                )
+                setSavedSnapshot((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        config: {
+                          ...prev.config,
+                          ui: { ...prev.config.ui, overlayPosition: undefined }
+                        }
+                      }
+                    : prev
+                )
                 setPositionReset(true)
                 setTimeout(() => setPositionReset(false), 2000)
               }}
@@ -452,6 +498,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
                 const theme = e.target.value as 'system' | 'light' | 'dark'
                 setConfigState({ ...config, ui: { ...config.ui, theme } })
                 onThemeChange?.(theme)
+                void window.api.previewOverlay({ theme })
               }}
               className="w-fit text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-800 dark:text-gray-100"
             >
@@ -466,11 +513,19 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       <footer className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center gap-3">
         <button
           onClick={handleSave}
-          disabled={saving}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          disabled={saving || !isDirty || !!shortcutConflict || !!emptyPrompt || !!invalidRetain}
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? 'Saving...' : 'Save'}
         </button>
+        {isDirty && !saving && (
+          <button
+            onClick={handleDiscard}
+            className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline underline-offset-2 cursor-pointer"
+          >
+            Discard changes
+          </button>
+        )}
         {savedBadge && (
           <span className="text-sm text-green-600" role="status">
             Settings saved

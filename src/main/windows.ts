@@ -70,7 +70,7 @@ export function createOverlayWindow(savedPosition?: { x: number; y: number }): B
 
   const win = new BrowserWindow({
     width: 260,
-    height: 40,
+    height: 44,
     x,
     y,
     show: false,

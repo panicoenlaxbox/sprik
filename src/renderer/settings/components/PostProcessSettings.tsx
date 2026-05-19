@@ -1,5 +1,7 @@
 import React from 'react'
+import { RotateCcw } from 'lucide-react'
 import type { Config } from '../../shared/types'
+import { DEFAULT_POST_PROCESSING_PROMPT } from '../../../shared/utils'
 
 const LLM_PROVIDERS: Record<string, { label: string; models: string[] }> = {
   anthropic: {
@@ -137,9 +139,23 @@ export default function PostProcessSettings({ config, onChange }: Props): React.
           )}
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="system-prompt" className="text-xs text-gray-500 dark:text-gray-400">
-              Instructions
-            </label>
+            <div className="flex items-center gap-1">
+              <label htmlFor="system-prompt" className="text-xs text-gray-500 dark:text-gray-400">
+                Instructions
+              </label>
+              <button
+                onClick={() => onChange({ prompt: DEFAULT_POST_PROCESSING_PROMPT })}
+                title="Reset to default"
+                aria-label="Reset instructions to default"
+                className={`p-1 rounded transition-colors ${
+                  config.prompt !== DEFAULT_POST_PROCESSING_PROMPT
+                    ? 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
+                    : 'invisible'
+                }`}
+              >
+                <RotateCcw size={14} />
+              </button>
+            </div>
             <textarea
               id="system-prompt"
               aria-label="Instructions"

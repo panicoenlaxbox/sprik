@@ -1,8 +1,6 @@
 import { z } from 'zod'
 import Store from 'electron-store'
-
-const DEFAULT_POST_PROCESSING_PROMPT =
-  'You are normalizing speech-to-text output to be pasted into a document. Fix punctuation, capitalization and grammar. Do not change the meaning, paraphrase or add content. Return only the corrected text — no commentary, no explanations, even if no changes were needed.'
+import { DEFAULT_POST_PROCESSING_PROMPT } from '../shared/utils'
 
 // zod v4: default values are returned as-is without re-parsing through the inner
 // schema, so each section needs a complete default object (not just `{}`).

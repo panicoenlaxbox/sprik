@@ -135,6 +135,11 @@ export interface AppApi {
   getRepoUrl: () => Promise<string>
   resetOverlayPosition: () => Promise<void>
   onOverlayPositionChanged: (cb: (pos: { x: number; y: number }) => void) => () => void
+  onOverlaySettingsChange: (cb: (overlay: Config['overlay']) => void) => () => void
+  previewOverlay: (partial: {
+    overlay?: Config['overlay']
+    theme?: Config['ui']['theme']
+  }) => Promise<void>
 }
 
 declare global {
