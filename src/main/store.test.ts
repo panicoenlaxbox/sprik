@@ -25,9 +25,9 @@ describe('getConfig', () => {
     expect(config.shortcuts.cancelRecording).toBe('Escape')
     expect(config.transcription.provider).toBe('groq')
     expect(config.transcription.model).toBe('whisper-large-v3-turbo')
-    expect(config.paste.pasteMode).toBe('clipboard-and-focus')
+    expect(config.pasteMode).toBe('clipboard-and-focus')
     expect(config.history.retain).toBe(100)
-    expect(config.autostart.enabled).toBe(false)
+    expect(config.startup.autostart).toBe(false)
   })
 
   it('merges stored values with defaults', () => {
@@ -52,10 +52,10 @@ describe('setConfig', () => {
   })
 
   it('overwrites previous values', () => {
-    setConfig({ paste: { pasteMode: 'clipboard-only' } })
-    setConfig({ paste: { pasteMode: 'clipboard-and-focus' } })
+    setConfig({ pasteMode: 'clipboard-only' })
+    setConfig({ pasteMode: 'clipboard-and-focus' })
 
-    expect(getConfig().paste.pasteMode).toBe('clipboard-and-focus')
+    expect(getConfig().pasteMode).toBe('clipboard-and-focus')
   })
 
   it('throws and does not save when the schema is violated', () => {
@@ -77,9 +77,9 @@ describe('configSchema', () => {
   })
 })
 
-describe('getConfig branch: non-object stored section', () => {
-  it('throws when a stored section value is not a plain object', () => {
-    storeData = { autostart: [true] as unknown as Record<string, unknown> }
+describe('getConfig: rejects invalid stored values', () => {
+  it('throws when a stored scalar value fails schema validation', () => {
+    storeData = { startup: [true] as unknown as Record<string, unknown> }
     expect(() => getConfig()).toThrow()
   })
 })

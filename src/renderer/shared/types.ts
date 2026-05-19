@@ -67,15 +67,15 @@ export interface Config {
     prompt: string
     endpoint?: string
   }
-  paste: {
-    pasteMode: 'clipboard-and-focus' | 'clipboard-only' | 'focus-only'
-  }
+  pasteMode: 'clipboard-and-focus' | 'clipboard-only' | 'focus-only'
   history: {
     retain: number
     enabled: boolean
+    saveAudio: boolean
   }
-  autostart: {
-    enabled: boolean
+  startup: {
+    autostart: boolean
+    autoCheck: boolean
   }
   ui: {
     theme: 'system' | 'light' | 'dark'
@@ -83,15 +83,9 @@ export interface Config {
     detailsPanelWidth: number
     overlayPosition?: { x: number; y: number }
   }
-  recordings: {
-    saveAudio: boolean
-  }
   overlay: {
     showTimer: boolean
     invertColors: boolean
-  }
-  updates: {
-    autoCheck: boolean
   }
 }
 

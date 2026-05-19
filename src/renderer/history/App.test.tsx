@@ -32,13 +32,11 @@ beforeEach(() => {
       model: 'claude-haiku-4-5',
       prompt: ''
     },
-    paste: { pasteMode: 'clipboard-and-focus' },
-    history: { retain: 100, enabled: true },
-    autostart: { enabled: false },
+    pasteMode: 'clipboard-and-focus',
+    history: { retain: 100, enabled: true, saveAudio: false },
+    startup: { autostart: false, autoCheck: true },
     ui: { theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 },
-    recordings: { saveAudio: false },
-    overlay: { showTimer: false, invertColors: true },
-    updates: { autoCheck: true }
+    overlay: { showTimer: false, invertColors: true }
   })
 })
 

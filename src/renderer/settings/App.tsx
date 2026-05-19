@@ -257,13 +257,11 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             </label>
             <select
               id="paste-mode"
-              value={config.paste.pasteMode}
+              value={config.pasteMode}
               onChange={(e) =>
                 setConfigState({
                   ...config,
-                  paste: {
-                    pasteMode: e.target.value as Config['paste']['pasteMode']
-                  }
+                  pasteMode: e.target.value as Config['pasteMode']
                 })
               }
               className="text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1.5"
@@ -286,9 +284,12 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
               <input
                 type="checkbox"
-                checked={config.autostart.enabled}
+                checked={config.startup.autostart}
                 onChange={(e) =>
-                  setConfigState({ ...config, autostart: { enabled: e.target.checked } })
+                  setConfigState({
+                    ...config,
+                    startup: { ...config.startup, autostart: e.target.checked }
+                  })
                 }
                 className="rounded"
                 aria-label="Launch Sprik at login"
@@ -299,9 +300,12 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={config.updates.autoCheck}
+                  checked={config.startup.autoCheck}
                   onChange={(e) =>
-                    setConfigState({ ...config, updates: { autoCheck: e.target.checked } })
+                    setConfigState({
+                      ...config,
+                      startup: { ...config.startup, autoCheck: e.target.checked }
+                    })
                   }
                   className="rounded"
                 />
@@ -365,10 +369,10 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
                   </p>
                 )}
                 <StorageSettings
-                  config={config.recordings}
+                  saveAudio={config.history.saveAudio}
                   recordingsPath={recordingsPath}
-                  onChange={(updates) =>
-                    setConfigState({ ...config, recordings: { ...config.recordings, ...updates } })
+                  onChange={(saveAudio) =>
+                    setConfigState({ ...config, history: { ...config.history, saveAudio } })
                   }
                 />
               </>

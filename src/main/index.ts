@@ -191,10 +191,10 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         if (signal?.aborted) return
       }
 
-      await copyAndPaste(text, config.paste.pasteMode)
+      await copyAndPaste(text, config.pasteMode)
 
       let path: string | undefined
-      if (config.recordings.saveAudio) {
+      if (config.history.saveAudio) {
         const sessionDir = join(app.getPath('userData'), 'recordings', `${Date.now()}`)
         mkdirSync(sessionDir, { recursive: true })
         copyFileSync(audioPath, join(sessionDir, 'audio.webm'))
@@ -299,8 +299,8 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
       )
       toggleFailed = result.toggleFailed
     }
-    if (prevConfig.autostart.enabled !== newConfig.autostart.enabled) {
-      setAutostart(newConfig.autostart.enabled)
+    if (prevConfig.startup.autostart !== newConfig.startup.autostart) {
+      setAutostart(newConfig.startup.autostart)
     }
     if (
       prevConfig.ui.theme !== newConfig.ui.theme &&
@@ -434,7 +434,7 @@ app.whenReady().then(async () => {
     unregisterCancelShortcut(getConfig().shortcuts.cancelRecording)
   })
 
-  setAutostart(getConfig().autostart.enabled)
+  setAutostart(getConfig().startup.autostart)
 
   workerWindow.webContents.once('did-finish-load', () => {
     const config = getConfig()

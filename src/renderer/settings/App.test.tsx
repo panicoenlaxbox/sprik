@@ -7,13 +7,11 @@ const mockConfig: Config = {
   shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' },
   transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' },
   postProcessing: { enabled: false, provider: 'anthropic', model: 'claude-sonnet-4-6', prompt: '' },
-  paste: { pasteMode: 'clipboard-and-focus' },
-  history: { retain: 100, enabled: true },
-  autostart: { enabled: false },
+  pasteMode: 'clipboard-and-focus',
+  history: { retain: 100, enabled: true, saveAudio: false },
+  startup: { autostart: false, autoCheck: true },
   ui: { theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 },
-  recordings: { saveAudio: false },
-  overlay: { showTimer: false, invertColors: true },
-  updates: { autoCheck: true }
+  overlay: { showTimer: false, invertColors: true }
 }
 
 const mockKeyStatus: ApiKeyStatus = { openai: false, groq: true, anthropic: false, azure: false }
@@ -104,7 +102,7 @@ describe('Settings App', () => {
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     expect(window.api.setConfig).toHaveBeenCalledWith(
-      expect.objectContaining({ paste: { pasteMode: 'clipboard-only' } })
+      expect.objectContaining({ pasteMode: 'clipboard-only' })
     )
   })
 
@@ -145,7 +143,7 @@ describe('Settings App', () => {
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     expect(window.api.setConfig).toHaveBeenCalledWith(
-      expect.objectContaining({ autostart: { enabled: true } })
+      expect.objectContaining({ startup: expect.objectContaining({ autostart: true }) })
     )
   })
 
@@ -153,7 +151,7 @@ describe('Settings App', () => {
     const user = userEvent.setup()
     vi.mocked(window.api.getConfig).mockResolvedValue({
       ...mockConfig,
-      history: { retain: 100, enabled: false }
+      history: { retain: 100, enabled: false, saveAudio: false }
     })
 
     render(<App />)

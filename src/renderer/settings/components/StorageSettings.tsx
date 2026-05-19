@@ -1,15 +1,14 @@
 import React from 'react'
 import { FolderOpen } from 'lucide-react'
-import type { Config } from '../../shared/types'
 
 interface Props {
-  config: Config['recordings']
+  saveAudio: boolean
   recordingsPath: string
-  onChange: (updates: Partial<Config['recordings']>) => void
+  onChange: (saveAudio: boolean) => void
 }
 
 export default function StorageSettings({
-  config,
+  saveAudio,
   recordingsPath,
   onChange
 }: Props): React.JSX.Element {
@@ -18,8 +17,8 @@ export default function StorageSettings({
       <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
         <input
           type="checkbox"
-          checked={config.saveAudio}
-          onChange={(e) => onChange({ saveAudio: e.target.checked })}
+          checked={saveAudio}
+          onChange={(e) => onChange(e.target.checked)}
           aria-label="Save audio"
           className="rounded"
         />

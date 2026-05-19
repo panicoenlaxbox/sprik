@@ -63,11 +63,11 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
     send({ phase: 'error', message: err.message })
   })
 
-  if (getConfig().updates.autoCheck) {
+  if (getConfig().startup.autoCheck) {
     autoUpdater.checkForUpdates().catch(() => {})
   }
   setInterval(() => {
-    if (getConfig().updates.autoCheck) {
+    if (getConfig().startup.autoCheck) {
       autoUpdater.checkForUpdates().catch(() => {})
     }
   }, CHECK_INTERVAL_MS)

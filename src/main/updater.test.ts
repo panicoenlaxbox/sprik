@@ -105,7 +105,7 @@ describe('initUpdater', () => {
   })
 
   it('does not call checkForUpdates when autoCheck is false', () => {
-    setupWin32(() => null, { storeData: { updates: { autoCheck: false } } })
+    setupWin32(() => null, { storeData: { startup: { autoCheck: false } } })
     expect(mockAutoUpdater.checkForUpdates).not.toHaveBeenCalled()
   })
 
@@ -209,7 +209,7 @@ describe('initUpdater', () => {
 
     it('does not call checkForUpdates on interval tick when autoCheck is false', () => {
       vi.useFakeTimers()
-      setupWin32(() => null, { storeData: { updates: { autoCheck: false } } })
+      setupWin32(() => null, { storeData: { startup: { autoCheck: false } } })
       vi.mocked(mockAutoUpdater.checkForUpdates).mockClear()
 
       vi.advanceTimersByTime(4 * 60 * 60 * 1000)

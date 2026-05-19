@@ -39,26 +39,24 @@ export const configSchema = z.object({
       prompt: DEFAULT_POST_PROCESSING_PROMPT
     }),
 
-  paste: z
-    .object({
-      pasteMode: z
-        .enum(['clipboard-and-focus', 'clipboard-only', 'focus-only'])
-        .default('clipboard-and-focus')
-    })
-    .default({ pasteMode: 'clipboard-and-focus' }),
+  pasteMode: z
+    .enum(['clipboard-and-focus', 'clipboard-only', 'focus-only'])
+    .default('clipboard-and-focus'),
 
   history: z
     .object({
       retain: z.number().int().positive().default(100),
-      enabled: z.boolean().default(true)
+      enabled: z.boolean().default(true),
+      saveAudio: z.boolean().default(false)
     })
-    .default({ retain: 100, enabled: true }),
+    .default({ retain: 100, enabled: true, saveAudio: false }),
 
-  autostart: z
+  startup: z
     .object({
-      enabled: z.boolean().default(false)
+      autostart: z.boolean().default(false),
+      autoCheck: z.boolean().default(true)
     })
-    .default({ enabled: false }),
+    .default({ autostart: false, autoCheck: true }),
 
   ui: z
     .object({
@@ -69,24 +67,12 @@ export const configSchema = z.object({
     })
     .default({ theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 }),
 
-  recordings: z
-    .object({
-      saveAudio: z.boolean().default(false)
-    })
-    .default({ saveAudio: false }),
-
   overlay: z
     .object({
       showTimer: z.boolean().default(false),
       invertColors: z.boolean().default(true)
     })
-    .default({ showTimer: false, invertColors: true }),
-
-  updates: z
-    .object({
-      autoCheck: z.boolean().default(true)
-    })
-    .default({ autoCheck: true })
+    .default({ showTimer: false, invertColors: true })
 })
 
 export type Config = z.infer<typeof configSchema>
