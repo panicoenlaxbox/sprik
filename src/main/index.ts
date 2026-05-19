@@ -377,100 +377,115 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   })
 }
 
-app.whenReady().then(async () => {
-  electronApp.setAppUserModelId('com.sprik.app')
+const gotTheLock = app.requestSingleInstanceLock()
 
-  if (process.platform === 'darwin') {
-    await systemPreferences.askForMediaAccess('microphone')
-  }
-
-  setupPermissions()
-
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-
-  initUpdater(() => appWindow)
-
-  workerWindow = createWorkerWindow()
-  overlayWindow = createOverlayWindow(getConfig().ui.overlayPosition)
-  overlayWindow.on('moved', () => {
-    const [x, y] = overlayWindow!.getPosition()
-    const cfg = getConfig()
-    setConfig({ ui: { ...cfg.ui, overlayPosition: { x, y } } })
-    appWindow?.webContents.send(CHANNELS.OVERLAY_POSITION_CHANGED, { x, y })
-  })
-
-  const shortcutHandlers = {
-    onToggle: () => {
-      if (orchestrator?.getState() === 'idle') {
-        const cfg = getConfig()
-        const key = getKey(cfg.transcription.provider)
-        if (!key) {
-          log(
-            'recording',
-            `no API key configured for provider: ${cfg.transcription.provider}`,
-            'warn'
-          )
-          const n = new Notification({
-            title: 'Sprik — No API key',
-            body: 'Set an API key in Settings before recording.'
-          })
-          n.on('click', () => openAppWindow())
-          n.show()
-          return
-        }
-        registerCancelShortcut(cfg.shortcuts.cancelRecording, shortcutHandlers.onCancel)
-      }
-      orchestrator?.toggle(getConfig().transcription.deviceId)
-    },
-    onCancel: () => {
-      unregisterCancelShortcut(getConfig().shortcuts.cancelRecording)
-      orchestrator?.cancel()
-    }
-  }
-
-  orchestrator = setupIpcBridges(workerWindow, overlayWindow, () => {
-    unregisterCancelShortcut(getConfig().shortcuts.cancelRecording)
-  })
-
-  setAutostart(getConfig().startup.autostart)
-
-  workerWindow.webContents.once('did-finish-load', () => {
-    const config = getConfig()
-    const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
-      log('shortcuts', `${a} is taken by another app`, 'warn')
-    )
-    if (toggleFailed) {
-      const n = new Notification({
-        title: 'Sprik — Shortcut unavailable',
-        body: `${config.shortcuts.toggleRecording} is already in use by another app. Change it in Settings.`
-      })
-      n.on('click', () => openAppWindow())
-      n.show()
-    }
-  })
-
-  setupSettingsIpc(shortcutHandlers)
-
-  createTray()
-
-  app.on('activate', () => {
-    if (
-      BrowserWindow.getAllWindows().filter((w) => w !== workerWindow && w !== overlayWindow)
-        .length === 0
-    ) {
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (appWindow && !appWindow.isDestroyed()) {
+      if (appWindow.isMinimized()) appWindow.restore()
+      appWindow.focus()
+    } else {
       openAppWindow()
     }
   })
 
-  app.on('will-quit', () => {
-    orchestrator?.deleteTempFile()
-    unregisterShortcuts()
-  })
-})
+  app.whenReady().then(async () => {
+    electronApp.setAppUserModelId('com.sprik.app')
 
-// Keep app alive in tray when all visible windows are closed
-app.on('window-all-closed', () => {
-  // Intentionally empty — app lives in the tray
-})
+    if (process.platform === 'darwin') {
+      await systemPreferences.askForMediaAccess('microphone')
+    }
+
+    setupPermissions()
+
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
+
+    initUpdater(() => appWindow)
+
+    workerWindow = createWorkerWindow()
+    overlayWindow = createOverlayWindow(getConfig().ui.overlayPosition)
+    overlayWindow.on('moved', () => {
+      const [x, y] = overlayWindow!.getPosition()
+      const cfg = getConfig()
+      setConfig({ ui: { ...cfg.ui, overlayPosition: { x, y } } })
+      appWindow?.webContents.send(CHANNELS.OVERLAY_POSITION_CHANGED, { x, y })
+    })
+
+    const shortcutHandlers = {
+      onToggle: () => {
+        if (orchestrator?.getState() === 'idle') {
+          const cfg = getConfig()
+          const key = getKey(cfg.transcription.provider)
+          if (!key) {
+            log(
+              'recording',
+              `no API key configured for provider: ${cfg.transcription.provider}`,
+              'warn'
+            )
+            const n = new Notification({
+              title: 'Sprik — No API key',
+              body: 'Set an API key in Settings before recording.'
+            })
+            n.on('click', () => openAppWindow())
+            n.show()
+            return
+          }
+          registerCancelShortcut(cfg.shortcuts.cancelRecording, shortcutHandlers.onCancel)
+        }
+        orchestrator?.toggle(getConfig().transcription.deviceId)
+      },
+      onCancel: () => {
+        unregisterCancelShortcut(getConfig().shortcuts.cancelRecording)
+        orchestrator?.cancel()
+      }
+    }
+
+    orchestrator = setupIpcBridges(workerWindow, overlayWindow, () => {
+      unregisterCancelShortcut(getConfig().shortcuts.cancelRecording)
+    })
+
+    setAutostart(getConfig().startup.autostart)
+
+    workerWindow.webContents.once('did-finish-load', () => {
+      const config = getConfig()
+      const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
+        log('shortcuts', `${a} is taken by another app`, 'warn')
+      )
+      if (toggleFailed) {
+        const n = new Notification({
+          title: 'Sprik — Shortcut unavailable',
+          body: `${config.shortcuts.toggleRecording} is already in use by another app. Change it in Settings.`
+        })
+        n.on('click', () => openAppWindow())
+        n.show()
+      }
+    })
+
+    setupSettingsIpc(shortcutHandlers)
+
+    createTray()
+
+    app.on('activate', () => {
+      if (
+        BrowserWindow.getAllWindows().filter((w) => w !== workerWindow && w !== overlayWindow)
+          .length === 0
+      ) {
+        openAppWindow()
+      }
+    })
+
+    app.on('will-quit', () => {
+      orchestrator?.deleteTempFile()
+      unregisterShortcuts()
+    })
+  })
+
+  // Keep app alive in tray when all visible windows are closed
+  app.on('window-all-closed', () => {
+    // Intentionally empty - app lives in the tray
+  })
+}
