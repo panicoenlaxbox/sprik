@@ -123,4 +123,28 @@ describe('anthropicProcessor', () => {
 
     await expect(anthropicProcessor.process('hello', validOpts)).rejects.toThrow()
   })
+
+  it('returns original text when response block type is not text', async () => {
+    server.use(
+      http.post('https://api.anthropic.com/v1/messages', () =>
+        HttpResponse.json({
+          id: 'msg_test',
+          type: 'message',
+          role: 'assistant',
+          content: [{ type: 'tool_use', id: 'tu_1', name: 'some_tool', input: {} }],
+          model: 'claude-sonnet-4-6',
+          stop_reason: 'tool_use',
+          usage: {
+            input_tokens: 10,
+            output_tokens: 5,
+            cache_read_input_tokens: 0,
+            cache_creation_input_tokens: 0
+          }
+        })
+      )
+    )
+
+    const result = await anthropicProcessor.process('original text', validOpts)
+    expect(result).toBe('original text')
+  })
 })

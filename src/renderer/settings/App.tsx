@@ -268,7 +268,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               }
               className="text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1.5"
             >
-              <option value="clipboard-and-focus">Copy to clipboard & paste at focus</option>
+              <option value="clipboard-and-focus">Copy to clipboard &amp; paste at focus</option>
               <option value="clipboard-only">Copy to clipboard only</option>
               <option value="focus-only">Paste at focus only</option>
             </select>

@@ -1,4 +1,5 @@
 import { existsSync } from 'fs'
+import { app } from 'electron'
 import { RecordingOrchestrator, type WorkerBridge, type OverlayBridge } from './recording'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
 
@@ -219,6 +220,74 @@ describe('RecordingOrchestrator', () => {
       orc.cancel()
 
       expect(onIdle).toHaveBeenCalledOnce()
+    })
+  })
+
+  describe('pipeline integration', () => {
+    it('runs pipeline, deletes temp file and resets when pipeline succeeds normally', async () => {
+      const worker = makeWorkerBridge()
+      const overlay = makeOverlayBridge()
+      const pipeline = { run: vi.fn().mockResolvedValue(undefined) }
+      const onIdle = vi.fn()
+      const orc = new RecordingOrchestrator(worker, overlay, pipeline, onIdle)
+
+      orc.start()
+      orc.stop()
+      worker.triggerAudio({ buffer: Buffer.from('fake'), durationMs: 200 })
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(pipeline.run).toHaveBeenCalledOnce()
+      expect(orc.getState()).toBe('idle')
+      expect(onIdle).toHaveBeenCalledOnce()
+    })
+
+    it('shows error state and recovers when pipeline throws', async () => {
+      vi.useFakeTimers()
+      const worker = makeWorkerBridge()
+      const overlay = makeOverlayBridge()
+      const pipeline = { run: vi.fn().mockRejectedValue(new Error('transcription failed')) }
+      const onIdle = vi.fn()
+      const orc = new RecordingOrchestrator(worker, overlay, pipeline, onIdle)
+
+      orc.start()
+      worker.triggerAudio({ buffer: Buffer.from('fake'), durationMs: 200 })
+      await Promise.resolve()
+      await Promise.resolve()
+
+      expect(orc.getState()).toBe('error')
+      expect(overlay.states).toContain('error')
+      expect(onIdle).toHaveBeenCalledOnce()
+
+      vi.advanceTimersByTime(1500)
+      expect(orc.getState()).toBe('idle')
+      expect(overlay.states.at(-1)).toBe('idle')
+
+      vi.useRealTimers()
+    })
+
+    it('catches and logs an Error when handleAudio itself rejects', async () => {
+      vi.mocked(app.getPath).mockImplementationOnce(() => {
+        throw new Error('disk full')
+      })
+      const worker = makeWorkerBridge()
+      const orc = new RecordingOrchestrator(worker, makeOverlayBridge())
+
+      orc.start()
+      worker.triggerAudio({ buffer: Buffer.from('x'), durationMs: 10 })
+      await Promise.resolve()
+    })
+
+    it('catches and logs a non-Error rejection from handleAudio', async () => {
+      vi.mocked(app.getPath).mockImplementationOnce(() => {
+        throw 'disk full' as unknown
+      })
+      const worker = makeWorkerBridge()
+      const orc = new RecordingOrchestrator(worker, makeOverlayBridge())
+
+      orc.start()
+      worker.triggerAudio({ buffer: Buffer.from('x'), durationMs: 10 })
+      await Promise.resolve()
     })
   })
 

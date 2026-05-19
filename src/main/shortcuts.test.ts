@@ -2,6 +2,7 @@ import { globalShortcut } from 'electron'
 import {
   registerShortcuts,
   registerCancelShortcut,
+  isShortcutRegistered,
   unregisterCancelShortcut,
   unregisterShortcuts
 } from './shortcuts'
@@ -31,6 +32,34 @@ describe('registerShortcuts', () => {
 
     expect(onCollision).toHaveBeenCalledWith('Ctrl+Alt+Space')
   })
+
+  it('calls onCollision and returns toggleFailed when accelerator contains non-ASCII characters', () => {
+    vi.mocked(globalShortcut.register).mockClear()
+    const onCollision = vi.fn()
+    const result = registerShortcuts(
+      { toggleRecording: 'Ctrl+á', cancelRecording: 'Escape' },
+      defaultHandlers,
+      onCollision
+    )
+    expect(onCollision).toHaveBeenCalledWith('Ctrl+á')
+    expect(result.toggleFailed).toBe(true)
+    expect(globalShortcut.register).not.toHaveBeenCalled()
+  })
+
+  it('returns toggleFailed when globalShortcut.register throws', () => {
+    vi.mocked(globalShortcut.register).mockImplementationOnce(() => {
+      throw new Error('blocked by OS')
+    })
+    const onCollision = vi.fn()
+    const result = registerShortcuts(defaultConfig, defaultHandlers, onCollision)
+    expect(result.toggleFailed).toBe(true)
+    expect(onCollision).toHaveBeenCalledWith('Ctrl+Alt+Space')
+  })
+
+  it('uses the default no-op onCollision when not provided and registration fails', () => {
+    vi.mocked(globalShortcut.register).mockReturnValueOnce(false)
+    expect(() => registerShortcuts(defaultConfig, defaultHandlers)).not.toThrow()
+  })
 })
 
 describe('registerCancelShortcut', () => {
@@ -51,6 +80,28 @@ describe('registerCancelShortcut', () => {
     registerCancelShortcut('Escape', noop, onCollision)
 
     expect(onCollision).toHaveBeenCalledWith('Escape')
+  })
+
+  it('calls onCollision when globalShortcut.register throws', () => {
+    vi.mocked(globalShortcut.register).mockImplementationOnce(() => {
+      throw new Error('blocked by OS')
+    })
+    const onCollision = vi.fn()
+    registerCancelShortcut('Escape', noop, onCollision)
+    expect(onCollision).toHaveBeenCalledWith('Escape')
+  })
+
+  it('uses the default no-op onCollision when not provided and registration fails', () => {
+    vi.mocked(globalShortcut.register).mockReturnValueOnce(false)
+    expect(() => registerCancelShortcut('Escape', noop)).not.toThrow()
+  })
+})
+
+describe('isShortcutRegistered', () => {
+  it('delegates to globalShortcut.isRegistered', () => {
+    vi.mocked(globalShortcut.isRegistered).mockReturnValueOnce(true)
+    expect(isShortcutRegistered('Ctrl+Alt+Space')).toBe(true)
+    expect(globalShortcut.isRegistered).toHaveBeenCalledWith('Ctrl+Alt+Space')
   })
 })
 

@@ -76,3 +76,10 @@ describe('configSchema', () => {
     expect(() => configSchema.parse({ ui: { theme: 'pink' } })).toThrow()
   })
 })
+
+describe('getConfig branch: non-object stored section', () => {
+  it('throws when a stored section value is not a plain object', () => {
+    storeData = { autostart: [true] as unknown as Record<string, unknown> }
+    expect(() => getConfig()).toThrow()
+  })
+})

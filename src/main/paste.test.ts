@@ -1,4 +1,4 @@
-import { clipboard } from 'electron'
+import { clipboard, Notification } from 'electron'
 import { exec } from 'child_process'
 import { copyAndPaste, getPasteCommand } from './paste'
 
@@ -86,5 +86,16 @@ describe('copyAndPaste', () => {
 
     await expect(copyAndPaste('hello world')).resolves.toBeUndefined()
     expect(clipboard.writeText).toHaveBeenCalledWith('hello world')
+  })
+
+  it('focus-only: shows notification and restores clipboard when native paste fails', async () => {
+    vi.mocked(clipboard.readText).mockReturnValue('prev')
+    mockExec.mockImplementationOnce((_, cb) => cb(new Error('paste error')))
+
+    await copyAndPaste('hello world', 'focus-only')
+
+    expect(clipboard.writeText).toHaveBeenNthCalledWith(1, 'hello world')
+    expect(clipboard.writeText).toHaveBeenNthCalledWith(2, 'prev')
+    expect(vi.mocked(Notification)).toHaveBeenCalled()
   })
 })

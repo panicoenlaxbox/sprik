@@ -89,4 +89,24 @@ describe('openaiProcessor', () => {
 
     await expect(openaiProcessor.process('hello', validOpts)).rejects.toThrow()
   })
+
+  it('returns original text when response content is null', async () => {
+    server.use(
+      http.post('https://api.openai.com/v1/chat/completions', () =>
+        HttpResponse.json({
+          id: 'chatcmpl-test',
+          object: 'chat.completion',
+          created: 1677858242,
+          model: 'gpt-4o-mini',
+          choices: [
+            { index: 0, message: { role: 'assistant', content: null }, finish_reason: 'stop' }
+          ],
+          usage: { prompt_tokens: 10, completion_tokens: 0, total_tokens: 10 }
+        })
+      )
+    )
+
+    const result = await openaiProcessor.process('original text', validOpts)
+    expect(result).toBe('original text')
+  })
 })
