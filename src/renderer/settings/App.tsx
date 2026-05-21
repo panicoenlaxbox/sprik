@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ProviderSelector from './components/ProviderSelector'
 import ApiKeyInput from './components/ApiKeyInput'
 import HotkeyRebinder from './components/HotkeyRebinder'
@@ -24,6 +24,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [savedBadge, setSavedBadge] = useState(false)
   const [toggleShortcutFailed, setToggleShortcutFailed] = useState(false)
   const [positionReset, setPositionReset] = useState(false)
+  const shortcutsSectionRef = useRef<HTMLElement>(null)
   const [savedSnapshot, setSavedSnapshot] = useState<{
     config: Config
     pendingKeys: Partial<Record<ApiProvider, string>>
@@ -44,6 +45,12 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
       )
     })
   }, [])
+
+  useEffect(() => {
+    if (toggleShortcutFailed) {
+      shortcutsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [toggleShortcutFailed])
 
   useEffect(() => {
     Promise.all([
@@ -236,7 +243,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
           </div>
         </section>
 
-        <section aria-labelledby="shortcuts-heading">
+        <section ref={shortcutsSectionRef} aria-labelledby="shortcuts-heading">
           <h2
             id="shortcuts-heading"
             className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
