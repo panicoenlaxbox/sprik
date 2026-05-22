@@ -52,9 +52,10 @@ export const configSchema = z.object({
   startup: z
     .object({
       autostart: z.boolean().default(false),
-      autoCheck: z.boolean().default(true)
+      autoCheck: z.boolean().default(true),
+      checkIntervalHours: z.number().int().min(1).max(168).default(4)
     })
-    .default({ autostart: false, autoCheck: true }),
+    .default({ autostart: false, autoCheck: true, checkIntervalHours: 4 }),
 
   ui: z
     .object({

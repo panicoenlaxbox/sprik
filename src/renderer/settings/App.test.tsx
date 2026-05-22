@@ -9,7 +9,7 @@ const mockConfig: Config = {
   postProcessing: { enabled: false, provider: 'anthropic', model: 'claude-sonnet-4-6', prompt: '' },
   pasteMode: 'clipboard-and-focus',
   history: { retain: 100, enabled: true, saveAudio: false },
-  startup: { autostart: false, autoCheck: true },
+  startup: { autostart: false, autoCheck: true, checkIntervalHours: 4 },
   ui: { theme: 'system', sidebarExpanded: false, detailsPanelWidth: 320 },
   overlay: { showTimer: false, invertColors: true }
 }

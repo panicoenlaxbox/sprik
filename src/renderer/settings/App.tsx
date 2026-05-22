@@ -339,20 +339,42 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
               Launch at login
             </label>
             {window.api.isAutoUpdateSupported() && (
-              <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.startup.autoCheck}
-                  onChange={(e) =>
-                    setConfigState({
-                      ...config,
-                      startup: { ...config.startup, autoCheck: e.target.checked }
-                    })
-                  }
-                  className="rounded"
-                />
-                Check automatically for updates
-              </label>
+              <div className="flex flex-col gap-1.5">
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.startup.autoCheck}
+                    onChange={(e) =>
+                      setConfigState({
+                        ...config,
+                        startup: { ...config.startup, autoCheck: e.target.checked }
+                      })
+                    }
+                    className="rounded"
+                  />
+                  Check automatically for updates
+                </label>
+                {config.startup.autoCheck && (
+                  <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 ml-6">
+                    Every
+                    <input
+                      type="number"
+                      min={1}
+                      max={168}
+                      value={config.startup.checkIntervalHours}
+                      onChange={(e) => {
+                        const hours = Math.min(168, Math.max(1, parseInt(e.target.value, 10) || 1))
+                        setConfigState({
+                          ...config,
+                          startup: { ...config.startup, checkIntervalHours: hours }
+                        })
+                      }}
+                      className="w-16 px-2 py-0.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    />
+                    hours
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </section>

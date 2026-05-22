@@ -76,6 +76,7 @@ export interface Config {
   startup: {
     autostart: boolean
     autoCheck: boolean
+    checkIntervalHours: number
   }
   ui: {
     theme: 'system' | 'light' | 'dark'

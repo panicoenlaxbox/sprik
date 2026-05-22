@@ -6,7 +6,6 @@ import { getConfig } from './store'
 import type { UpdateStatus } from '../renderer/shared/types'
 
 const { autoUpdater } = pkg
-const CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000
 
 export function initUpdater(getWindow: () => BrowserWindow | null): void {
   if (process.platform !== 'win32') return
@@ -66,9 +65,15 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
   if (getConfig().startup.autoCheck) {
     autoUpdater.checkForUpdates().catch(() => {})
   }
-  setInterval(() => {
-    if (getConfig().startup.autoCheck) {
-      autoUpdater.checkForUpdates().catch(() => {})
-    }
-  }, CHECK_INTERVAL_MS)
+
+  function scheduleNextCheck(): void {
+    const intervalMs = getConfig().startup.checkIntervalHours * 60 * 60 * 1000
+    setTimeout(() => {
+      if (getConfig().startup.autoCheck) {
+        autoUpdater.checkForUpdates().catch(() => {})
+      }
+      scheduleNextCheck()
+    }, intervalMs)
+  }
+  scheduleNextCheck()
 }
