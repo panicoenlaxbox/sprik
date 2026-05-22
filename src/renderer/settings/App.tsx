@@ -369,7 +369,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
                           startup: { ...config.startup, checkIntervalHours: hours }
                         })
                       }}
-                      className="w-16 px-2 py-0.5 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                      className="w-16 px-2 py-1.5 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
                     />
                     hours
                   </div>
