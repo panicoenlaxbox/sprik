@@ -13,7 +13,10 @@ vi.mock('electron', () => ({
   },
   clipboard: {
     writeText: vi.fn(),
-    readText: vi.fn(() => '')
+    readText: vi.fn(() => ''),
+    writeImage: vi.fn(),
+    readImage: vi.fn(() => ({ isEmpty: () => true })),
+    availableFormats: vi.fn(() => [] as string[])
   },
   safeStorage: {
     isEncryptionAvailable: vi.fn(() => true),

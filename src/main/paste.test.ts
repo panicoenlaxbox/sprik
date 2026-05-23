@@ -12,6 +12,10 @@ const mockExec = vi.mocked(
 
 afterEach(() => {
   vi.mocked(clipboard.writeText).mockReset()
+  vi.mocked(clipboard.writeImage).mockReset()
+  vi.mocked(clipboard.readText).mockReset()
+  vi.mocked(clipboard.readImage).mockReset()
+  vi.mocked(clipboard.availableFormats).mockReset()
   mockExec.mockClear()
 })
 
@@ -64,7 +68,8 @@ describe('copyAndPaste', () => {
     expect(mockExec).not.toHaveBeenCalled()
   })
 
-  it('focus-only: pastes text and restores previous clipboard content', async () => {
+  it('focus-only: pastes text and restores previous text content', async () => {
+    vi.mocked(clipboard.availableFormats).mockReturnValue([])
     vi.mocked(clipboard.readText).mockReturnValue('previous content')
 
     await copyAndPaste('hello world', 'focus-only')
@@ -72,6 +77,22 @@ describe('copyAndPaste', () => {
     expect(clipboard.writeText).toHaveBeenNthCalledWith(1, 'hello world')
     expect(mockExec).toHaveBeenCalledOnce()
     expect(clipboard.writeText).toHaveBeenNthCalledWith(2, 'previous content')
+  })
+
+  it('focus-only: pastes text and restores previous image content', async () => {
+    const mockImage = { isEmpty: () => false }
+    vi.mocked(clipboard.availableFormats).mockReturnValue(['image/png'])
+    vi.mocked(clipboard.readText).mockReturnValue('')
+    vi.mocked(clipboard.readImage).mockReturnValue(
+      mockImage as ReturnType<typeof clipboard.readImage>
+    )
+
+    await copyAndPaste('hello world', 'focus-only')
+
+    expect(clipboard.writeText).toHaveBeenCalledTimes(1)
+    expect(clipboard.writeText).toHaveBeenCalledWith('hello world')
+    expect(mockExec).toHaveBeenCalledOnce()
+    expect(clipboard.writeImage).toHaveBeenCalledWith(mockImage)
   })
 
   it('defaults to clipboard-and-focus when no mode is given', async () => {
@@ -89,6 +110,7 @@ describe('copyAndPaste', () => {
   })
 
   it('focus-only: shows notification and restores clipboard when native paste fails', async () => {
+    vi.mocked(clipboard.availableFormats).mockReturnValue([])
     vi.mocked(clipboard.readText).mockReturnValue('prev')
     mockExec.mockImplementationOnce((_, cb) => cb(new Error('paste error')))
 

@@ -310,7 +310,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
             >
               <option value="clipboard-and-focus">Copy to clipboard &amp; paste at focus</option>
               <option value="clipboard-only">Copy to clipboard only</option>
-              <option value="focus-only">Paste at focus only</option>
+              <option value="focus-only">Paste at focus, restore clipboard</option>
             </select>
           </div>
         </section>

@@ -31,7 +31,10 @@ export async function copyAndPaste(
   }
 
   if (mode === 'focus-only') {
-    const previous = clipboard.readText()
+    const hasImage = clipboard.availableFormats().some((f) => f.startsWith('image/'))
+    const previousText = clipboard.readText()
+    const previousImage = hasImage ? clipboard.readImage() : null
+
     clipboard.writeText(text)
     try {
       await execPromise(getPasteCommand())
@@ -43,7 +46,11 @@ export async function copyAndPaste(
       }).show()
       return
     } finally {
-      clipboard.writeText(previous)
+      if (previousImage && !previousImage.isEmpty()) {
+        clipboard.writeImage(previousImage)
+      } else {
+        clipboard.writeText(previousText)
+      }
     }
     return
   }
