@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Settings, History, Info, PanelLeftClose, PanelLeftOpen, RotateCcw, X } from 'lucide-react'
+import { Settings, History, Info, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
 import SettingsView from '../settings/App'
 import HistoryView from '../history/App'
 import AboutView from '../about/App'
@@ -125,7 +125,6 @@ export default function App(): React.JSX.Element {
       </div>
       {updateReady && !updateDismissed && updateStatus.phase === 'ready' && (
         <div className="absolute bottom-4 right-4 flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50">
-          <RotateCcw size={16} className="text-blue-600 dark:text-blue-400 shrink-0" />
           <span className="text-sm text-gray-700 dark:text-gray-200 whitespace-nowrap">
             Version {updateStatus.version} ready to install
           </span>
