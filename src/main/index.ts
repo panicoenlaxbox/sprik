@@ -54,7 +54,7 @@ import { setLogRenderer, log } from './logger'
 import pkg from 'electron-updater'
 
 const { autoUpdater } = pkg
-import { initUpdater } from './updater'
+import { initUpdater, getLatestUpdateStatus } from './updater'
 
 let tray: Tray | null = null
 let appWindow: BrowserWindow | null = null
@@ -404,6 +404,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.RECORDING_CANCEL, () => orchestrator?.cancel())
 
   ipcMain.handle(CHANNELS.UPDATE_GET_VERSION, () => app.getVersion())
+  ipcMain.handle(CHANNELS.UPDATE_GET_STATUS, () => getLatestUpdateStatus())
   ipcMain.handle(CHANNELS.APP_GET_REPO_URL, () => repository)
 
   ipcMain.handle(CHANNELS.UPDATE_CHECK, () => {

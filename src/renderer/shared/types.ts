@@ -130,6 +130,7 @@ export interface AppApi {
   getAppVersion: () => Promise<string>
   isAutoUpdateSupported: () => boolean
   onUpdateStatus: (cb: (status: UpdateStatus) => void) => () => void
+  getUpdateStatus: () => Promise<UpdateStatus>
   checkForUpdates: () => Promise<void>
   installUpdate: () => Promise<void>
   openExternalUrl: (url: string) => Promise<void>

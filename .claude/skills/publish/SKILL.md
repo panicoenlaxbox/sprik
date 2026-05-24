@@ -6,9 +6,9 @@ disable-model-invocation: true
 
 Publish a new release of the project. Follow these steps exactly:
 
-1. Verify the working tree is clean (no uncommitted changes). If there are uncommitted changes, stop and tell the user to commit or stash them first.
+1. Verify the working tree is clean (no uncommitted changes). If there are uncommitted changes, use AskUserQuestion to ask the user whether they want you to commit those changes for them or prefer to handle it themselves. If they want you to commit, stage all modified tracked files, write an appropriate commit message yourself, and create the commit before continuing. If they prefer to handle it themselves, stop here.
 
-2. Ask the user which version bump they want: patch, minor, or major. Wait for their answer before continuing.
+2. Use AskUserQuestion to ask the user which version bump they want: patch, minor, or major. Wait for their answer before continuing.
 
 3. Run `pnpm version <patch|minor|major>` with the chosen bump type. This automatically bumps package.json, creates the commit, and creates the `v<version>` tag.
 

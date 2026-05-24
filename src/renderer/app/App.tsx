@@ -39,14 +39,16 @@ export default function App(): React.JSX.Element {
     []
   )
 
-  useEffect(
-    () =>
-      window.api.onUpdateStatus((s) => {
-        setUpdateStatus(s)
-        if (s.phase === 'ready') setUpdateDismissed(false)
-      }),
-    []
-  )
+  useEffect(() => {
+    window.api.getUpdateStatus().then((s) => {
+      setUpdateStatus(s)
+      if (s.phase === 'ready') setUpdateDismissed(false)
+    })
+    return window.api.onUpdateStatus((s) => {
+      setUpdateStatus(s)
+      if (s.phase === 'ready') setUpdateDismissed(false)
+    })
+  }, [])
 
   async function toggleSidebar(): Promise<void> {
     const next = !expanded

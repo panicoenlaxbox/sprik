@@ -89,6 +89,8 @@ const api = {
     return () => ipcRenderer.removeListener(CHANNELS.UPDATE_STATUS, handler)
   },
 
+  getUpdateStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke(CHANNELS.UPDATE_GET_STATUS),
+
   checkForUpdates: (): Promise<void> => ipcRenderer.invoke(CHANNELS.UPDATE_CHECK),
 
   installUpdate: (): Promise<void> => ipcRenderer.invoke(CHANNELS.UPDATE_INSTALL),

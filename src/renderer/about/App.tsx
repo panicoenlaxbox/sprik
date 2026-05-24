@@ -18,6 +18,7 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     window.api.getAppVersion().then(setVersion)
     window.api.getRepoUrl().then(setRepoUrl)
+    window.api.getUpdateStatus().then(setStatus)
     return window.api.onUpdateStatus(setStatus)
   }, [])
 

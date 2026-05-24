@@ -31,6 +31,7 @@ export const CHANNELS = {
   UPDATE_CHECK: 'update:check',
   UPDATE_INSTALL: 'update:install',
   UPDATE_GET_VERSION: 'update:get-version',
+  UPDATE_GET_STATUS: 'update:get-status',
   SHELL_OPEN_EXTERNAL: 'shell:open-external',
   APP_GET_REPO_URL: 'app:get-repo-url',
   OVERLAY_RESET_POSITION: 'overlay:reset-position',

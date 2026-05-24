@@ -7,6 +7,12 @@ import type { UpdateStatus } from '../renderer/shared/types'
 
 const { autoUpdater } = pkg
 
+let latestStatus: UpdateStatus = { phase: 'idle' }
+
+export function getLatestUpdateStatus(): UpdateStatus {
+  return latestStatus
+}
+
 export function initUpdater(getWindow: () => BrowserWindow | null): void {
   if (process.platform !== 'win32') return
 
@@ -20,6 +26,7 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
   let pendingVersion = ''
 
   function send(status: UpdateStatus): void {
+    latestStatus = status
     const win = getWindow()
     if (win && !win.isDestroyed()) {
       win.webContents.send(CHANNELS.UPDATE_STATUS, status)
