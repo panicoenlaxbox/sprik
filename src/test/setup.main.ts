@@ -45,7 +45,8 @@ vi.mock('electron', () => ({
     createEmpty: vi.fn(() => ({}))
   },
   Notification: vi.fn().mockImplementation(() => ({
-    show: vi.fn()
+    show: vi.fn(),
+    on: vi.fn()
   })),
   shell: {
     openExternal: vi.fn()

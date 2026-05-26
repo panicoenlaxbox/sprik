@@ -1,7 +1,7 @@
-import { app } from 'electron'
+import { app, Notification } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { CHANNELS } from '../shared/channels'
-import { initUpdater } from './updater'
+import { initUpdater, getAndClearPendingNavigation } from './updater'
 
 const mockAutoUpdater = vi.hoisted(() => ({
   autoDownload: false as boolean,
@@ -35,16 +35,20 @@ function getHandler(eventName: string): (...args: unknown[]) => unknown {
   return call[1]
 }
 
-function makeWindow(destroyed = false): BrowserWindow {
+function makeWindow(destroyed = false, loading = false): BrowserWindow {
   return {
     isDestroyed: vi.fn(() => destroyed),
-    webContents: { send: vi.fn() }
+    webContents: { send: vi.fn(), isLoading: vi.fn(() => loading) }
   } as unknown as BrowserWindow
 }
 
 function setupWin32(
   getWindow: () => BrowserWindow | null = () => makeWindow(),
-  options: { storeData?: Record<string, unknown>; isPackaged?: boolean } = {}
+  options: {
+    storeData?: Record<string, unknown>
+    isPackaged?: boolean
+    openWindow?: () => BrowserWindow
+  } = {}
 ): void {
   Object.defineProperty(process, 'platform', { value: 'win32', configurable: true })
   Object.defineProperty(app, 'isPackaged', {
@@ -55,7 +59,7 @@ function setupWin32(
   storeData = options.storeData ?? {}
   vi.mocked(mockAutoUpdater.on).mockClear()
   vi.mocked(mockAutoUpdater.checkForUpdates).mockClear()
-  initUpdater(getWindow)
+  initUpdater(getWindow, options.openWindow ?? (() => makeWindow()))
 }
 
 const originalPlatform = process.platform
@@ -71,7 +75,10 @@ describe('initUpdater', () => {
   it('returns immediately on non-win32 platforms', () => {
     Object.defineProperty(process, 'platform', { value: 'linux', configurable: true })
     vi.mocked(mockAutoUpdater.on).mockClear()
-    initUpdater(() => null)
+    initUpdater(
+      () => null,
+      () => makeWindow()
+    )
     expect(mockAutoUpdater.on).not.toHaveBeenCalled()
   })
 
@@ -102,6 +109,11 @@ describe('initUpdater', () => {
   it('calls checkForUpdates immediately when autoCheck is true', () => {
     setupWin32()
     expect(mockAutoUpdater.checkForUpdates).toHaveBeenCalledOnce()
+  })
+
+  it('logs current version before checking', () => {
+    setupWin32()
+    expect(vi.mocked(app.getVersion)()).toBe('0.1.0')
   })
 
   it('does not call checkForUpdates when autoCheck is false', () => {
@@ -183,6 +195,53 @@ describe('initUpdater', () => {
         phase: 'ready',
         version: '2.0.0'
       })
+    })
+
+    it('update-downloaded: shows a native OS notification', () => {
+      vi.mocked(Notification).mockClear()
+      setupWin32(() => makeWindow(false))
+      getHandler('update-downloaded')({ version: '2.0.0' })
+      expect(Notification).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Sprik update ready' })
+      )
+      const instance = vi.mocked(Notification).mock.results[0].value as {
+        show: ReturnType<typeof vi.fn>
+        on: ReturnType<typeof vi.fn>
+      }
+      expect(instance.show).toHaveBeenCalled()
+    })
+
+    it('notification click: sends NAVIGATE to loaded window and clears pendingNavigation', () => {
+      const win = makeWindow(false, false)
+      const openWindow = vi.fn(() => win)
+      setupWin32(() => win, { openWindow })
+      getHandler('update-downloaded')({ version: '2.0.0' })
+
+      const instance = vi.mocked(Notification).mock.results[
+        vi.mocked(Notification).mock.results.length - 1
+      ].value as { on: ReturnType<typeof vi.fn> }
+      const clickHandler = instance.on.mock.calls.find(([e]) => e === 'click')?.[1] as () => void
+      clickHandler()
+
+      expect(openWindow).toHaveBeenCalled()
+      expect(vi.mocked(win.webContents.send)).toHaveBeenCalledWith(CHANNELS.NAVIGATE, 'about')
+      expect(getAndClearPendingNavigation()).toBeNull()
+    })
+
+    it('notification click: sets pendingNavigation when window is loading', () => {
+      const win = makeWindow(false, true)
+      const openWindow = vi.fn(() => win)
+      setupWin32(() => win, { openWindow })
+      getHandler('update-downloaded')({ version: '2.0.0' })
+
+      const instance = vi.mocked(Notification).mock.results[
+        vi.mocked(Notification).mock.results.length - 1
+      ].value as { on: ReturnType<typeof vi.fn> }
+      const clickHandler = instance.on.mock.calls.find(([e]) => e === 'click')?.[1] as () => void
+      clickHandler()
+
+      expect(vi.mocked(win.webContents.send)).not.toHaveBeenCalledWith(CHANNELS.NAVIGATE, 'about')
+      expect(getAndClearPendingNavigation()).toBe('about')
     })
 
     it('error: sends error phase with message', () => {

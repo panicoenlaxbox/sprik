@@ -38,7 +38,9 @@ export const CHANNELS = {
   OVERLAY_POSITION_CHANGED: 'overlay:position-changed',
   OVERLAY_SETTINGS_CHANGED: 'overlay:settings-changed',
   OVERLAY_PREVIEW: 'overlay:preview',
-  LOG_GET_ALL: 'log:get-all'
+  LOG_GET_ALL: 'log:get-all',
+  NAVIGATE: 'navigate',
+  NAVIGATE_REQUEST: 'navigate-request'
 } as const
 
 export type Channel = (typeof CHANNELS)[keyof typeof CHANNELS]

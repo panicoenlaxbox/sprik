@@ -105,6 +105,14 @@ const api = {
 
   installUpdate: (): Promise<void> => ipcRenderer.invoke(CHANNELS.UPDATE_INSTALL),
 
+  getNavigationRequest: (): Promise<string | null> => ipcRenderer.invoke(CHANNELS.NAVIGATE_REQUEST),
+
+  onNavigate: (cb: (view: string) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, view: string): void => cb(view)
+    ipcRenderer.on(CHANNELS.NAVIGATE, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.NAVIGATE, handler)
+  },
+
   openExternalUrl: (url: string): Promise<void> =>
     ipcRenderer.invoke(CHANNELS.SHELL_OPEN_EXTERNAL, url),
 

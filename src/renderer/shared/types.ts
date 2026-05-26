@@ -135,6 +135,8 @@ export interface AppApi {
   onThemeChange: (cb: (theme: 'system' | 'light' | 'dark') => void) => () => void
   onHistoryEntryAdded: (cb: (entry: HistoryEntry) => void) => () => void
   cancelRecording: () => Promise<void>
+  getNavigationRequest: () => Promise<string | null>
+  onNavigate: (cb: (view: string) => void) => () => void
   getAppVersion: () => Promise<string>
   isAutoUpdateSupported: () => boolean
   onUpdateStatus: (cb: (status: UpdateStatus) => void) => () => void

@@ -4,6 +4,7 @@ import {
   Tray,
   Menu,
   nativeImage,
+  type NativeImage,
   session,
   ipcMain,
   clipboard,
@@ -55,9 +56,11 @@ import { SCOPES } from '../shared/scopes'
 import pkg from 'electron-updater'
 
 const { autoUpdater } = pkg
-import { initUpdater, getLatestUpdateStatus } from './updater'
+import { initUpdater, getLatestUpdateStatus, getAndClearPendingNavigation } from './updater'
 
 let tray: Tray | null = null
+let normalTrayIcon: NativeImage | null = null
+let badgeTrayIcon: NativeImage | null = null
 let appWindow: BrowserWindow | null = null
 let quitting = false
 let workerWindow: BrowserWindow | null = null
@@ -113,8 +116,27 @@ function openAppWindow(): BrowserWindow {
 }
 
 function createTray(): void {
-  const trayIcon = nativeImage.createFromPath(icon)
-  tray = new Tray(trayIcon.resize({ width: 16, height: 16 }))
+  normalTrayIcon = nativeImage.createFromPath(icon).resize({ width: 16, height: 16 })
+
+  // Compose badge icon: overlay a red dot (r=3) at top-right corner (cx=12, cy=3)
+  const buf = Buffer.from(normalTrayIcon.toBitmap())
+  const cx = 12,
+    cy = 3,
+    r = 3
+  for (let y = 0; y < 16; y++) {
+    for (let x = 0; x < 16; x++) {
+      if ((x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r) {
+        const i = (y * 16 + x) * 4
+        buf[i] = 68 // B
+        buf[i + 1] = 68 // G
+        buf[i + 2] = 239 // R (red-500)
+        buf[i + 3] = 255 // A
+      }
+    }
+  }
+  badgeTrayIcon = nativeImage.createFromBitmap(buf, { width: 16, height: 16 })
+
+  tray = new Tray(normalTrayIcon)
   tray.setToolTip('Sprik')
 
   const menu = Menu.buildFromTemplate([
@@ -413,6 +435,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
 
   ipcMain.handle(CHANNELS.UPDATE_GET_VERSION, () => app.getVersion())
   ipcMain.handle(CHANNELS.UPDATE_GET_STATUS, () => getLatestUpdateStatus())
+  ipcMain.handle(CHANNELS.NAVIGATE_REQUEST, () => getAndClearPendingNavigation())
   ipcMain.handle(CHANNELS.APP_GET_REPO_URL, () => repository)
 
   ipcMain.handle(CHANNELS.UPDATE_CHECK, () => {
@@ -458,7 +481,14 @@ if (!gotTheLock) {
       optimizer.watchWindowShortcuts(window)
     })
 
-    initUpdater(() => appWindow)
+    initUpdater(
+      () => appWindow,
+      openAppWindow,
+      (status) => {
+        if (!tray || tray.isDestroyed() || !normalTrayIcon || !badgeTrayIcon) return
+        tray.setImage(status.phase === 'ready' ? badgeTrayIcon : normalTrayIcon)
+      }
+    )
 
     workerWindow = createWorkerWindow()
     overlayWindow = createOverlayWindow(getConfig().ui.overlayPosition)

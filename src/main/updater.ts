@@ -1,4 +1,4 @@
-import { app, type BrowserWindow } from 'electron'
+import { app, Notification, type BrowserWindow } from 'electron'
 import pkg from 'electron-updater'
 import { CHANNELS } from '../shared/channels'
 import { log } from './logger'
@@ -9,12 +9,23 @@ import type { UpdateStatus } from '../renderer/shared/types'
 const { autoUpdater } = pkg
 
 let latestStatus: UpdateStatus = { phase: 'idle' }
+let pendingNavigation: string | null = null
 
 export function getLatestUpdateStatus(): UpdateStatus {
   return latestStatus
 }
 
-export function initUpdater(getWindow: () => BrowserWindow | null): void {
+export function getAndClearPendingNavigation(): string | null {
+  const nav = pendingNavigation
+  pendingNavigation = null
+  return nav
+}
+
+export function initUpdater(
+  getWindow: () => BrowserWindow | null,
+  openWindow: () => BrowserWindow,
+  onStatusChange?: (status: UpdateStatus) => void
+): void {
   if (process.platform !== 'win32') return
 
   autoUpdater.autoDownload = true
@@ -28,6 +39,7 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
 
   function send(status: UpdateStatus): void {
     latestStatus = status
+    onStatusChange?.(status)
     const win = getWindow()
     if (win && !win.isDestroyed()) {
       win.webContents.send(CHANNELS.UPDATE_STATUS, status)
@@ -63,6 +75,19 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
   autoUpdater.on('update-downloaded', (info) => {
     log(SCOPES.updater, `Update downloaded: ${info.version}`)
     send({ phase: 'ready', version: info.version })
+    const n = new Notification({
+      title: 'Sprik update ready',
+      body: `Version ${info.version} is ready to install. Open Sprik to restart.`
+    })
+    n.on('click', () => {
+      pendingNavigation = 'about'
+      const win = openWindow()
+      if (!win.webContents.isLoading()) {
+        win.webContents.send(CHANNELS.NAVIGATE, 'about')
+        pendingNavigation = null
+      }
+    })
+    n.show()
   })
 
   autoUpdater.on('error', (err) => {
@@ -70,6 +95,7 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
     send({ phase: 'error', message: err.message })
   })
 
+  log(SCOPES.updater, `Current version: ${app.getVersion()}`)
   if (getConfig().startup.autoCheck) {
     autoUpdater.checkForUpdates().catch(() => {})
   }
