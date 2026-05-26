@@ -5,7 +5,8 @@ import type {
   ApiProvider,
   OverlayState,
   HistoryEntry,
-  UpdateStatus
+  UpdateStatus,
+  LogEntry
 } from '../renderer/shared/types'
 
 const api = {
@@ -15,12 +16,21 @@ const api = {
     return () => ipcRenderer.removeListener(CHANNELS.OVERLAY_STATE, handler)
   },
 
-  onLog: (cb: (scope: string, message: string, level: string) => void): (() => void) => {
-    const handler = (_: IpcRendererEvent, scope: string, message: string, level: string): void =>
-      cb(scope, message, level)
+  onLog: (
+    cb: (scope: string, message: string, level: string, ts: number) => void
+  ): (() => void) => {
+    const handler = (
+      _: IpcRendererEvent,
+      scope: string,
+      message: string,
+      level: string,
+      ts: number
+    ): void => cb(scope, message, level, ts)
     ipcRenderer.on(CHANNELS.LOG_FORWARD, handler)
     return () => ipcRenderer.removeListener(CHANNELS.LOG_FORWARD, handler)
   },
+
+  getLogHistory: (): Promise<LogEntry[]> => ipcRenderer.invoke(CHANNELS.LOG_GET_ALL),
 
   getConfig: (): Promise<Config> => ipcRenderer.invoke(CHANNELS.SETTINGS_GET),
 

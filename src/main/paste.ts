@@ -1,6 +1,7 @@
 import { clipboard, Notification } from 'electron'
 import { exec } from 'child_process'
 import { log } from './logger'
+import { SCOPES } from '../shared/scopes'
 
 function execPromise(cmd: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -39,7 +40,7 @@ export async function copyAndPaste(
     try {
       await execPromise(getPasteCommand())
     } catch (err) {
-      log('paste', `native paste failed: ${(err as Error).message}`, 'warn')
+      log(SCOPES.paste, `native paste failed: ${(err as Error).message}`, 'warn')
       new Notification({
         title: 'Sprik - Auto-paste failed',
         body: 'Text copied to clipboard - paste it manually.'
@@ -60,7 +61,11 @@ export async function copyAndPaste(
   try {
     await execPromise(getPasteCommand())
   } catch (err) {
-    log('paste', `native paste failed, text is in clipboard: ${(err as Error).message}`, 'warn')
+    log(
+      SCOPES.paste,
+      `native paste failed, text is in clipboard: ${(err as Error).message}`,
+      'warn'
+    )
     new Notification({
       title: 'Sprik - Auto-paste failed',
       body: 'Text copied to clipboard - paste it manually.'

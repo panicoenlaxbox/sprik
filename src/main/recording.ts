@@ -3,6 +3,7 @@ import { join } from 'path'
 import { writeFileSync, unlinkSync, existsSync } from 'fs'
 import { CHANNELS, type OverlayState, type RecordingAudioPayload } from './ipc'
 import { log } from './logger'
+import { SCOPES } from '../shared/scopes'
 
 export type RecordingState = 'idle' | 'recording' | 'error'
 
@@ -39,7 +40,7 @@ export class RecordingOrchestrator {
   ) {
     worker.onAudio((payload) => {
       this.handleAudio(payload).catch((e: unknown) =>
-        log('recording', e instanceof Error ? e.message : String(e), 'error')
+        log(SCOPES.recording, e instanceof Error ? e.message : String(e), 'error')
       )
     })
     worker.onError((err) => this.handleError(err))
@@ -103,7 +104,7 @@ export class RecordingOrchestrator {
     const tempDir = app.getPath('temp')
     this.tempPath = join(tempDir, `sprik-${Date.now()}.webm`)
     writeFileSync(this.tempPath, payload.buffer)
-    log('recording', `saved ${this.tempPath} (${payload.durationMs}ms)`)
+    log(SCOPES.recording, `saved ${this.tempPath} (${payload.durationMs}ms)`)
 
     if (this.state === 'idle') {
       this.deleteTempFile()
@@ -135,7 +136,7 @@ export class RecordingOrchestrator {
   }
 
   private handleError(error: string): void {
-    log('recording', `worker error: ${error}`, 'error')
+    log(SCOPES.recording, `worker error: ${error}`, 'error')
     this.deleteTempFile()
     this.reset()
   }

@@ -21,7 +21,13 @@ describe('setLogRenderer', () => {
     const wc = { isDestroyed: vi.fn(() => false), send: vi.fn() }
     setLogRenderer(wc as unknown as WebContents)
     log('test', 'hello')
-    expect(wc.send).toHaveBeenCalledWith(CHANNELS.LOG_FORWARD, 'test', 'hello', 'info')
+    expect(wc.send).toHaveBeenCalledWith(
+      CHANNELS.LOG_FORWARD,
+      'test',
+      'hello',
+      'info',
+      expect.any(Number)
+    )
   })
 })
 
@@ -30,7 +36,13 @@ describe('log', () => {
     const wc = { isDestroyed: vi.fn(() => false), send: vi.fn() }
     setLogRenderer(wc as unknown as WebContents)
     log('scope', 'message', 'warn')
-    expect(wc.send).toHaveBeenCalledWith(CHANNELS.LOG_FORWARD, 'scope', 'message', 'warn')
+    expect(wc.send).toHaveBeenCalledWith(
+      CHANNELS.LOG_FORWARD,
+      'scope',
+      'message',
+      'warn',
+      expect.any(Number)
+    )
   })
 
   it('skips renderer send when target is destroyed', () => {

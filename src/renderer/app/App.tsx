@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { Settings, History, Info, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
+import React, { useState, useEffect, useRef } from 'react'
+import { Settings, History, Info, ScrollText, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react'
 import SettingsView from '../settings/App'
 import HistoryView from '../history/App'
 import AboutView from '../about/App'
+import LogsView from './LogsView'
 import { useTheme } from '../shared/useTheme'
-import type { Config, UpdateStatus } from '../shared/types'
+import type { Config, UpdateStatus, LogEntry } from '../shared/types'
 
-type View = 'settings' | 'history' | 'about'
+type View = 'settings' | 'history' | 'about' | 'logs'
 
 export default function App(): React.JSX.Element {
   const [view, setView] = useState<View>('settings')
@@ -19,6 +20,9 @@ export default function App(): React.JSX.Element {
   })
   const [updateStatus, setUpdateStatus] = useState<UpdateStatus>({ phase: 'idle' })
   const [updateDismissed, setUpdateDismissed] = useState(false)
+  const [logEntries, setLogEntries] = useState<LogEntry[]>([])
+  const pendingLogs = useRef<LogEntry[]>([])
+  const historyLoaded = useRef(false)
 
   useTheme(theme)
 
@@ -30,14 +34,29 @@ export default function App(): React.JSX.Element {
     })
   }, [])
 
-  useEffect(
-    () =>
-      window.api.onLog((scope, message, level) => {
-        const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log
-        fn(`%c[${scope}]%c ${message}`, 'color:#6366f1;font-weight:bold', 'color:inherit')
-      }),
-    []
-  )
+  useEffect(() => {
+    window.api.getLogHistory().then((history) => {
+      const seen = new Set(history.map((e) => `${e.ts}|${e.scope}|${e.message}`))
+      const extra = pendingLogs.current.filter((e) => !seen.has(`${e.ts}|${e.scope}|${e.message}`))
+      setLogEntries([...history, ...extra])
+      historyLoaded.current = true
+    })
+    return window.api.onLog((scope, message, level, ts) => {
+      const fn = level === 'error' ? console.error : level === 'warn' ? console.warn : console.log
+      fn(`%c[${scope}]%c ${message}`, 'color:#6366f1;font-weight:bold', 'color:inherit')
+      const entry: LogEntry = {
+        scope,
+        message,
+        level: level as LogEntry['level'],
+        ts: ts ?? Date.now()
+      }
+      if (!historyLoaded.current) {
+        pendingLogs.current.push(entry)
+      } else {
+        setLogEntries((prev) => [...prev, entry])
+      }
+    })
+  }, [])
 
   useEffect(() => {
     window.api.getUpdateStatus().then((s) => {
@@ -63,6 +82,7 @@ export default function App(): React.JSX.Element {
   const navItems: { id: View; icon: React.JSX.Element; label: string; badge?: boolean }[] = [
     { id: 'settings', icon: <Settings size={20} />, label: 'Settings' },
     { id: 'history', icon: <History size={20} />, label: 'History' },
+    { id: 'logs', icon: <ScrollText size={20} />, label: 'Logs' },
     { id: 'about', icon: <Info size={20} />, label: 'About', badge: updateReady }
   ]
 
@@ -118,6 +138,9 @@ export default function App(): React.JSX.Element {
         </div>
         <div className={view === 'history' ? 'h-full' : 'hidden'}>
           <HistoryView />
+        </div>
+        <div className={view === 'logs' ? 'h-full relative' : 'hidden'}>
+          <LogsView entries={logEntries} />
         </div>
         <div className={view === 'about' ? 'h-full' : 'hidden'}>
           <AboutView />

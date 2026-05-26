@@ -500,7 +500,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
                 setPositionReset(true)
                 setTimeout(() => setPositionReset(false), 2000)
               }}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 underline underline-offset-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Reset position
             </button>

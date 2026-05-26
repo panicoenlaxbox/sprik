@@ -2,6 +2,7 @@ import { app, type BrowserWindow } from 'electron'
 import pkg from 'electron-updater'
 import { CHANNELS } from '../shared/channels'
 import { log } from './logger'
+import { SCOPES } from '../shared/scopes'
 import { getConfig } from './store'
 import type { UpdateStatus } from '../renderer/shared/types'
 
@@ -34,18 +35,18 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
   }
 
   autoUpdater.on('checking-for-update', () => {
-    log('updater', 'Checking for update...')
+    log(SCOPES.updater, 'Checking for update...')
     send({ phase: 'checking' })
   })
 
   autoUpdater.on('update-available', (info) => {
     pendingVersion = info.version
-    log('updater', `Update available: ${info.version}`)
+    log(SCOPES.updater, `Update available: ${info.version}`)
     send({ phase: 'available', version: info.version })
   })
 
   autoUpdater.on('update-not-available', (info) => {
-    log('updater', `Already up to date (${info.version})`)
+    log(SCOPES.updater, `Already up to date (${info.version})`)
     send({ phase: 'up-to-date' })
   })
 
@@ -53,19 +54,19 @@ export function initUpdater(getWindow: () => BrowserWindow | null): void {
   autoUpdater.on('download-progress', (p) => {
     const percent = Math.round(p.percent)
     if (Math.floor(percent / 10) > Math.floor(lastLoggedPercent / 10)) {
-      log('updater', `Downloading ${pendingVersion}... ${percent}%`)
+      log(SCOPES.updater, `Downloading ${pendingVersion}... ${percent}%`)
       lastLoggedPercent = percent
     }
     send({ phase: 'downloading', version: pendingVersion, percent })
   })
 
   autoUpdater.on('update-downloaded', (info) => {
-    log('updater', `Update downloaded: ${info.version}`)
+    log(SCOPES.updater, `Update downloaded: ${info.version}`)
     send({ phase: 'ready', version: info.version })
   })
 
   autoUpdater.on('error', (err) => {
-    log('updater', err.message, 'error')
+    log(SCOPES.updater, err.message, 'error')
     send({ phase: 'error', message: err.message })
   })
 

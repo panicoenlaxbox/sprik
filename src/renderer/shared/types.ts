@@ -90,6 +90,13 @@ export interface Config {
   }
 }
 
+export interface LogEntry {
+  scope: string
+  message: string
+  level: 'info' | 'warn' | 'error'
+  ts: number
+}
+
 export type ApiProvider = 'openai' | 'groq' | 'anthropic' | 'azure'
 export const API_PROVIDERS: ApiProvider[] = ['anthropic', 'azure', 'groq', 'openai']
 export type ApiKeyStatus = Record<ApiProvider, boolean>
@@ -105,7 +112,8 @@ export type UpdateStatus =
 
 export interface AppApi {
   onOverlayState: (cb: (state: OverlayState) => void) => () => void
-  onLog: (cb: (scope: string, message: string, level: string) => void) => () => void
+  onLog: (cb: (scope: string, message: string, level: string, ts: number) => void) => () => void
+  getLogHistory: () => Promise<LogEntry[]>
   getConfig: () => Promise<Config>
   setConfig: (partial: Partial<Config>) => Promise<{ toggleFailed: boolean }>
   getApiKeyStatus: () => Promise<ApiKeyStatus>

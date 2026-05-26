@@ -50,7 +50,8 @@ import { join } from 'path'
 import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
 import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries } from './history'
 import { setAutostart } from './autostart'
-import { setLogRenderer, log } from './logger'
+import { setLogRenderer, log, readLogFile } from './logger'
+import { SCOPES } from '../shared/scopes'
 import pkg from 'electron-updater'
 
 const { autoUpdater } = pkg
@@ -160,7 +161,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         })
         transcriptionDurationMs = Date.now() - t0
       } catch (err) {
-        log('transcription', err instanceof Error ? err.message : String(err), 'error')
+        log(SCOPES.transcription, err instanceof Error ? err.message : String(err), 'error')
         new Notification({
           title: 'Sprik — Could not process transcript',
           body: 'API key or connection issue.'
@@ -169,7 +170,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
       }
 
       if (!transcript) {
-        log('transcription', 'empty transcript returned', 'warn')
+        log(SCOPES.transcription, 'empty transcript returned', 'warn')
         new Notification({
           title: 'Sprik — Transcription failed',
           body: 'No speech detected or API returned an empty result.'
@@ -195,7 +196,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
           })
           postProcessingDurationMs = Date.now() - t0
         } catch (err) {
-          log('postProcessing', err instanceof Error ? err.message : String(err), 'error')
+          log(SCOPES.postProcessing, err instanceof Error ? err.message : String(err), 'error')
           new Notification({
             title: 'Sprik — Could not process transcript',
             body: 'API key or connection issue.'
@@ -204,7 +205,7 @@ function buildPipeline(setOverlayState: (s: OverlayState) => void): TranscribePi
         }
 
         if (!text) {
-          log('postProcessing', 'empty result returned', 'warn')
+          log(SCOPES.postProcessing, 'empty result returned', 'warn')
           new Notification({
             title: 'Sprik — Post-processing failed',
             body: 'API returned an empty result.'
@@ -293,7 +294,7 @@ function setupIpcBridges(
       overlay.webContents.send(CHANNELS.OVERLAY_STATE, state)
       overlay.setIgnoreMouseEvents(state === 'idle', { forward: true })
       if (state !== 'idle') overlay.moveTop()
-      log('overlay', `state = ${state}`)
+      log(SCOPES.overlay, `state = ${state}`)
     }
   }
 
@@ -319,7 +320,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     ) {
       unregisterShortcuts()
       const result = registerShortcuts(newConfig.shortcuts, shortcutHandlers, (a) =>
-        log('shortcuts', `${a} is taken by another app`, 'warn')
+        log(SCOPES.shortcuts, `${a} is taken by another app`, 'warn')
       )
       toggleFailed = result.toggleFailed
     }
@@ -341,6 +342,7 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     ) {
       overlayWindow.webContents.send(CHANNELS.OVERLAY_SETTINGS_CHANGED, newConfig.overlay)
     }
+    log(SCOPES.user, 'settings saved')
     return { toggleFailed }
   })
 
@@ -362,8 +364,14 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   })
 
   ipcMain.handle(CHANNELS.HISTORY_GET_ALL, () => getEntries())
-  ipcMain.handle(CHANNELS.HISTORY_DELETE, (_, id: string) => deleteEntry(id))
-  ipcMain.handle(CHANNELS.HISTORY_CLEAR, () => clearEntries())
+  ipcMain.handle(CHANNELS.HISTORY_DELETE, (_, id: string) => {
+    deleteEntry(id)
+    log(SCOPES.user, 'history entry deleted')
+  })
+  ipcMain.handle(CHANNELS.HISTORY_CLEAR, () => {
+    clearEntries()
+    log(SCOPES.user, 'history cleared')
+  })
   ipcMain.handle(CHANNELS.HISTORY_EXPORT, () => exportEntries())
   ipcMain.handle(CHANNELS.CLIPBOARD_WRITE, (_, text: string) => clipboard.writeText(text))
 
@@ -414,6 +422,8 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
   ipcMain.handle(CHANNELS.UPDATE_INSTALL, () => {
     if (process.platform === 'win32') autoUpdater.quitAndInstall()
   })
+
+  ipcMain.handle(CHANNELS.LOG_GET_ALL, () => readLogFile())
 
   ipcMain.on(CHANNELS.LOG_WORKER, (_, scope: string, message: string, level: string) => {
     log(scope, message, level as Parameters<typeof log>[2])
@@ -498,7 +508,7 @@ if (!gotTheLock) {
     workerWindow.webContents.once('did-finish-load', () => {
       const config = getConfig()
       const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
-        log('shortcuts', `${a} is taken by another app`, 'warn')
+        log(SCOPES.shortcuts, `${a} is taken by another app`, 'warn')
       )
       if (toggleFailed) {
         const n = new Notification({

@@ -15,18 +15,19 @@ declare global {
 }
 
 import { USB_DEVICE_ID_RE } from '../../shared/utils'
+import { SCOPES } from '../../shared/scopes'
 
 let mediaRecorder: MediaRecorder | null = null
 let chunks: Blob[] = []
 let startedAt = 0
 
 async function startRecording(deviceId?: string): Promise<void> {
-  window.workerApi.log('worker', 'startRecording called', 'info')
+  window.workerApi.log(SCOPES.worker, 'startRecording called', 'info')
   chunks = []
   try {
     const constraint = deviceId ? { audio: { deviceId: { exact: deviceId } } } : { audio: true }
     const stream = await navigator.mediaDevices.getUserMedia(constraint)
-    window.workerApi.log('worker', 'got mic stream', 'info')
+    window.workerApi.log(SCOPES.worker, 'got mic stream', 'info')
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' })
 
     mediaRecorder.ondataavailable = (e): void => {
@@ -47,7 +48,7 @@ async function startRecording(deviceId?: string): Promise<void> {
     mediaRecorder.start(250)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    window.workerApi.log('worker', `getUserMedia error: ${message}`, 'error')
+    window.workerApi.log(SCOPES.worker, `getUserMedia error: ${message}`, 'error')
     window.workerApi.sendError(message)
   }
 }
