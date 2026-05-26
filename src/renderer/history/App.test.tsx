@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App'
 import type { HistoryEntry } from '../shared/types'
@@ -116,5 +116,50 @@ describe('History App', () => {
     await user.type(screen.getByLabelText(/search history/i), 'zzznomatch')
 
     expect(screen.getByText(/no results for that query/i)).toBeInTheDocument()
+  })
+
+  it('reloads all entries from disk when a new entry is added', async () => {
+    const entry3: HistoryEntry = {
+      id: 'abc-3',
+      processed: 'New entry after retain trim',
+      timestamp: '2026-04-24T11:00:00.000Z',
+      transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' }
+    }
+    let addedCallback: ((entry: HistoryEntry) => void) | undefined
+    vi.mocked(window.api.onHistoryEntryAdded).mockImplementation((cb) => {
+      addedCallback = cb
+      return () => {}
+    })
+    vi.mocked(window.api.getHistory)
+      .mockResolvedValueOnce([entry1, entry2])
+      .mockResolvedValueOnce([entry3, entry1])
+
+    render(<App />)
+    await waitFor(() => screen.getByText('Hello world from Groq'))
+
+    addedCallback!(entry3)
+
+    await waitFor(() => expect(screen.getByText('New entry after retain trim')).toBeInTheDocument())
+    expect(screen.queryByText('Another transcription via OpenAI')).not.toBeInTheDocument()
+  })
+
+  it('replaces entries when history is trimmed via settings change', async () => {
+    let trimmedCallback: ((entries: HistoryEntry[]) => void) | undefined
+    vi.mocked(window.api.onHistoryTrimmed).mockImplementation((cb) => {
+      trimmedCallback = cb
+      return () => {}
+    })
+
+    render(<App />)
+    await waitFor(() => screen.getByText('Hello world from Groq'))
+
+    await act(async () => {
+      trimmedCallback!([entry2])
+    })
+
+    await waitFor(() =>
+      expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument()
+    )
+    expect(screen.getByText('Another transcription via OpenAI')).toBeInTheDocument()
   })
 })

@@ -47,6 +47,14 @@ export function clearEntries(): void {
   store.set('entries', [])
 }
 
+export function trimEntries(retain: number): HistoryEntry[] {
+  const all = getEntries()
+  all.slice(retain).forEach(removeEntryFiles)
+  const trimmed = all.slice(0, retain)
+  store.set('entries', trimmed)
+  return trimmed
+}
+
 export function exportEntries(): string {
   return JSON.stringify(getEntries(), null, 2)
 }

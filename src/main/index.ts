@@ -49,7 +49,14 @@ import { getConfig, setConfig } from './store'
 import { copyFileSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import { getKey, setKey, clearKey, getKeyStatus } from './secrets'
-import { appendEntry, getEntries, deleteEntry, clearEntries, exportEntries } from './history'
+import {
+  appendEntry,
+  getEntries,
+  deleteEntry,
+  clearEntries,
+  exportEntries,
+  trimEntries
+} from './history'
 import { setAutostart } from './autostart'
 import { setLogRenderer, log, readLogFile } from './logger'
 import { SCOPES } from '../shared/scopes'
@@ -363,6 +370,10 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
       !overlayWindow.isDestroyed()
     ) {
       overlayWindow.webContents.send(CHANNELS.OVERLAY_SETTINGS_CHANGED, newConfig.overlay)
+    }
+    if (newConfig.history.retain < prevConfig.history.retain) {
+      const trimmed = trimEntries(newConfig.history.retain)
+      appWindow?.webContents.send(CHANNELS.HISTORY_TRIMMED, trimmed)
     }
     log(SCOPES.user, 'settings saved')
     return { toggleFailed }

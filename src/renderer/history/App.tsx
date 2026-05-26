@@ -75,9 +75,14 @@ export default function App(): React.JSX.Element {
       setEntries(data)
       setLoading(false)
     })
-    return window.api.onHistoryEntryAdded((entry) => {
-      setEntries((prev) => [entry, ...prev])
+    const unsubAdded = window.api.onHistoryEntryAdded(() => {
+      window.api.getHistory().then(setEntries)
     })
+    const unsubTrimmed = window.api.onHistoryTrimmed(setEntries)
+    return () => {
+      unsubAdded()
+      unsubTrimmed()
+    }
   }, [])
 
   useEffect(() => {

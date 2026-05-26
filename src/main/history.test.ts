@@ -4,6 +4,7 @@ import {
   deleteEntry,
   clearEntries,
   exportEntries,
+  trimEntries,
   type HistoryEntry
 } from './history'
 import { rmSync, existsSync } from 'fs'
@@ -107,6 +108,50 @@ describe('clearEntries', () => {
     clearEntries()
 
     expect(getEntries()).toHaveLength(0)
+  })
+})
+
+describe('trimEntries', () => {
+  it('reduces stored entries to the given limit and returns them', () => {
+    for (let i = 0; i < 5; i++) {
+      appendEntry({ ...entryData, processed: `Entry ${i}` }, 10)
+    }
+
+    const result = trimEntries(2)
+
+    expect(result).toHaveLength(2)
+    expect(getEntries()).toHaveLength(2)
+  })
+
+  it('keeps the most recent entries when trimming', () => {
+    appendEntry({ ...entryData, processed: 'Oldest' }, 10)
+    appendEntry({ ...entryData, processed: 'Middle' }, 10)
+    appendEntry({ ...entryData, processed: 'Newest' }, 10)
+
+    trimEntries(2)
+
+    const remaining = getEntries() as HistoryEntry[]
+    expect(remaining.map((e) => e.processed)).toEqual(['Newest', 'Middle'])
+  })
+
+  it('removes files of entries evicted by the trim', () => {
+    const evictedPath = '/recordings/old'
+    appendEntry({ ...entryData, path: evictedPath }, 10)
+    appendEntry(entryData, 10)
+
+    trimEntries(1)
+
+    expect(rmSync).toHaveBeenCalledWith(evictedPath, { recursive: true, force: true })
+  })
+
+  it('is a no-op when entries are already within the limit', () => {
+    appendEntry(entryData, 10)
+    appendEntry(entryData, 10)
+
+    const result = trimEntries(5)
+
+    expect(result).toHaveLength(2)
+    expect(getEntries()).toHaveLength(2)
   })
 })
 

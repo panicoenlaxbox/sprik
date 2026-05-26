@@ -134,6 +134,7 @@ export interface AppApi {
   getRecordingsPath: () => Promise<string>
   onThemeChange: (cb: (theme: 'system' | 'light' | 'dark') => void) => () => void
   onHistoryEntryAdded: (cb: (entry: HistoryEntry) => void) => () => void
+  onHistoryTrimmed: (cb: (entries: HistoryEntry[]) => void) => () => void
   cancelRecording: () => Promise<void>
   getNavigationRequest: () => Promise<string | null>
   onNavigate: (cb: (view: string) => void) => () => void

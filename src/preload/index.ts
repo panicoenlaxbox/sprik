@@ -87,6 +87,12 @@ const api = {
     return () => ipcRenderer.removeListener(CHANNELS.HISTORY_ENTRY_ADDED, handler)
   },
 
+  onHistoryTrimmed: (cb: (entries: HistoryEntry[]) => void): (() => void) => {
+    const handler = (_: IpcRendererEvent, entries: HistoryEntry[]): void => cb(entries)
+    ipcRenderer.on(CHANNELS.HISTORY_TRIMMED, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.HISTORY_TRIMMED, handler)
+  },
+
   cancelRecording: (): Promise<void> => ipcRenderer.invoke(CHANNELS.RECORDING_CANCEL),
 
   getAppVersion: (): Promise<string> => ipcRenderer.invoke(CHANNELS.UPDATE_GET_VERSION),

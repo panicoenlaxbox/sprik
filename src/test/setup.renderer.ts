@@ -30,6 +30,7 @@ Object.defineProperty(window, 'api', {
     getRecordingsPath: vi.fn(),
     onThemeChange: vi.fn(() => () => {}),
     onHistoryEntryAdded: vi.fn(() => () => {}),
+    onHistoryTrimmed: vi.fn(() => () => {}),
     cancelRecording: vi.fn(),
     getAppVersion: vi.fn().mockResolvedValue('0.1.0'),
     isAutoUpdateSupported: vi.fn().mockReturnValue(false),

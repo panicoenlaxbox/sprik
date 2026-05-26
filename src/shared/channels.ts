@@ -27,6 +27,7 @@ export const CHANNELS = {
   LOG_WORKER: 'log:worker',
   UI_THEME_CHANGED: 'ui:theme-changed',
   HISTORY_ENTRY_ADDED: 'history:entry-added',
+  HISTORY_TRIMMED: 'history:trimmed',
   UPDATE_STATUS: 'update:status',
   UPDATE_CHECK: 'update:check',
   UPDATE_INSTALL: 'update:install',
