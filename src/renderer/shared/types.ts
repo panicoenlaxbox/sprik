@@ -114,6 +114,7 @@ export interface AppApi {
   onOverlayState: (cb: (state: OverlayState) => void) => () => void
   onLog: (cb: (scope: string, message: string, level: string, ts: number) => void) => () => void
   getLogHistory: () => Promise<LogEntry[]>
+  log: (scope: string, message: string, level?: string) => void
   getConfig: () => Promise<Config>
   setConfig: (partial: Partial<Config>) => Promise<{ toggleFailed: boolean }>
   getApiKeyStatus: () => Promise<ApiKeyStatus>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { type OverlayState } from '../shared/types'
 import { useTheme } from '../shared/useTheme'
+import { SCOPES } from '../../shared/scopes'
 
 function formatElapsed(seconds: number): string {
   return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
@@ -33,11 +34,28 @@ export default function App(): React.JSX.Element {
 
   useEffect(() => {
     const unsubscribe = window.api.onOverlayState((s) => {
+      window.api.log(SCOPES.overlay, `received ${s}`, 'info')
       nextStateRef.current = s as OverlayState
       setState(s as OverlayState)
     })
     return unsubscribe
   }, [])
+
+  // Diagnostic: log when the overlay has actually painted a new state, to
+  // measure perceived latency between the shortcut press and visible feedback.
+  // Double rAF ensures the log fires after the browser has committed the frame.
+  useEffect(() => {
+    let raf2 = 0
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        window.api.log(SCOPES.overlay, `painted ${state}`, 'info')
+      })
+    })
+    return () => {
+      cancelAnimationFrame(raf1)
+      cancelAnimationFrame(raf2)
+    }
+  }, [state])
 
   useEffect(() => {
     return window.api.onOverlaySettingsChange((overlay) => {

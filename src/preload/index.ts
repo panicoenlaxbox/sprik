@@ -32,6 +32,9 @@ const api = {
 
   getLogHistory: (): Promise<LogEntry[]> => ipcRenderer.invoke(CHANNELS.LOG_GET_ALL),
 
+  log: (scope: string, message: string, level: string = 'info'): void =>
+    ipcRenderer.send(CHANNELS.LOG_WORKER, scope, message, level),
+
   getConfig: (): Promise<Config> => ipcRenderer.invoke(CHANNELS.SETTINGS_GET),
 
   setConfig: (partial: Partial<Config>): Promise<{ toggleFailed: boolean }> =>

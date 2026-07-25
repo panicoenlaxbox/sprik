@@ -46,6 +46,7 @@ async function startRecording(deviceId?: string): Promise<void> {
 
     startedAt = Date.now()
     mediaRecorder.start(250)
+    window.workerApi.log(SCOPES.worker, 'mediaRecorder started', 'info')
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     window.workerApi.log(SCOPES.worker, `getUserMedia error: ${message}`, 'error')

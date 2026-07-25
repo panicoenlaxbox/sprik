@@ -26,7 +26,8 @@ function formatTs(ts: number): string {
   const hh = d.getHours().toString().padStart(2, '0')
   const mm = d.getMinutes().toString().padStart(2, '0')
   const ss = d.getSeconds().toString().padStart(2, '0')
-  return `${DD}/${MM} ${hh}:${mm}:${ss}`
+  const ms = d.getMilliseconds().toString().padStart(3, '0')
+  return `${DD}/${MM} ${hh}:${mm}:${ss}.${ms}`
 }
 
 interface Props {
@@ -119,7 +120,7 @@ export default function LogsView({ entries }: Props): React.JSX.Element {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto min-h-0 text-xs"
+        className="flex-1 overflow-y-auto min-h-0 text-sm"
       >
         <div ref={topRef} />
         {filtered.length === 0 ? (
@@ -136,7 +137,7 @@ export default function LogsView({ entries }: Props): React.JSX.Element {
                   key={i}
                   className={`border-b border-gray-100 dark:border-gray-800/60 ${LEVEL_ROW_HIGHLIGHT[entry.level]}`}
                 >
-                  <td className="px-3 py-1 whitespace-nowrap text-gray-400 dark:text-gray-500 select-none w-[118px]">
+                  <td className="px-3 py-1 whitespace-nowrap text-gray-400 dark:text-gray-500 select-none w-[150px]">
                     {formatTs(entry.ts)}
                   </td>
                   <td className="px-2 py-1 whitespace-nowrap w-[52px]">

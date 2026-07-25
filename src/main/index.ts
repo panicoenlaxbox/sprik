@@ -513,6 +513,7 @@ if (!gotTheLock) {
 
     const shortcutHandlers = {
       onToggle: () => {
+        log(SCOPES.shortcuts, 'toggle fired', 'info')
         if (orchestrator?.getState() === 'idle') {
           const cfg = getConfig()
           const key = getKey(cfg.transcription.provider)
@@ -550,6 +551,11 @@ if (!gotTheLock) {
       const config = getConfig()
       const { toggleFailed } = registerShortcuts(config.shortcuts, shortcutHandlers, (a) =>
         log(SCOPES.shortcuts, `${a} is taken by another app`, 'warn')
+      )
+      log(
+        SCOPES.shortcuts,
+        `worker loaded; shortcuts registered (toggleFailed=${toggleFailed})`,
+        'info'
       )
       if (toggleFailed) {
         const n = new Notification({

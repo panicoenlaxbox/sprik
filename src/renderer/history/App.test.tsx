@@ -157,9 +157,7 @@ describe('History App', () => {
       trimmedCallback!([entry2])
     })
 
-    await waitFor(() =>
-      expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument()
-    )
+    await waitFor(() => expect(screen.queryByText('Hello world from Groq')).not.toBeInTheDocument())
     expect(screen.getByText('Another transcription via OpenAI')).toBeInTheDocument()
   })
 })
