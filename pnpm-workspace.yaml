@@ -1,3 +1,6 @@
+# Not a monorepo: this file only carries pnpm settings (pnpm 11 no longer reads
+# them from the "pnpm" field in package.json). Do not add a "packages:" field.
+strictDepBuilds: false
 allowBuilds:
   electron: true
   electron-winstaller: false
