@@ -22,7 +22,7 @@ jobs:
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 11
+          version: 9
 
       - uses: actions/setup-node@v6
         with:
@@ -50,30 +50,37 @@ jobs:
         include:
           - os: windows-latest
             build_cmd: build:win
-          - os: ubuntu-latest
-            build_cmd: build:linux
-          - os: macos-latest
-            build_cmd: build:mac
+          # Linux and macOS are disabled for now (Windows-only support).
+          # Re-enable by uncommenting these entries and the matching steps below.
+          # - os: ubuntu-latest
+          #   build_cmd: build:linux
+          # - os: macos-latest
+          #   build_cmd: build:mac
     steps:
       - uses: actions/checkout@v6
 
       - uses: pnpm/action-setup@v6
         with:
-          version: 11
+          version: 9
 
       - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
 
-      - name: Install Linux packaging tools
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
+      # - name: Install Linux packaging tools
+      #   if: runner.os == 'Linux'
+      #   run: sudo apt-get update && sudo apt-get install -y rpm fakeroot
 
       - run: pnpm install
 
       - name: Build installer
         run: pnpm ${{ matrix.build_cmd }}
+
+      # Fail the build (and skip the release) if the packaged app is missing any
+      # production dependency, so a broken artifact never gets published.
+      - name: Verify packaged app
+        run: node scripts/verify-asar.mjs
 
       - name: Create GitHub Release (Windows)
         if: runner.os == 'Windows'
@@ -84,18 +91,18 @@ jobs:
             dist/latest.yml
           body: ''
 
-      - name: Create GitHub Release (Linux)
-        if: runner.os == 'Linux'
-        uses: softprops/action-gh-release@v3
-        with:
-          files: |
-            dist/*.AppImage
-            dist/*.deb
-          body: ''
+      # - name: Create GitHub Release (Linux)
+      #   if: runner.os == 'Linux'
+      #   uses: softprops/action-gh-release@v3
+      #   with:
+      #     files: |
+      #       dist/*.AppImage
+      #       dist/*.deb
+      #     body: ''
 
-      - name: Create GitHub Release (macOS)
-        if: runner.os == 'macOS'
-        uses: softprops/action-gh-release@v3
-        with:
-          files: dist/*.dmg
-          body: ''
+      # - name: Create GitHub Release (macOS)
+      #   if: runner.os == 'macOS'
+      #   uses: softprops/action-gh-release@v3
+      #   with:
+      #     files: dist/*.dmg
+      #     body: ''
