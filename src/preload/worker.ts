@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('workerApi', {
   sendAudio: (buffer: ArrayBuffer, durationMs: number, microphone?: string) =>
     ipcRenderer.send(WORKER_CHANNELS.RECORDING_AUDIO, { buffer, durationMs, microphone }),
   sendError: (message: string) => ipcRenderer.send(WORKER_CHANNELS.RECORDING_ERROR, message),
+  sendStarted: () => ipcRenderer.send(WORKER_CHANNELS.RECORDING_STARTED),
+  sendAborted: () => ipcRenderer.send(WORKER_CHANNELS.RECORDING_ABORTED),
   log: (scope: string, message: string, level: string) =>
     ipcRenderer.send(WORKER_CHANNELS.LOG_WORKER, scope, message, level)
 })

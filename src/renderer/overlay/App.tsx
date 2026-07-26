@@ -8,8 +8,19 @@ function formatElapsed(seconds: number): string {
   return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
 }
 
-const TIMED_STATES: OverlayState[] = ['recording', 'transcribing', 'processing']
-const CANCELLABLE_STATES: OverlayState[] = ['recording', 'transcribing', 'processing']
+const CANCELLABLE_STATES: OverlayState[] = ['starting', 'recording', 'transcribing', 'processing']
+
+/**
+ * States that show an elapsed timer, grouped so the counter restarts when the
+ * group changes: waiting for the microphone is timed on its own, and the actual
+ * recording starts from zero once the device is open.
+ */
+function timerGroup(state: OverlayState): 'starting' | 'recording' | null {
+  if (state === 'starting') return 'starting'
+  if (state === 'recording' || state === 'transcribing' || state === 'processing')
+    return 'recording'
+  return null
+}
 
 export default function App(): React.JSX.Element {
   const [state, setState] = useState<OverlayState>('idle')
@@ -65,10 +76,12 @@ export default function App(): React.JSX.Element {
   }, [])
 
   useEffect(() => {
-    if (TIMED_STATES.includes(state)) {
-      const carryOver = TIMED_STATES.includes(prevStateRef.current)
+    const group = timerGroup(state)
+    if (group) {
+      const carryOver = group === timerGroup(prevStateRef.current)
       if (!carryOver) {
         startTimeRef.current = Date.now()
+        setElapsed(0)
       }
       const id = setInterval(() => {
         setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000))
@@ -76,7 +89,7 @@ export default function App(): React.JSX.Element {
       prevStateRef.current = state
       return () => {
         clearInterval(id)
-        if (!TIMED_STATES.includes(nextStateRef.current)) {
+        if (!timerGroup(nextStateRef.current)) {
           setElapsed(0)
         }
       }
@@ -85,17 +98,32 @@ export default function App(): React.JSX.Element {
     return undefined
   }, [state])
 
-  if (state === 'idle') return <></>
+  // The pill stays mounted while idle (hidden via opacity) instead of rendering
+  // nothing: an empty transparent window gets treated as not visible on
+  // Windows, which freezes the compositor and makes the next state invisible.
+  const idle = state === 'idle'
 
   return (
     <div
-      style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      style={
+        {
+          WebkitAppRegion: 'drag',
+          opacity: idle ? 0 : 1,
+          pointerEvents: idle ? 'none' : undefined
+        } as React.CSSProperties
+      }
       className={`w-fit flex items-center gap-2 px-3 py-2 mx-1 rounded-full text-sm font-medium select-none border whitespace-nowrap ${
         invertColors
           ? 'bg-zinc-900 dark:bg-white text-white dark:text-gray-900 border-zinc-700 dark:border-gray-300'
           : 'bg-white dark:bg-zinc-900 text-gray-900 dark:text-white border-gray-400 dark:border-zinc-600'
       }`}
     >
+      {state === 'starting' && (
+        <>
+          <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+          <span>Starting mic...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+        </>
+      )}
       {state === 'recording' && (
         <>
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />

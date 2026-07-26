@@ -4,6 +4,7 @@ export { CHANNELS, type Channel } from '../shared/channels'
 
 export const overlayStateSchema = z.enum([
   'idle',
+  'starting',
   'recording',
   'transcribing',
   'processing',

@@ -6,6 +6,11 @@ out
 coverage
 .DS_Store
 .eslintcache
+# Local-only: pnpm 11 writes its build allowlist here (pnpm approve-builds).
+# It MUST NOT be committed - CI builds with pnpm 9, which treats any
+# pnpm-workspace.yaml as a monorepo and then fails. pnpm 9 reads the allowlist
+# from the "pnpm" field in package.json instead.
+pnpm-workspace.yaml
 *.log*
 .env
 .env.local

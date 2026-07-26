@@ -9,6 +9,8 @@ declare global {
       onCancel: (cb: () => void) => () => void
       sendAudio: (buffer: ArrayBuffer, durationMs: number, microphone?: string) => void
       sendError: (message: string) => void
+      sendStarted: () => void
+      sendAborted: () => void
       log: (scope: string, message: string, level: string) => void
     }
   }
@@ -21,13 +23,30 @@ let mediaRecorder: MediaRecorder | null = null
 let chunks: Blob[] = []
 let startedAt = 0
 
+// Incremented on every start/stop/cancel. `getUserMedia` can take many seconds
+// when the audio device is cold, so a stop or cancel may arrive while it is
+// still pending. The session id lets the resolved stream detect that it is
+// stale, release the device and report back instead of starting a recording
+// nobody is waiting for.
+let session = 0
+
 async function startRecording(deviceId?: string): Promise<void> {
   window.workerApi.log(SCOPES.worker, 'startRecording called', 'info')
   chunks = []
+  session += 1
+  const mySession = session
   try {
     const constraint = deviceId ? { audio: { deviceId: { exact: deviceId } } } : { audio: true }
     const stream = await navigator.mediaDevices.getUserMedia(constraint)
     window.workerApi.log(SCOPES.worker, 'got mic stream', 'info')
+
+    if (mySession !== session) {
+      stream.getTracks().forEach((t) => t.stop())
+      window.workerApi.log(SCOPES.worker, 'mic stream arrived after stop; discarded', 'warn')
+      window.workerApi.sendAborted()
+      return
+    }
+
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' })
 
     mediaRecorder.ondataavailable = (e): void => {
@@ -47,6 +66,7 @@ async function startRecording(deviceId?: string): Promise<void> {
     startedAt = Date.now()
     mediaRecorder.start(250)
     window.workerApi.log(SCOPES.worker, 'mediaRecorder started', 'info')
+    window.workerApi.sendStarted()
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     window.workerApi.log(SCOPES.worker, `getUserMedia error: ${message}`, 'error')
@@ -55,12 +75,14 @@ async function startRecording(deviceId?: string): Promise<void> {
 }
 
 function stopRecording(): void {
+  session += 1
   if (mediaRecorder?.state === 'recording') {
     mediaRecorder.stop()
   }
 }
 
 function cancelRecording(): void {
+  session += 1
   if (mediaRecorder?.state === 'recording') {
     mediaRecorder.ondataavailable = null
     mediaRecorder.onstop = null

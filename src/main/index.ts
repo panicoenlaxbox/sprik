@@ -315,6 +315,12 @@ function setupIpcBridges(
     },
     onError: (cb) => {
       ipcMain.on(CHANNELS.RECORDING_ERROR, (_, message: string) => cb(message))
+    },
+    onStarted: (cb) => {
+      ipcMain.on(CHANNELS.RECORDING_STARTED, () => cb())
+    },
+    onAborted: (cb) => {
+      ipcMain.on(CHANNELS.RECORDING_ABORTED, () => cb())
     }
   }
 
@@ -463,6 +469,12 @@ function setupSettingsIpc(shortcutHandlers: { onToggle: () => void; onCancel: ()
     log(scope, message, level as Parameters<typeof log>[2])
   })
 }
+
+// Windows' native occlusion tracker marks the transparent overlay as hidden
+// while it has nothing to paint, which freezes its compositor: IPC still
+// arrives but requestAnimationFrame never fires, so the pill stays invisible
+// even though the state changed. Keep occluded windows alive.
+app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
 
 const gotTheLock = app.requestSingleInstanceLock()
 

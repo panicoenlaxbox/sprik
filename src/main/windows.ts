@@ -47,7 +47,10 @@ export function createWorkerWindow(): BrowserWindow {
       preload: join(__dirname, '../preload/worker.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      // The worker window is never shown, so Chromium would throttle its timers
+      // and the MediaRecorder chunk callbacks along with them.
+      backgroundThrottling: false
     }
   })
 
@@ -87,7 +90,10 @@ export function createOverlayWindow(savedPosition?: { x: number; y: number }): B
       preload: join(__dirname, '../preload/index.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      // Without this the overlay stops producing frames after being idle for a
+      // while: state changes arrive but never paint, so the user sees nothing.
+      backgroundThrottling: false
     }
   })
 

@@ -1,5 +1,6 @@
 export type OverlayState =
   | 'idle'
+  | 'starting'
   | 'recording'
   | 'transcribing'
   | 'processing'

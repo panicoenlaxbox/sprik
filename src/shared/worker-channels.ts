@@ -6,6 +6,8 @@ type WorkerChannelKeys =
   | 'RECORDING_CANCEL'
   | 'RECORDING_AUDIO'
   | 'RECORDING_ERROR'
+  | 'RECORDING_STARTED'
+  | 'RECORDING_ABORTED'
   | 'LOG_WORKER'
 
 export const WORKER_CHANNELS = {
@@ -14,5 +16,7 @@ export const WORKER_CHANNELS = {
   RECORDING_CANCEL: 'recording:cancel',
   RECORDING_AUDIO: 'recording:audio',
   RECORDING_ERROR: 'recording:error',
+  RECORDING_STARTED: 'recording:started',
+  RECORDING_ABORTED: 'recording:aborted',
   LOG_WORKER: 'log:worker'
 } as const satisfies Pick<typeof CHANNELS, WorkerChannelKeys>

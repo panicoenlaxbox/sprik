@@ -4,6 +4,8 @@ export const CHANNELS = {
   RECORDING_CANCEL: 'recording:cancel',
   RECORDING_AUDIO: 'recording:audio',
   RECORDING_ERROR: 'recording:error',
+  RECORDING_STARTED: 'recording:started',
+  RECORDING_ABORTED: 'recording:aborted',
   OVERLAY_STATE: 'overlay:state',
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',

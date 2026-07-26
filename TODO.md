@@ -1,98 +1,112 @@
-# TODO: Diagnose first-recording latency / overlay not appearing
+# First-recording latency: diagnosed, partially fixed
 
-## Problem (reported by user)
+## Diagnosis (CLOSED) - app.log, 2026-07-26 17:23
 
-When starting a recording via the global shortcut for the **first time after the app
-has been idle in the tray for a while** (not necessarily right after Windows boot -
-often an hour or more into the session), there is an erratic delay. Sometimes the
-user "sees nothing": the recording overlay (the pill that shows `Recording...`,
-`Transcribing...`, etc.) does not appear promptly, so the user cannot tell whether it
-is recording. The user's visual "is it recording?" signal IS that overlay.
-
-Historical workaround the user found: open the main window from the tray and close it
-again, then the shortcut works fast. (Likely just buys time / bumps process priority.)
-
-## What we already established (from code + old app.log)
-
-- The recording flow: shortcut -> `onToggle` (main) -> `orchestrator.start()` sets the
-  overlay state FIRST, then sends `RECORDING_START` to the hidden worker window, which
-  calls `navigator.mediaDevices.getUserMedia()`.
-  - `src/main/index.ts` (onToggle, shortcutHandlers), `src/main/recording.ts`
-    (`start()`), `src/renderer/worker/index.ts` (`startRecording`).
-- Confirmed: the worker reacts to the shortcut in ~8 ms even when "slow"; the whole
-  erratic delay historically sat INSIDE `getUserMedia` (mic/audio device cold start,
-  0.5 s up to ~7 s), i.e. the OS/Chromium audio capture device going cold after idle.
-- The "shortcut not registered yet" theory only explains the case immediately after
-  Windows boot (registration is gated on the worker window's `did-finish-load`). It
-  does NOT explain the user's real case (an hour into the session).
-- Still OPEN: the "I see nothing" / overlay-appearance part. The old logs could not
-  measure it because the `overlay state = X` line is written by MAIN at send time, not
-  when the overlay actually paints.
-
-## Instrumentation added (this is what the new logs give us)
-
-Per shortcut press, `app.log` should contain (scope in parentheses):
+The instrumented run reproduced the problem and identified three separate faults.
+Timeline of the single press the user reported:
 
 ```
-(shortcuts) toggle fired                                   # global shortcut handler ran (absent => press was ignored / not registered)
-(shortcuts) worker loaded; shortcuts registered (...)      # startup only: when the shortcut became live
-(overlay)   state = recording                              # MAIN sends the state
-(overlay)   received recording                             # overlay renderer received the IPC
-(worker)    startRecording called                          # worker renderer received IPC, about to call getUserMedia
-(overlay)   painted recording                              # overlay actually painted (double requestAnimationFrame)
-(worker)    got mic stream                                 # getUserMedia resolved
-(worker)    mediaRecorder started                          # recording actually started
+17:21:54.328  app starts (0.3.4)
+17:21:54.461  shortcuts registered
+17:21:54.646  overlay painted idle          <- last frame the overlay produced
+--- 67 s idle ---
+17:23:02.687  toggle fired                  <- 1st press DID arrive (25 ms to main)
+17:23:02.712  state = recording
+17:23:02.714  worker startRecording called
+17:23:02.721  overlay received recording
+              *** no "painted recording" *** <- (1) user saw nothing
+17:23:18.359  toggle fired                  <- 2nd press, 15.6 s later
+17:23:18.362  state = transcribing
+17:23:18.363  overlay received transcribing
+17:23:19.826  worker got mic stream         <- (2) getUserMedia took 17.11 s
+17:23:19.827  mediaRecorder started         <- (3) started AFTER the stop
+17:23:19.884  overlay painted transcribing  <- first frame in 17 s
+              *** no "(recording) saved" ***
+17:24:46.466  state = cancelled             <- user cancelled, 86 s later
 ```
 
-Files: `src/main/index.ts`, `src/renderer/overlay/App.tsx`,
-`src/renderer/worker/index.ts`, plus `src/preload/index.ts` +
-`src/renderer/shared/types.ts` (gave the overlay a `window.api.log(...)` that reuses
-the `LOG_WORKER` channel so it can write to `app.log`).
+1. **Overlay compositor frozen.** The overlay received the IPC in 9 ms but produced
+   no frame for 17 s: `requestAnimationFrame` never fired while ordinary tasks (IPC,
+   logging) kept running. That is Chromium treating the window as not visible. The
+   overlay is a transparent, non-focusable, always-on-top window that rendered `<></>`
+   while idle - a completely empty transparent surface - and no window set
+   `backgroundThrottling: false`. This also explains the old workaround of opening and
+   closing the main window.
+2. **Cold microphone: `getUserMedia` took 17.11 s.** Root cause of the real latency
+   (previously measured at 0.5-7 s).
+3. **Stop-during-start race.** The 2nd press called `stop()` while `getUserMedia` was
+   still pending; the worker's `stopRecording()` saw `mediaRecorder === null` and did
+   nothing. 1.5 s later the recorder started anyway and recorded orphaned for 87 s with
+   the mic open. Main had set the overlay to `transcribing` but never changed its own
+   state, so nothing reconciled: no `saved` line, no transcription, no history entry.
+   Nothing was ever pasted, and the audio the user spoke was never captured because the
+   device was not open yet.
 
-## How to analyze (next session)
+## Fixes applied
 
-Use the millisecond timestamps in `app.log` (`%APPDATA%\sprik\app.log`). The in-app
-Logs viewer now also shows milliseconds. Do NOT rely on a console paste (no timestamps)
-or second-only precision - the gaps of interest are sub-second.
+Fault 1 - overlay must always paint:
 
-Find the slow case: the first recording after a long idle gap (large time gap before
-`toggle fired`), or the entry near the wall-clock time the user says it felt slow.
+- `app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')` in
+  `src/main/index.ts` (before `requestSingleInstanceLock`).
+- `backgroundThrottling: false` on the overlay and worker windows (`src/main/windows.ts`).
+- The pill stays mounted while idle, hidden with `opacity: 0` + `pointerEvents: none`,
+  instead of rendering `<></>` (`src/renderer/overlay/App.tsx`).
 
-Compute these gaps for that press and attribute the delay:
+Fault 3 - the race, plus honest feedback while the mic opens:
 
-1. **Overlay slow to appear** -> big gap `state = recording` -> `painted recording`
-   (or `received recording` -> `painted recording` for pure paint time). This is the
-   "I see nothing" hypothesis.
-2. **Mic cold start** -> big gap `startRecording called` -> `got mic stream`.
-3. **Pre-handler delay (blind spot)** -> all logged gaps are small yet the user felt it
-   slow => the latency is BEFORE `toggle fired` (OS delivering the global shortcut /
-   the main process waking from an OS-throttled/suspended state). We cannot timestamp
-   the physical keypress, so this is diagnosed by elimination.
+- New overlay state `starting` ("Starting mic..." with its own elapsed timer) sent as
+  soon as the shortcut fires. `recording` is only shown once the worker confirms the
+  device is open, so the pill no longer claims to be recording while it is not.
+  `starting` is cancellable (X button and the cancel shortcut).
+- New worker -> main channels `RECORDING_STARTED` / `RECORDING_ABORTED`
+  (`src/shared/channels.ts`, `src/shared/worker-channels.ts`, `src/preload/worker.ts`).
+- The worker keeps a `session` counter bumped on every start/stop/cancel. A mic stream
+  that resolves after a stop is stale: its tracks are stopped, no recorder is created,
+  and `sendAborted()` tells main to return to idle
+  (`src/renderer/worker/index.ts`).
+- Orchestrator states are now `idle | starting | recording | stopping | error`
+  (`src/main/recording.ts`). `toggle()` during `starting` aborts cleanly (`cancelled`)
+  instead of faking a transcription; `stop()` only acts while `recording` and moves to
+  `stopping` so it cannot be sent twice.
+- `MIC_START_WARN_MS` (20 s) only logs a warning and keeps waiting. It deliberately does
+  NOT abort: a slow open cannot be told apart from a stuck one, and killing an open that
+  would have succeeded destroys a good recording. The user decides via cancel.
 
-Note on trust: timestamps are stamped by MAIN when it receives each log. Gaps between
-two SAME-origin renderer events (`received`->`painted`, or `startRecording`->`got mic
-stream`) are clean because the logging-IPC overhead cancels out.
+All four checks pass (`format`, `typecheck`, `lint`, 208 tests).
 
-## What to collect from the user
+## Still open: the cold microphone (fault 2)
 
-- `app.log` (the file), and `app.old.log` if it exists (electron-log rotates at ~1 MB).
-- Approximate wall-clock time of a moment it felt slow (optional but helpful).
-- User plans to clear `app.log` (app closed) before this run to start from empty.
+Nothing here makes `getUserMedia` faster. The first recording after a long idle gap will
+still show `Starting mic...` for several seconds (17 s in the worst measured case) and
+audio spoken during that window is lost. The user chose honest feedback over keeping the
+device warm, because every keep-warm option lights up the Windows mic-in-use indicator:
 
-## Candidate fixes (only after diagnosis confirms the cause)
+- permanent warm input stream: instant start, indicator always on (intrusive for a tray app);
+- silent-output `AudioContext`: no indicator, may not warm the _input_ device;
+- warm-up at startup: only helps the first recording of a session, not after later idle;
+- periodic brief warm-ups: keeps the device awake, may blink the indicator.
 
-- If mic cold start: keep the audio pipeline warm. Tradeoff - the Windows mic-in-use
-  indicator turns on whenever the capture device is open, so a permanent warm stream is
-  intrusive for a tray app. Options discussed: silent output `AudioContext` keep-warm
-  (no indicator, may not fully warm the input device), warm-up at startup (helps only
-  the first recording of a session, not after later idle), periodic brief warm-ups
-  (keeps device awake but may blink the indicator).
-- If overlay paint: investigate the transparent always-on-top overlay window's
-  compositing / `backgroundThrottling` on the overlay (and worker) windows in
-  `src/main/windows.ts`; consider keeping the pill mounted (hidden) instead of rendering
-  `<></>` when idle so the surface stays warm.
-- If pre-handler: main-process wake / OS throttling - hardest; investigate whether the
-  main process is being suspended by Windows when idle.
+## How to verify the fixes on the next slow run
+
+The diagnostic log lines were kept on purpose. In `%APPDATA%\sprik\app.log`, per press:
+
+```
+(shortcuts) toggle fired
+(overlay)   state = starting
+(overlay)   received starting
+(overlay)   painted starting      <- must now appear within ~tens of ms, even after long idle
+(worker)    startRecording called
+(worker)    got mic stream        <- the remaining latency lives here
+(worker)    mediaRecorder started
+(overlay)   state = recording
+(overlay)   painted recording
+```
+
+- `painted starting` missing or seconds late => the overlay throttling fix is incomplete.
+- `got mic stream` still many seconds after `startRecording called` => expected for now;
+  that is the open cold-start issue above.
+- `mic stream arrived after stop; discarded` (warn) => the race was hit and handled
+  correctly; the overlay must go back to idle instead of sticking on `transcribing`.
 
 ## Environment note
 
