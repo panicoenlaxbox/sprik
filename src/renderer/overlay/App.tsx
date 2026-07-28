@@ -22,6 +22,25 @@ function timerGroup(state: OverlayState): 'starting' | 'recording' | null {
   return null
 }
 
+/**
+ * Elapsed timer. Tabular digits keep the pill from reshuffling (and the close
+ * button from shifting) every time a digit changes width.
+ */
+function Elapsed({ seconds }: { seconds: number }): React.JSX.Element {
+  return <span className="ml-1.5 tabular-nums">{formatElapsed(seconds)}</span>
+}
+
+/** Trailing ellipsis whose dots pulse in sequence (see `.overlay-dot` in index.css). */
+function Dots(): React.JSX.Element {
+  return (
+    <span className="overlay-dots" aria-hidden="true">
+      <span className="overlay-dot">.</span>
+      <span className="overlay-dot">.</span>
+      <span className="overlay-dot">.</span>
+    </span>
+  )
+}
+
 export default function App(): React.JSX.Element {
   const [state, setState] = useState<OverlayState>('idle')
   const [theme, setTheme] = useState<'system' | 'light' | 'dark'>('system')
@@ -121,25 +140,41 @@ export default function App(): React.JSX.Element {
       {state === 'starting' && (
         <>
           <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
-          <span>Starting mic...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+          <span>
+            Starting mic
+            <Dots />
+            {showTimer && <Elapsed seconds={elapsed} />}
+          </span>
         </>
       )}
       {state === 'recording' && (
         <>
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span>Recording...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+          <span>
+            Recording
+            <Dots />
+            {showTimer && <Elapsed seconds={elapsed} />}
+          </span>
         </>
       )}
       {state === 'transcribing' && (
         <>
           <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-          <span>Transcribing...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+          <span>
+            Transcribing
+            <Dots />
+            {showTimer && <Elapsed seconds={elapsed} />}
+          </span>
         </>
       )}
       {state === 'processing' && (
         <>
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-          <span>Processing...{showTimer && ` ${formatElapsed(elapsed)}`}</span>
+          <span>
+            Processing
+            <Dots />
+            {showTimer && <Elapsed seconds={elapsed} />}
+          </span>
         </>
       )}
       {state === 'cancelled' && (
@@ -158,7 +193,7 @@ export default function App(): React.JSX.Element {
         <button
           style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
           onClick={() => window.api.cancelRecording()}
-          className={`ml-1 transition-colors cursor-pointer ${
+          className={`transition-colors cursor-pointer ${
             invertColors
               ? 'text-gray-400 hover:text-gray-200 dark:text-gray-500 dark:hover:text-gray-700'
               : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
