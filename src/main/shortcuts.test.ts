@@ -46,6 +46,20 @@ describe('registerShortcuts', () => {
     expect(globalShortcut.register).not.toHaveBeenCalled()
   })
 
+  it('treats an empty toggle accelerator as a failure instead of registering it', () => {
+    vi.mocked(globalShortcut.register).mockClear()
+    const onCollision = vi.fn()
+
+    const result = registerShortcuts(
+      { toggleRecording: '', cancelRecording: '' },
+      defaultHandlers,
+      onCollision
+    )
+
+    expect(result.toggleFailed).toBe(true)
+    expect(globalShortcut.register).not.toHaveBeenCalled()
+  })
+
   it('returns toggleFailed when globalShortcut.register throws', () => {
     vi.mocked(globalShortcut.register).mockImplementationOnce(() => {
       throw new Error('blocked by OS')
@@ -95,6 +109,18 @@ describe('registerCancelShortcut', () => {
     vi.mocked(globalShortcut.register).mockReturnValueOnce(false)
     expect(() => registerCancelShortcut('Escape', noop)).not.toThrow()
   })
+
+  it('registers nothing and reports no collision when no shortcut is configured', () => {
+    vi.mocked(globalShortcut.register).mockClear()
+    vi.mocked(globalShortcut.unregister).mockClear()
+    const onCollision = vi.fn()
+
+    registerCancelShortcut('', noop, onCollision)
+
+    expect(globalShortcut.register).not.toHaveBeenCalled()
+    expect(globalShortcut.unregister).not.toHaveBeenCalled()
+    expect(onCollision).not.toHaveBeenCalled()
+  })
 })
 
 describe('isShortcutRegistered', () => {
@@ -110,6 +136,12 @@ describe('unregisterCancelShortcut', () => {
     vi.mocked(globalShortcut.unregister).mockReset()
     unregisterCancelShortcut('Escape')
     expect(globalShortcut.unregister).toHaveBeenCalledWith('Escape')
+  })
+
+  it('does nothing when no shortcut is configured', () => {
+    vi.mocked(globalShortcut.unregister).mockReset()
+    unregisterCancelShortcut('')
+    expect(globalShortcut.unregister).not.toHaveBeenCalled()
   })
 })
 

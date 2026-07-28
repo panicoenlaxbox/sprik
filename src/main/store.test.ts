@@ -22,12 +22,18 @@ describe('getConfig', () => {
     const config = getConfig()
 
     expect(config.shortcuts.toggleRecording).toBe('Ctrl+Alt+Space')
-    expect(config.shortcuts.cancelRecording).toBe('Escape')
+    expect(config.shortcuts.cancelRecording).toBe('')
     expect(config.transcription.provider).toBe('groq')
     expect(config.transcription.model).toBe('whisper-large-v3-turbo')
     expect(config.pasteMode).toBe('clipboard-and-focus')
     expect(config.history.retain).toBe(100)
     expect(config.startup.autostart).toBe(false)
+  })
+
+  it('keeps a cancel shortcut that was already stored', () => {
+    storeData = { shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' } }
+
+    expect(getConfig().shortcuts.cancelRecording).toBe('Escape')
   })
 
   it('merges stored values with defaults', () => {

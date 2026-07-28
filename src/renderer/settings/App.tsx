@@ -14,7 +14,7 @@ interface Props {
 }
 
 const DEFAULT_TOGGLE = 'Ctrl+Alt+Space'
-const DEFAULT_CANCEL = 'Escape'
+const DEFAULT_CANCEL = ''
 
 export default function App({ onThemeChange }: Props): React.JSX.Element {
   const [config, setConfigState] = useState<Config | null>(null)
@@ -91,7 +91,9 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
     return () => window.removeEventListener('beforeunload', handler)
   }, [isDirty])
 
-  const shortcutConflict = config?.shortcuts.toggleRecording === config?.shortcuts.cancelRecording
+  const shortcutConflict =
+    !!config?.shortcuts.cancelRecording &&
+    config.shortcuts.toggleRecording === config.shortcuts.cancelRecording
   const emptyPrompt = config?.postProcessing.enabled && !config.postProcessing.prompt.trim()
   const invalidRetain =
     config?.history.enabled &&
@@ -268,6 +270,7 @@ export default function App({ onThemeChange }: Props): React.JSX.Element {
                 label="Cancel recording"
                 value={config.shortcuts.cancelRecording}
                 defaultValue={DEFAULT_CANCEL}
+                allowEmpty
                 onChange={(v) =>
                   setConfigState({
                     ...config,

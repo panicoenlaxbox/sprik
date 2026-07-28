@@ -8,9 +8,12 @@ export const configSchema = z.object({
   shortcuts: z
     .object({
       toggleRecording: z.string().default('Ctrl+Alt+Space'),
-      cancelRecording: z.string().default('Escape')
+      // Opt-in on purpose: a global cancel accelerator is swallowed system-wide
+      // while a recording runs, so the app ships without one and cancelling is a
+      // deliberate click on the overlay. Empty means "no shortcut".
+      cancelRecording: z.string().default('')
     })
-    .default({ toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' }),
+    .default({ toggleRecording: 'Ctrl+Alt+Space', cancelRecording: '' }),
 
   transcription: z
     .object({

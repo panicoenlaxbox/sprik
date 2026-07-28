@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, X } from 'lucide-react'
 
 interface Props {
   label: string
   value: string
   defaultValue: string
   onChange: (combo: string) => void
+  /** Lets the shortcut be left unset (empty string), shown as "Not set". */
+  allowEmpty?: boolean
 }
 
 export default function HotkeyRebinder({
   label,
   value,
   defaultValue,
-  onChange
+  onChange,
+  allowEmpty = false
 }: Props): React.JSX.Element {
   const [capturing, setCapturing] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -41,7 +44,12 @@ export default function HotkeyRebinder({
     e.preventDefault()
     e.stopPropagation()
 
-    if (e.key === 'Escape') {
+    const bare = !e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey
+
+    // Only a bare Backspace clears: with a modifier it is a shortcut like any
+    // other, so Ctrl+Backspace binds instead of clearing.
+    if (allowEmpty && bare && (e.key === 'Backspace' || e.key === 'Delete')) {
+      onChange('')
       setCapturing(false)
       return
     }
@@ -67,7 +75,10 @@ export default function HotkeyRebinder({
     setCapturing(false)
   }
 
-  const keys = value.split('+')
+  const keys = value ? value.split('+') : []
+  const clearable = allowEmpty && value !== ''
+  // Doubles as the hint that Backspace is how you leave the shortcut unset.
+  const placeholder = allowEmpty ? 'Press keys or Backspace' : 'Press keys...'
 
   return (
     <div className="contents">
@@ -81,28 +92,44 @@ export default function HotkeyRebinder({
             onKeyDown={handleKeyDown}
             onBlur={() => setCapturing(false)}
             value=""
-            placeholder="Press keys..."
+            placeholder={placeholder}
             aria-label={`Capturing shortcut for ${label}`}
-            className="text-sm border border-blue-400 rounded-md px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500 focus:outline-none w-48 placeholder:text-blue-400 dark:placeholder:text-blue-500 dark:text-blue-300"
+            className="text-sm border border-blue-400 rounded-md px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-500 focus:outline-none w-56 placeholder:text-blue-400 dark:placeholder:text-blue-500 dark:text-blue-300"
           />
         ) : (
           <button
             onClick={() => setCapturing(true)}
-            aria-label={`Change shortcut for ${label}: currently ${value}`}
-            className="flex items-center gap-1 border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 w-48"
+            aria-label={`Change shortcut for ${label}: currently ${value || 'Not set'}`}
+            className="flex items-center gap-1 border border-gray-300 dark:border-gray-600 rounded-md px-2 py-1.5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 w-56"
           >
-            {keys.map((k, i) => (
-              <kbd
-                key={i}
-                className="inline-flex items-center px-1.5 py-0.5 text-xs font-mono font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-[0_1px_0_rgba(0,0,0,0.2)]"
-              >
-                {k}
-              </kbd>
-            ))}
+            {keys.length === 0 ? (
+              <span className="text-sm text-gray-500 dark:text-gray-400">Not set</span>
+            ) : (
+              keys.map((k, i) => (
+                <kbd
+                  key={i}
+                  className="inline-flex items-center px-1.5 py-0.5 text-xs font-mono font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-[0_1px_0_rgba(0,0,0,0.2)]"
+                >
+                  {k}
+                </kbd>
+              ))
+            )}
           </button>
         )}
 
-        {!capturing && value !== defaultValue && (
+        {!capturing && clearable && (
+          <button
+            onClick={() => onChange('')}
+            title="Clear shortcut"
+            aria-label={`Clear ${label} shortcut`}
+            className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 rounded transition-colors"
+          >
+            <X size={14} />
+          </button>
+        )}
+
+        {/* An empty default makes "reset" identical to "clear" above. */}
+        {!capturing && defaultValue !== '' && value !== defaultValue && (
           <button
             onClick={() => onChange(defaultValue)}
             title="Reset to default"

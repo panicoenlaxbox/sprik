@@ -7,7 +7,7 @@ with optional post-processing via an LLM. Lives in the system tray, no window in
 
 ## Features
 
-- **Global hotkey** — press once to start recording, press again to stop and transcribe (`Ctrl+Alt+Space` by default, rebindable); a separate configurable hotkey cancels the recording
+- **Global hotkey** — press once to start recording, press again to stop and transcribe (`Ctrl+Alt+Space` by default, rebindable); cancel by clicking the overlay's X, or bind an optional cancel hotkey (none by default, since a global accelerator is swallowed system-wide while recording)
 - **Auto-paste** — result lands directly where your cursor is; falls back to clipboard with a notification if paste is unavailable
 - **Transcription providers** — Groq, OpenAI, and Azure (Microsoft Foundry)
 - **Post-processing** — optional LLM cleanup pass via Anthropic, OpenAI, or Azure; prompt is fully customizable

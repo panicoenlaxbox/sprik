@@ -37,23 +37,16 @@ describe('HotkeyRebinder', () => {
     expect(screen.getByPlaceholderText(/press keys/i)).toBeInTheDocument()
   })
 
-  it('cancels capture mode when Escape is pressed without calling onChange', async () => {
+  it('binds Escape like any other key (clicking away is how you back out)', async () => {
     const onChange = vi.fn()
     const user = userEvent.setup()
 
-    render(
-      <HotkeyRebinder
-        label="Cancel recording"
-        value="Escape"
-        defaultValue="Escape"
-        onChange={onChange}
-      />
-    )
+    render(<HotkeyRebinder label="Cancel recording" value="" defaultValue="" onChange={onChange} />)
 
     await user.click(screen.getByRole('button'))
     fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Escape' })
 
-    expect(onChange).not.toHaveBeenCalled()
+    expect(onChange).toHaveBeenCalledWith('Escape')
     expect(screen.queryByPlaceholderText(/press keys/i)).not.toBeInTheDocument()
   })
 
@@ -166,6 +159,157 @@ describe('HotkeyRebinder', () => {
     await user.click(screen.getByRole('button', { name: /reset toggle recording to default/i }))
 
     expect(onChange).toHaveBeenCalledWith('Ctrl+Alt+Space')
+  })
+
+  describe('optional shortcut (allowEmpty)', () => {
+    it('renders "Not set" instead of a key when no shortcut is bound', () => {
+      const { container } = render(
+        <HotkeyRebinder
+          label="Cancel recording"
+          value=""
+          defaultValue=""
+          allowEmpty
+          onChange={vi.fn()}
+        />
+      )
+
+      expect(container.querySelectorAll('kbd')).toHaveLength(0)
+      expect(screen.getByText('Not set')).toBeInTheDocument()
+    })
+
+    it('clears the shortcut from the clear button', async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <HotkeyRebinder
+          label="Cancel recording"
+          value="Escape"
+          defaultValue=""
+          allowEmpty
+          onChange={onChange}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: /clear cancel recording shortcut/i }))
+
+      expect(onChange).toHaveBeenCalledWith('')
+    })
+
+    it('hides the clear button when there is nothing to clear', () => {
+      render(
+        <HotkeyRebinder
+          label="Cancel recording"
+          value=""
+          defaultValue=""
+          allowEmpty
+          onChange={vi.fn()}
+        />
+      )
+
+      expect(
+        screen.queryByRole('button', { name: /clear cancel recording shortcut/i })
+      ).not.toBeInTheDocument()
+    })
+
+    it('clears the shortcut when Backspace is pressed while capturing', async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <HotkeyRebinder
+          label="Cancel recording"
+          value="Escape"
+          defaultValue=""
+          allowEmpty
+          onChange={onChange}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: /change shortcut/i }))
+      fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Backspace' })
+
+      expect(onChange).toHaveBeenCalledWith('')
+      expect(screen.queryByPlaceholderText(/press keys/i)).not.toBeInTheDocument()
+    })
+
+    it('binds Backspace with a modifier instead of clearing', async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <HotkeyRebinder
+          label="Cancel recording"
+          value=""
+          defaultValue=""
+          allowEmpty
+          onChange={onChange}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: /change shortcut/i }))
+      fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), {
+        key: 'Backspace',
+        ctrlKey: true
+      })
+
+      expect(onChange).toHaveBeenCalledWith('Ctrl+Backspace')
+    })
+
+    it('binds a bare Backspace as a shortcut when clearing is not allowed', async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <HotkeyRebinder
+          label="Toggle recording"
+          value="Ctrl+Alt+Space"
+          defaultValue="Ctrl+Alt+Space"
+          onChange={onChange}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: /change shortcut/i }))
+      fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Backspace' })
+
+      expect(onChange).toHaveBeenCalledWith('Backspace')
+    })
+
+    it('binds Escape as the cancel shortcut for whoever wants it', async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <HotkeyRebinder
+          label="Cancel recording"
+          value=""
+          defaultValue=""
+          allowEmpty
+          onChange={onChange}
+        />
+      )
+
+      await user.click(screen.getByRole('button', { name: /change shortcut/i }))
+      fireEvent.keyDown(screen.getByPlaceholderText(/press keys/i), { key: 'Escape' })
+
+      expect(onChange).toHaveBeenCalledWith('Escape')
+    })
+
+    it('does not offer reset when the default is no shortcut at all', () => {
+      render(
+        <HotkeyRebinder
+          label="Cancel recording"
+          value="Escape"
+          defaultValue=""
+          allowEmpty
+          onChange={vi.fn()}
+        />
+      )
+
+      expect(
+        screen.queryByRole('button', { name: /reset cancel recording to default/i })
+      ).not.toBeInTheDocument()
+    })
   })
 
   it('renders a single-key shortcut as one kbd element', () => {

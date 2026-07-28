@@ -13,7 +13,7 @@ export interface ShortcutHandlers {
 export type ShortcutCollisionReporter = (accelerator: string) => void
 
 function isValidAccelerator(acc: string): boolean {
-  return acc.split('').every((c) => c.charCodeAt(0) <= 127)
+  return acc.length > 0 && acc.split('').every((c) => c.charCodeAt(0) <= 127)
 }
 
 export function registerShortcuts(
@@ -45,6 +45,9 @@ export function registerCancelShortcut(
   handler: () => void,
   onCollision: ShortcutCollisionReporter = () => {}
 ): void {
+  // No cancel shortcut configured: nothing to register, and nothing to report -
+  // this is the default, not a failure.
+  if (!accelerator) return
   globalShortcut.unregister(accelerator)
   let registered: boolean
   try {
@@ -56,6 +59,7 @@ export function registerCancelShortcut(
 }
 
 export function unregisterCancelShortcut(accelerator: string): void {
+  if (!accelerator) return
   globalShortcut.unregister(accelerator)
 }
 

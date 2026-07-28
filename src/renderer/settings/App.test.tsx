@@ -4,7 +4,7 @@ import App from './App'
 import type { Config, ApiKeyStatus } from '../shared/types'
 
 const mockConfig: Config = {
-  shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' },
+  shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: '' },
   transcription: { provider: 'groq', model: 'whisper-large-v3-turbo' },
   postProcessing: { enabled: false, provider: 'anthropic', model: 'claude-sonnet-4-6', prompt: '' },
   pasteMode: 'clipboard-and-focus',
@@ -145,6 +145,59 @@ describe('Settings App', () => {
     expect(window.api.setConfig).toHaveBeenCalledWith(
       expect.objectContaining({ startup: expect.objectContaining({ autostart: true }) })
     )
+  })
+
+  it('ships with no cancel shortcut bound', async () => {
+    render(<App />)
+    await waitFor(() => screen.getByText('Settings'))
+
+    expect(
+      screen.getByRole('button', {
+        name: /change shortcut for cancel recording: currently not set/i
+      })
+    ).toBeInTheDocument()
+  })
+
+  it('hints at Backspace when capturing the optional cancel shortcut', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => screen.getByText('Settings'))
+
+    await user.click(screen.getByRole('button', { name: /change shortcut for cancel recording/i }))
+
+    expect(screen.getByPlaceholderText(/press keys or backspace/i)).toBeInTheDocument()
+  })
+
+  it('saves an empty cancel shortcut when the user clears a stored one', async () => {
+    const user = userEvent.setup()
+    vi.mocked(window.api.getConfig).mockResolvedValue({
+      ...mockConfig,
+      shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: 'Escape' }
+    })
+
+    render(<App />)
+    await waitFor(() => screen.getByText('Settings'))
+
+    await user.click(screen.getByRole('button', { name: /clear cancel recording shortcut/i }))
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(window.api.setConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        shortcuts: { toggleRecording: 'Ctrl+Alt+Space', cancelRecording: '' }
+      })
+    )
+  })
+
+  it('does not flag a shortcut conflict when no cancel shortcut is set', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await waitFor(() => screen.getByText('Settings'))
+
+    // Make it dirty so a conflict would actually block saving.
+    await user.selectOptions(screen.getByRole('combobox', { name: /provider/i }), 'openai')
+
+    expect(screen.queryByText(/cannot be the same/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /save/i })).toBeEnabled()
   })
 
   it('shows retain input and storage options only when history is enabled', async () => {
