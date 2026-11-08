@@ -11,6 +11,32 @@ const { autoUpdater } = pkg
 let latestStatus: UpdateStatus = { phase: 'idle' }
 let pendingNavigation: string | null = null
 
+const MAX_ERROR_SUMMARY_LENGTH = 150
+
+// electron-updater error messages may embed response headers, stack traces and
+// the whole releases feed. Reduce them to something short enough for the UI;
+// the full message still goes to the log.
+export function summarizeUpdateError(err: Error): string {
+  const statusCode =
+    (err as { statusCode?: unknown }).statusCode ?? err.message.match(/HttpError: (\d{3})/)?.[1]
+  if (statusCode !== undefined) {
+    const code = Number(statusCode)
+    const hint = code >= 500 && code <= 599 ? ' - try again later' : ''
+    return `Update server responded with HTTP ${code}${hint}`
+  }
+
+  const netError = err.message.match(/net::ERR_[A-Z_]+/)?.[0]
+  if (netError) return `Network error (${netError})`
+
+  const firstLine = err.message
+    .split('\n')[0]
+    .split(/ Headers:|, XML:/)[0]
+    .trim()
+  return firstLine.length > MAX_ERROR_SUMMARY_LENGTH
+    ? `${firstLine.slice(0, MAX_ERROR_SUMMARY_LENGTH - 3)}...`
+    : firstLine
+}
+
 export function getLatestUpdateStatus(): UpdateStatus {
   return latestStatus
 }
@@ -92,7 +118,7 @@ export function initUpdater(
 
   autoUpdater.on('error', (err) => {
     log(SCOPES.updater, err.message, 'error')
-    send({ phase: 'error', message: err.message })
+    send({ phase: 'error', message: summarizeUpdateError(err) })
   })
 
   log(SCOPES.updater, `Current version: ${app.getVersion()}`)

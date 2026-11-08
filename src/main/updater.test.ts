@@ -1,7 +1,7 @@
 import { app, Notification } from 'electron'
 import type { BrowserWindow } from 'electron'
 import { CHANNELS } from '../shared/channels'
-import { initUpdater, getAndClearPendingNavigation } from './updater'
+import { initUpdater, getAndClearPendingNavigation, summarizeUpdateError } from './updater'
 
 const mockAutoUpdater = vi.hoisted(() => ({
   autoDownload: false as boolean,
@@ -252,6 +252,52 @@ describe('initUpdater', () => {
         phase: 'error',
         message: 'network failure'
       })
+    })
+
+    it('error: sends a summarized message instead of the raw one', () => {
+      const win = makeWindow(false)
+      setupWin32(() => win)
+      getHandler('error')(
+        new Error(
+          'Cannot parse releases feed: Error: Unable to find latest version on GitHub, please ensure a production release exists: HttpError: 504 "<html>...</html>"\nHeaders: {}, XML: <feed/>'
+        )
+      )
+      expect(vi.mocked(win.webContents.send)).toHaveBeenCalledWith(CHANNELS.UPDATE_STATUS, {
+        phase: 'error',
+        message: 'Update server responded with HTTP 504 - try again later'
+      })
+    })
+  })
+
+  describe('summarizeUpdateError', () => {
+    it('uses statusCode when present', () => {
+      const err = Object.assign(new Error('404 Not Found\nHeaders: {}'), { statusCode: 404 })
+      expect(summarizeUpdateError(err)).toBe('Update server responded with HTTP 404')
+    })
+
+    it('extracts the HTTP status from a wrapped HttpError message', () => {
+      const err = new Error('Unable to find latest version: HttpError: 503 \nHeaders: {}')
+      expect(summarizeUpdateError(err)).toBe(
+        'Update server responded with HTTP 503 - try again later'
+      )
+    })
+
+    it('reports Chromium network errors', () => {
+      const err = new Error('net::ERR_INTERNET_DISCONNECTED at SimpleURLLoaderWrapper...')
+      expect(summarizeUpdateError(err)).toBe('Network error (net::ERR_INTERNET_DISCONNECTED)')
+    })
+
+    it('keeps only the first line and drops headers and feed XML', () => {
+      expect(summarizeUpdateError(new Error('Something broke Headers: {"a":1}\nstack'))).toBe(
+        'Something broke'
+      )
+      expect(summarizeUpdateError(new Error('Bad feed, XML: <feed/>'))).toBe('Bad feed')
+    })
+
+    it('truncates long messages with an ASCII ellipsis', () => {
+      const summary = summarizeUpdateError(new Error('x'.repeat(500)))
+      expect(summary).toHaveLength(150)
+      expect(summary.endsWith('...')).toBe(true)
     })
   })
 
